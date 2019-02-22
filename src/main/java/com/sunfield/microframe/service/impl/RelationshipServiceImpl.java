@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+//TODO 由接口层检查必须传入参数userId、userIdOpposite、type非空！！
 @Service
 public class RelationshipServiceImpl implements RelationshipService {
 
