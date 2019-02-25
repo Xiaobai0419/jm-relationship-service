@@ -1,5 +1,6 @@
 package com.sunfield.microframe.service;
 
+import com.sunfield.microframe.common.response.Page;
 import com.sunfield.microframe.domain.JmRelationshipFriendship;
 
 import java.util.List;
@@ -18,17 +19,20 @@ public interface RelationshipService {
     //删除好友
     JmRelationshipFriendship removeFriend(JmRelationshipFriendship jmRelationshipFriendship);
 
-    //单个用户查询对另一个用户的好友状态（用于用户详情页、人脉搜索列表显示已请求状态）
+    //单个用户查询与另一个用户的好友状态（用于用户详情页、人脉搜索列表显示已请求状态）
     JmRelationshipFriendship findFriendRecord(JmRelationshipFriendship jmRelationshipFriendship);
 
     //单个用户好友列表
     List<JmRelationshipFriendship> findFriends(JmRelationshipFriendship jmRelationshipFriendship);
 
-    //单个用户默认好友列表（获取通讯录，或其他，待确认）
+    //单个用户好友列表--分页
+    Page<JmRelationshipFriendship> findFriendsPage(JmRelationshipFriendship jmRelationshipFriendship);
 
     //单个用户待处理（好友）请求列表
     List<JmRelationshipFriendship> findFriendRequestsOppsite(JmRelationshipFriendship jmRelationshipFriendship);
 
+    //单个用户待处理（好友）请求列表--分页
+    Page<JmRelationshipFriendship> findFriendRequestsOppsitePage(JmRelationshipFriendship jmRelationshipFriendship);
 
     //单个用户间发消息，服务端需要调融云
 

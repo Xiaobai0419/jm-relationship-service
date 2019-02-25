@@ -33,6 +33,14 @@ public interface JmRelationshipFriendshipMapper {
 	public List<JmRelationshipFriendship> findFriends(JmRelationshipFriendship obj);
 
 	/**
+	 * 查询我的好友（互为好友及单方好友的合集）--分页
+	 * @param obj
+	 * @return
+	 */
+	@SelectProvider(type=JmRelationshipFriendshipSqlProvider.class, method="generateFindFriendsPageSql")
+	public List<JmRelationshipFriendship> findFriendsPage(JmRelationshipFriendship obj);
+
+	/**
 	 * 查询我发出的所有好友请求状态列表（包括已拒绝我的）
 	 * @param obj
 	 * @return
@@ -47,6 +55,14 @@ public interface JmRelationshipFriendshipMapper {
 	 */
 	@SelectProvider(type=JmRelationshipFriendshipSqlProvider.class, method="generateFindFriendRequestsOppsiteSql")
 	public List<JmRelationshipFriendship> findFriendRequestsOppsite(JmRelationshipFriendship obj);
+
+	/**
+	 * 查询所有请求我为好友（不包括我已拒绝的）的列表--分页
+	 * @param obj
+	 * @return
+	 */
+	@SelectProvider(type=JmRelationshipFriendshipSqlProvider.class, method="generateFindFriendRequestsOppsitePageSql")
+	public List<JmRelationshipFriendship> findFriendRequestsOppsitePage(JmRelationshipFriendship obj);
 
 	/**
 	 * 插入单行

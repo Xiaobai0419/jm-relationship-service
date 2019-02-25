@@ -81,6 +81,16 @@ public class JmRelationshipFriendshipSqlProvider {
 		}.toString();
 	}
 
+	//查询我的好友（互为好友及单方好友的合集）--分页
+	public String generateFindFriendsPageSql(JmRelationshipFriendship obj){
+		StringBuilder sql = new StringBuilder(generateFindFriendsSql(obj));
+		sql.append(" LIMIT ");
+		sql.append((obj.getPageNumber() - 1) * obj.getPageSize());
+		sql.append(", ");
+		sql.append(obj.getPageSize());
+		return sql.toString();
+	}
+
 	//查询我发出的所有好友请求状态（我的所有非好友的已请求和已拒绝我的）
 	public String generateFindFriendRequestsSql(JmRelationshipFriendship obj){
 		return new SQL(){
@@ -119,6 +129,16 @@ public class JmRelationshipFriendshipSqlProvider {
 				WHERE("type = 2");
 			}
 		}.toString();
+	}
+
+	//查询所有请求我为好友（不包括我已拒绝的）的列表--分页
+	public String generateFindFriendRequestsOppsitePageSql(JmRelationshipFriendship obj){
+		StringBuilder sql = new StringBuilder(generateFindFriendRequestsOppsiteSql(obj));
+		sql.append(" LIMIT ");
+		sql.append((obj.getPageNumber() - 1) * obj.getPageSize());
+		sql.append(", ");
+		sql.append(obj.getPageSize());
+		return sql.toString();
 	}
 
 	//1.我作为主方请求对方为好友，就添加一条自己作为主方类型为2的记录 2.我作为主方同意了对方的好友请求，就加一条自己作为主方类型为0的好友记录
