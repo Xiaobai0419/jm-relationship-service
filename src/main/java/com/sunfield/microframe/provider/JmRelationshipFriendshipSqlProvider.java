@@ -44,7 +44,7 @@ public class JmRelationshipFriendshipSqlProvider {
 
 	//查询我和另一个人的好友状态，用于单独显示某人页面时我与他的好友状态，或请求加对方为好友时查询是否可改已有被拒绝记录为请求记录，无记录代表不是好友，也未请求过他为好友
 	public String generateFindFriendRecordSql(JmRelationshipFriendship obj){
-		return new SQL(){
+		String sql = new SQL(){
 			{
 				SELECT(COLUMNS);
 				FROM("jm_relationship_friendship");
@@ -57,11 +57,16 @@ public class JmRelationshipFriendshipSqlProvider {
 
 				AND();
 				WHERE("status = '0'");
+
+				//查询最亲近关系并取第一条，防止：1.陌生人相互请求，双双通过（双方会各有两条对方好友记录） 2.陌生人相互请求，一方通过，另一方未处理或拒绝（一方会有一条对方好友记录，另一方会有两条记录，一条对方好友，一条对方尚未通过或被对方拒绝记录，取最亲近关系即好友记录）
+				ORDER_BY("type");
 			}
 		}.toString();
+		sql += " limit 0,1 ";
+		return sql;
 	}
 
-	//查询我的好友（互为好友及单方好友的合集）
+	//查询我的好友（互为好友及单方好友的合集）--应考虑去重，去掉自己（防止加自己为好友，和相互请求双双通过的情况）
  	public String generateFindFriendsSql(JmRelationshipFriendship obj){
 		return new SQL(){
 			{
@@ -112,6 +117,7 @@ public class JmRelationshipFriendshipSqlProvider {
 	}
 
 	//查询所有请求我为好友（不包括我已拒绝的，如需要所有历史则另设接口）的列表，我拒绝过而再次请求我的人会以我为对方更新他为主方的已拒绝状态为请求状态，包含在这个集合中
+	//应考虑去掉自己，防止请求自己为好友的情况
 	public String generateFindFriendRequestsOppsiteSql(JmRelationshipFriendship obj){
 		return new SQL(){
 			{

@@ -138,7 +138,8 @@ public class RelationshipController {
     }
 
     //单个用户查询与另一个用户的好友状态（用于用户详情页、人脉搜索列表显示已请求状态，显示不同按钮，特别：已请求尚未通过的置灰显示请求中，已拒绝的可重新显示加好友按钮）
-    @ApiOperation(value="查询与另一个用户的好友状态")
+    //双向查询，你可能请求过对方，或与对方是好友；对方可能请求过你好友，待通过或已被拒绝，或你已删除对方，对方保持单向好友关系
+    @ApiOperation(value="查询与另一个用户的好友状态，返回数据的reverse字段为true代表是反向关系")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendRecord", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipFriendship> findFriendRecord(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
@@ -153,7 +154,7 @@ public class RelationshipController {
             if(result == null) {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.NO_RELATIONSHIP);//无好友和请求关联
             }else {
-                return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS, result);
+                return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS, result);//可能是任意一个方向的任意关系，方向根据reverse字段进行区分
             }
         }catch (Exception e) {
             e.printStackTrace();

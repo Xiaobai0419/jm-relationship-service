@@ -22,6 +22,16 @@ public class JmRelationshipFriendship extends BaseDomain{
 
 	private JmAppUser user;
 
+	private Boolean reverse = false;//反向关系，即操作者的对方作为主方和操作者的关系；默认为正向关系，即操作者作为主方和对方的关系
+
+	public Boolean getReverse() {
+		return reverse;
+	}
+
+	public void setReverse(Boolean reverse) {
+		this.reverse = reverse;
+	}
+
 	public JmAppUser getUser() {
 		return user;
 	}

@@ -7,42 +7,18 @@
     <list default="true" id="8ee584b4-248c-4001-8f9f-fd8e9950f06f" name="Default Changelist" comment="修改配置文件编码方式为UTF-8;新增访谈相关生成代码">
       <change beforePath="$PROJECT_DIR$/../commons/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../commons/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../commons/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../commons/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/response/Page.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/response/ResponseBean.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/response/ResponseStatus$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/response/ResponseStatus.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/utils/DateUtils.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/utils/ExceptionUtils.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/utils/ParamValidateUtils.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/response/ResponseBean.class" beforeDir="false" afterPath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/response/ResponseBean.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/utils/ExceptionUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/utils/ExceptionUtils.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/utils/SmsUtils.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/common/utils/UUID.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/domain/JmAppUser.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/domain/JmAppVersion.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/domain/base/BaseDomain.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/params/LoginParams.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/params/ThirdPartyLoginParams.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/params/UpdateBussinessIdParams.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/params/UpdateExpertStatusParams.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/params/UpdateFoodParams.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/params/UpdateMemberTimeParams.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/params/UpdateMobileParams.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/params/UpdateNickNameParams.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/params/UpdateScoreParams.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/params/UpdateSignParams.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/domain/JmAppUser.class" beforeDir="false" afterPath="$PROJECT_DIR$/../commons/target/classes/com/sunfield/microframe/domain/JmAppUser.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../commons/target/commons-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../commons/target/commons-1.0-SNAPSHOT.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../commons/target/maven-archiver/pom.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../commons/target/maven-archiver/pom.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../commons/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/../commons/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../commons/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__ch_qos_logback_logback_classic_1_1_11.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__ch_qos_logback_logback_core_1_1_11.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jm-relationship-service.iml" beforeDir="false" afterPath="$PROJECT_DIR$/jm-relationship-service.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/config/RedisConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/config/RedisConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/response/RelationshipResponseStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/response/RelationshipResponseStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs.dir_IS_UNDEFINED/jm-relationship-service.log" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/utils/FrientsUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/utils/FrientsUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/feign/JmAppUserFeignService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/feign/JmAppUserFeignService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/feign/JmIndustriesFeignService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/feign/JmIndustriesFeignService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/domain/JmRelationshipFriendship.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/domain/JmRelationshipFriendship.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/provider/JmRelationshipFriendshipSqlProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/provider/JmRelationshipFriendshipSqlProvider.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/rest/RelationshipController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/rest/RelationshipController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/service/impl/RelationshipServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/service/impl/RelationshipServiceImpl.java" afterDir="false" />
@@ -167,8 +143,8 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="class" value="96" />
-          <entry key="java" value="119" />
+          <entry key="class" value="107" />
+          <entry key="java" value="123" />
           <entry key="log" value="1" />
           <entry key="md" value="1" />
           <entry key="properties" value="7" />
@@ -177,8 +153,8 @@
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="CLASS" value="96" />
-          <entry key="JAVA" value="119" />
+          <entry key="CLASS" value="107" />
+          <entry key="JAVA" value="123" />
           <entry key="Markdown" value="1" />
           <entry key="PLAIN_TEXT" value="1" />
           <entry key="Properties" value="7" />
@@ -188,18 +164,18 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="71" />
-          <entry key="java" value="7218" />
+          <entry key="java" value="8029" />
           <entry key="md" value="2" />
           <entry key="properties" value="1" />
-          <entry key="txt" value="46" />
+          <entry key="txt" value="75" />
           <entry key="xml" value="121" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="JAVA" value="7218" />
+          <entry key="JAVA" value="8029" />
           <entry key="Markdown" value="2" />
-          <entry key="PLAIN_TEXT" value="117" />
+          <entry key="PLAIN_TEXT" value="146" />
           <entry key="Properties" value="1" />
           <entry key="XML" value="121" />
         </counts>
@@ -214,8 +190,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/rest/RelationshipController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3190">
-              <caret line="151" column="72" selection-start-line="151" selection-start-column="72" selection-end-line="151" selection-end-column="72" />
+            <state relative-caret-position="320">
+              <caret line="152" column="75" selection-start-line="152" selection-start-column="75" selection-end-line="152" selection-end-column="75" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -226,8 +202,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/service/impl/RelationshipServiceImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="179" column="44" lean-forward="true" selection-start-line="179" selection-start-column="44" selection-end-line="179" selection-end-column="44" />
+            <state relative-caret-position="110">
+              <caret line="233" column="13" selection-start-line="233" selection-start-column="13" selection-end-line="233" selection-end-column="13" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -238,8 +214,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/mapper/JmRelationshipFriendshipMapper.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="506">
-              <caret line="23" column="53" selection-start-line="23" selection-start-column="53" selection-end-line="23" selection-end-column="53" />
+            <state relative-caret-position="154">
+              <caret line="23" column="56" selection-start-line="23" selection-start-column="56" selection-end-line="23" selection-end-column="56" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -250,24 +226,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/provider/JmRelationshipFriendshipSqlProvider.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
-              <caret line="18" column="66" selection-start-line="18" selection-start-column="66" selection-end-line="18" selection-end-column="66" />
+            <state relative-caret-position="327">
+              <caret line="65" column="19" selection-start-line="65" selection-start-column="19" selection-end-line="65" selection-end-column="19" />
               <folding>
                 <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/domain/JmRelationshipFriendship.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="331">
-              <caret line="16" column="58" lean-forward="true" selection-start-line="16" selection-start-column="58" selection-end-line="16" selection-end-column="58" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#1023#1024#0" expanded="true" />
-                <element signature="e#1041#1042#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -276,8 +238,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/utils/FrientsUtil.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="200">
-              <caret line="10" column="8" lean-forward="true" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="8" />
+            <state relative-caret-position="7">
+              <caret line="26" selection-start-line="26" selection-end-line="26" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -361,19 +323,19 @@
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/mapper/JmWisdomAnswersMapper.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/utils/GroupUtil.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/utils/MessageUtil.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/domain/JmRelationshipFriendship.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/response/WebcastResponseStatus.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/mapper/JmRelationshipFriendshipMapper.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/service/RelationshipService.java" />
         <option value="$PROJECT_DIR$/src/main/resources/logback.xml" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/response/RelationshipResponseStatus.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/rest/RelationshipController.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/config/RedisConfig.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/feign/JmAppUserFeignService.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/feign/JmIndustriesFeignService.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/provider/JmRelationshipFriendshipSqlProvider.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/utils/FrientsUtil.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/domain/JmRelationshipFriendship.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/rest/RelationshipController.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/provider/JmRelationshipFriendshipSqlProvider.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/sunfield/microframe/service/impl/RelationshipServiceImpl.java" />
       </list>
     </option>
@@ -689,7 +651,7 @@
     <property name="RequestMappingsPanelWidth2" value="75" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551085893041" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551096004887" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../fenghuang-microservices-master/fenghuang-eureka" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -892,7 +854,7 @@
       <workItem from="1550635291146" duration="13638000" />
       <workItem from="1550708692597" duration="17270000" />
       <workItem from="1550795290733" duration="19914000" />
-      <workItem from="1551054014410" duration="27975000" />
+      <workItem from="1551054014410" duration="38161000" />
     </task>
     <task id="LOCAL-00001" summary="集成Apollo配置中心.">
       <created>1548999996597</created>
@@ -1027,11 +989,18 @@
       <option name="project" value="LOCAL" />
       <updated>1551067384472</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="完成好友相关功能;添加日志配置;添加lombok相关.">
+      <created>1551086005121</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1551086005121</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="286431000" />
+    <option name="totallyTimeSpent" value="296617000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1175,7 +1144,8 @@
     <MESSAGE value="提交好友操作框架；一些待开发备注." />
     <MESSAGE value="封装融云消息、群组操作工具类." />
     <MESSAGE value="完善好友功能，添加相关逻辑." />
-    <option name="LAST_COMMIT_MESSAGE" value="完善好友功能，添加相关逻辑." />
+    <MESSAGE value="完成好友相关功能;添加日志配置;添加lombok相关." />
+    <option name="LAST_COMMIT_MESSAGE" value="完成好友相关功能;添加日志配置;添加lombok相关." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1190,55 +1160,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$MAVEN_REPOSITORY$/org/springframework/spring-tx/4.3.14.RELEASE/spring-tx-4.3.14.RELEASE.jar!/org/springframework/transaction/annotation/Isolation.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="110">
-          <caret line="8" column="4" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/springframework/spring-tx/4.3.14.RELEASE/spring-tx-4.3.14.RELEASE.jar!/org/springframework/transaction/annotation/Transactional.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="28" column="48" lean-forward="true" selection-start-line="28" selection-start-column="48" selection-end-line="28" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/META-INF/app.properties">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="33" selection-start-column="33" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/cn/rongcloud/im/server-sdk-java/3.0.2/server-sdk-java-3.0.2.jar!/io/rong/messages/TxtMessage.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="19" column="18" selection-start-line="19" selection-start-column="18" selection-end-line="19" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/cn/rongcloud/im/server-sdk-java/3.0.2/server-sdk-java-3.0.2.jar!/io/rong/models/message/RecallMessage.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="652">
-          <caret line="54" column="25" selection-start-line="54" selection-start-column="25" selection-end-line="54" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/cn/rongcloud/im/server-sdk-java/3.0.2/server-sdk-java-3.0.2.jar!/io/rong/RongCloud.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="24" column="19" selection-start-line="24" selection-start-column="19" selection-end-line="24" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/cn/rongcloud/im/server-sdk-java/3.0.2/server-sdk-java-3.0.2.jar!/io/rong/methods/message/Message.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="21" column="19" selection-start-line="21" selection-start-column="19" selection-end-line="21" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/cn/rongcloud/im/server-sdk-java/3.0.2/server-sdk-java-3.0.2.jar!/io/rong/messages/VoiceMessage.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="182">
@@ -1355,13 +1276,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="280">
           <caret line="72" column="11" selection-start-line="72" selection-start-column="11" selection-end-line="72" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/springframework/data/spring-data-redis/1.8.10.RELEASE/spring-data-redis-1.8.10.RELEASE.jar!/org/springframework/data/redis/core/ZSetOperations.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="154">
-          <caret line="17" column="9" selection-start-line="17" selection-start-column="9" selection-end-line="17" selection-end-column="9" />
         </state>
       </provider>
     </entry>
@@ -1485,38 +1399,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/mapper/JmRelationshipFriendshipMapper.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="506">
-          <caret line="23" column="53" selection-start-line="23" selection-start-column="53" selection-end-line="23" selection-end-column="53" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/provider/JmRelationshipFriendshipSqlProvider.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="18" column="66" selection-start-line="18" selection-start-column="66" selection-end-line="18" selection-end-column="66" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/domain/JmRelationshipFriendship.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="331">
-          <caret line="16" column="58" lean-forward="true" selection-start-line="16" selection-start-column="58" selection-end-line="16" selection-end-column="58" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1023#1024#0" expanded="true" />
-            <element signature="e#1041#1042#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/config/RedisConfig.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="176">
@@ -1524,13 +1406,6 @@
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/springframework/data/spring-data-redis/1.8.10.RELEASE/spring-data-redis-1.8.10.RELEASE.jar!/org/springframework/data/redis/core/DefaultZSetOperations.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="23" column="19" selection-start-line="23" selection-start-column="19" selection-end-line="23" selection-end-column="19" />
         </state>
       </provider>
     </entry>
@@ -1555,26 +1430,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/utils/FrientsUtil.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="10" column="8" lean-forward="true" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="8" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/rest/RelationshipController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3190">
-          <caret line="151" column="72" selection-start-line="151" selection-start-column="72" selection-end-line="151" selection-end-column="72" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/cn/rongcloud/im/server-sdk-java/3.0.2/server-sdk-java-3.0.2.jar!/io/rong/models/response/ResponseResult.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="286">
@@ -1586,10 +1441,135 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/redis/clients/jedis/2.9.0/jedis-2.9.0.jar!/redis/clients/util/RedisInputStream.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="81">
+          <caret line="64" column="18" selection-start-line="64" selection-start-column="18" selection-end-line="64" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/redis/clients/jedis/2.9.0/jedis-2.9.0.jar!/redis/clients/jedis/Protocol.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="218">
+          <caret line="159" column="23" lean-forward="true" selection-start-line="159" selection-start-column="23" selection-end-line="159" selection-end-column="23" />
+          <folding>
+            <element signature="e#6977#6978#0" expanded="true" />
+            <element signature="e#7018#7019#0" expanded="true" />
+            <element signature="e#8302#8303#0" expanded="true" />
+            <element signature="e#8336#8337#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/redis/clients/jedis/2.9.0/jedis-2.9.0.jar!/redis/clients/jedis/Connection.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="302">
+          <caret line="317" column="30" selection-start-line="317" selection-start-column="30" selection-end-line="317" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/redis/clients/jedis/2.9.0/jedis-2.9.0.jar!/redis/clients/jedis/BinaryJedis.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="279">
+          <caret line="657" column="33" lean-forward="true" selection-start-line="657" selection-start-column="33" selection-end-line="657" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/springframework/data/spring-data-redis/1.8.10.RELEASE/spring-data-redis-1.8.10.RELEASE.jar!/org/springframework/data/redis/connection/jedis/JedisConnection.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="411">
+          <caret line="2016" column="62" lean-forward="true" selection-start-line="2016" selection-start-column="62" selection-end-line="2016" selection-end-column="62" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/springframework/data/spring-data-redis/1.8.10.RELEASE/spring-data-redis-1.8.10.RELEASE.jar!/org/springframework/data/redis/connection/DefaultStringRedisConnection.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="218">
+          <caret line="991" column="41" lean-forward="true" selection-start-line="991" selection-start-column="41" selection-end-line="991" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/springframework/data/spring-data-redis/1.8.10.RELEASE/spring-data-redis-1.8.10.RELEASE.jar!/org/springframework/data/redis/core/ZSetOperations.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="13" column="12" selection-start-line="13" selection-start-column="12" selection-end-line="13" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/springframework/data/spring-data-redis/1.8.10.RELEASE/spring-data-redis-1.8.10.RELEASE.jar!/org/springframework/data/redis/core/DefaultZSetOperations.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="24" column="47" lean-forward="true" selection-start-line="24" selection-start-column="47" selection-end-line="24" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/common/utils/FrientsUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7">
+          <caret line="26" selection-start-line="26" selection-end-line="26" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/mapper/JmRelationshipFriendshipMapper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="23" column="56" selection-start-line="23" selection-start-column="56" selection-end-line="23" selection-end-column="56" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/domain/JmRelationshipFriendship.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="33" lean-forward="true" selection-start-line="33" selection-end-line="33" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1001#1002#0" expanded="true" />
+            <element signature="e#1022#1023#0" expanded="true" />
+            <element signature="e#1066#1067#0" expanded="true" />
+            <element signature="e#1095#1096#0" expanded="true" />
+            <element signature="e#1023#1024#0" expanded="true" />
+            <element signature="e#1041#1042#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/rest/RelationshipController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="320">
+          <caret line="152" column="75" selection-start-line="152" selection-start-column="75" selection-end-line="152" selection-end-column="75" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/mybatis/mybatis/3.4.0/mybatis-3.4.0.jar!/org/apache/ibatis/jdbc/AbstractSQL.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1525">
+          <caret line="46" column="25" selection-start-line="46" selection-start-column="19" selection-end-line="46" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/provider/JmRelationshipFriendshipSqlProvider.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="327">
+          <caret line="65" column="19" selection-start-line="65" selection-start-column="19" selection-end-line="65" selection-end-column="19" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/sunfield/microframe/service/impl/RelationshipServiceImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="179" column="44" lean-forward="true" selection-start-line="179" selection-start-column="44" selection-end-line="179" selection-end-column="44" />
+        <state relative-caret-position="110">
+          <caret line="233" column="13" selection-start-line="233" selection-start-column="13" selection-end-line="233" selection-end-column="13" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

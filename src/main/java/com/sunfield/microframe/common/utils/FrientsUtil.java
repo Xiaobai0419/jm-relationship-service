@@ -22,17 +22,17 @@ public class FrientsUtil {
 
     //获取用户一度好友集合名
     private String getFrKey(String userId) {
-        return FR_PRE + userId.substring(0,8);
+        return FR_PRE + userId;
     }
 
     //获取用户二度好友集合名
     private String getSecFrKey(String userId) {
-        return SEC_FR_PRE + userId.substring(0,8);
+        return SEC_FR_PRE + userId;
     }
 
     //获取用户三度好友集合名
     private String getThrFrKey(String userId) {
-        return THR_FR_PRE + userId.substring(0,8);
+        return THR_FR_PRE + userId;
     }
 
     @Autowired

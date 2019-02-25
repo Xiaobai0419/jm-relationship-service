@@ -81,17 +81,20 @@ public class RelationshipServiceImpl implements RelationshipService {
             jmRelationshipFriendship.setType(2);
             //更新已有记录为类型2
             int mysqlResult = jmRelationshipFriendshipMapper.update(jmRelationshipFriendship);
-            //调用融云sdk通知对方一个好友请求，要包含请求者昵称、userId信息--消息类型：系统消息
-            TxtMessage txtMessage = null;
-            //已缓存：从缓存直接获取用户信息
-            JmAppUser user = findUser(jmRelationshipFriendship.getUserId());
-            if(user != null && StringUtils.isNotBlank(user.getNickName())) {
-                txtMessage = new TxtMessage(user.getNickName() + "请求加您为好友", jmRelationshipFriendship.getUserId());
-            }else {
-                txtMessage = new TxtMessage("您有一个新的好友请求", jmRelationshipFriendship.getUserId());
+            ResponseResult responseResult = null;
+            if(mysqlResult > 0) {
+                //调用融云sdk通知对方一个好友请求，要包含请求者昵称、userId信息--消息类型：系统消息
+                TxtMessage txtMessage = null;
+                //已缓存：从缓存直接获取用户信息
+                JmAppUser user = findUser(jmRelationshipFriendship.getUserId());
+                if(user != null && StringUtils.isNotBlank(user.getNickName())) {
+                    txtMessage = new TxtMessage(user.getNickName() + "请求加您为好友", jmRelationshipFriendship.getUserId());
+                }else {
+                    txtMessage = new TxtMessage("您有一个新的好友请求", jmRelationshipFriendship.getUserId());
+                }
+                responseResult = MessageUtil.sendSystemTxtMessage(jmRelationshipFriendship.getUserId()
+                        ,new String[]{jmRelationshipFriendship.getUserIdOpposite()},txtMessage);
             }
-            ResponseResult responseResult = MessageUtil.sendSystemTxtMessage(jmRelationshipFriendship.getUserId()
-                    ,new String[]{jmRelationshipFriendship.getUserIdOpposite()},txtMessage);
             if( mysqlResult > 0 && responseResult != null && responseResult.getCode() == 200) {
                 jmRelationshipFriendship.setType(5);//特殊标识，用于通知操作者好友请求成功，与已经是好友，已经请求过好友区分
                 return jmRelationshipFriendship;
@@ -104,16 +107,19 @@ public class RelationshipServiceImpl implements RelationshipService {
             jmRelationshipFriendship.setType(2);
             //插入类型2记录
             int mysqlResult = jmRelationshipFriendshipMapper.insert(jmRelationshipFriendship);
-            //调用融云sdk通知对方一个好友请求，要包含请求者昵称、userId信息--消息类型：系统消息
-            TxtMessage txtMessage = null;
-            JmAppUser user = findUser(jmRelationshipFriendship.getUserId());
-            if(user != null && StringUtils.isNotBlank(user.getNickName())) {
-                txtMessage = new TxtMessage(user.getNickName() + "请求加您为好友", jmRelationshipFriendship.getUserId());
-            }else {
-                txtMessage = new TxtMessage("您有一个新的好友请求", jmRelationshipFriendship.getUserId());
+            ResponseResult responseResult = null;
+            if(mysqlResult > 0) {
+                //调用融云sdk通知对方一个好友请求，要包含请求者昵称、userId信息--消息类型：系统消息
+                TxtMessage txtMessage = null;
+                JmAppUser user = findUser(jmRelationshipFriendship.getUserId());
+                if(user != null && StringUtils.isNotBlank(user.getNickName())) {
+                    txtMessage = new TxtMessage(user.getNickName() + "请求加您为好友", jmRelationshipFriendship.getUserId());
+                }else {
+                    txtMessage = new TxtMessage("您有一个新的好友请求", jmRelationshipFriendship.getUserId());
+                }
+                responseResult = MessageUtil.sendSystemTxtMessage(jmRelationshipFriendship.getUserId()
+                        ,new String[]{jmRelationshipFriendship.getUserIdOpposite()},txtMessage);
             }
-            ResponseResult responseResult = MessageUtil.sendSystemTxtMessage(jmRelationshipFriendship.getUserId()
-                    ,new String[]{jmRelationshipFriendship.getUserIdOpposite()},txtMessage);
             if( mysqlResult > 0 && responseResult != null && responseResult.getCode() == 200) {
                 jmRelationshipFriendship.setType(5);//特殊标识，用于通知操作者好友请求成功，与已经是好友，已经请求过好友区分
                 return jmRelationshipFriendship;
@@ -144,37 +150,40 @@ public class RelationshipServiceImpl implements RelationshipService {
         //更新请求者类型为0
         int mysqlResult1 = jmRelationshipFriendshipMapper.update(jmRelationshipFriendshipOppsite);
         int mysqlResult2 = 0;
-        if(mysqlResult1 > 0) {
+        if(mysqlResult1 > 0) {//更新成功才插入，防止更新不存在记录也插入的情况
             jmRelationshipFriendship.setType(0);
             //插入自身类型0记录
             mysqlResult2 = jmRelationshipFriendshipMapper.insert(jmRelationshipFriendship);
         }
-        //到Redis中向自己、对方的一度好友Zset集合各插入对方记录
-        JmAppUser user = findUser(jmRelationshipFriendship.getUserId());//自身信息
-        JmAppUser userOppsite = findUser(jmRelationshipFriendship.getUserIdOpposite());//对方信息
         boolean addFriend = false,addFriendOppsite = false;
-        if(user != null && userOppsite != null) {
-            //如有任何异常，会在接口层抛出并记录到后台
-            double userIndustry = Double.parseDouble(user.getIndustry());
-            double userOppsiteIndustry = Double.parseDouble(userOppsite.getIndustry());
-            addFriend = frientsUtil.addFriend(jmRelationshipFriendship.getUserId(),
-                    jmRelationshipFriendship.getUserIdOpposite(),userOppsiteIndustry);
-            addFriendOppsite = frientsUtil.addFriend(jmRelationshipFriendship.getUserIdOpposite(),
-                    jmRelationshipFriendship.getUserId(),userIndustry);
-            log.info("Redis Input:addFriend/" + addFriend + ",addFriendOppsite/" + addFriendOppsite);
+        ResponseResult responseResult = null;
+        if(mysqlResult1 > 0 && mysqlResult2 > 0) {//关系型数据库完全操作成功才操作Redis:防止更新不存在记录也会更新Redis的情况
+            //到Redis中向自己、对方的一度好友Zset集合各插入对方记录
+            JmAppUser user = findUser(jmRelationshipFriendship.getUserId());//自身信息
+            JmAppUser userOppsite = findUser(jmRelationshipFriendship.getUserIdOpposite());//对方信息
+            if(user != null && userOppsite != null) {
+                //如有任何异常，会在接口层抛出并记录到后台
+                double userIndustry = Double.parseDouble(user.getIndustry());
+                double userOppsiteIndustry = Double.parseDouble(userOppsite.getIndustry());
+                addFriend = frientsUtil.addFriend(jmRelationshipFriendship.getUserId(),
+                        jmRelationshipFriendship.getUserIdOpposite(),userOppsiteIndustry);
+                addFriendOppsite = frientsUtil.addFriend(jmRelationshipFriendship.getUserIdOpposite(),
+                        jmRelationshipFriendship.getUserId(),userIndustry);
+                log.info("Redis Input:addFriend/" + addFriend + ",addFriendOppsite/" + addFriendOppsite);
+            }
+            //调用融云sdk通知对方已通过好友--消息类型：系统消息
+            TxtMessage txtMessage = null;
+            if(user != null && StringUtils.isNotBlank(user.getNickName())) {
+                txtMessage = new TxtMessage(user.getNickName() + "已通过了您的好友请求", jmRelationshipFriendship.getUserId());
+            }else {
+                txtMessage = new TxtMessage("您的好友请求已通过", jmRelationshipFriendship.getUserId());
+            }
+            responseResult = MessageUtil.sendSystemTxtMessage(jmRelationshipFriendship.getUserId()
+                    ,new String[]{jmRelationshipFriendship.getUserIdOpposite()},txtMessage);
+            log.info("RongCloud Send Result:" + responseResult.toString());
         }
-        //调用融云sdk通知对方已通过好友--消息类型：系统消息
-        TxtMessage txtMessage = null;
-        if(user != null && StringUtils.isNotBlank(user.getNickName())) {
-            txtMessage = new TxtMessage(user.getNickName() + "已通过了您的好友请求", jmRelationshipFriendship.getUserId());
-        }else {
-            txtMessage = new TxtMessage("您的好友请求已通过", jmRelationshipFriendship.getUserId());
-        }
-        ResponseResult responseResult = MessageUtil.sendSystemTxtMessage(jmRelationshipFriendship.getUserId()
-                ,new String[]{jmRelationshipFriendship.getUserIdOpposite()},txtMessage);
-        log.info("RongCloud Send Result:" + responseResult.toString());
-        //各种分布式事务成功条件满足后
-        if(mysqlResult1 > 0 && mysqlResult2 > 0 && addFriend && addFriendOppsite
+        //各种分布式事务成功条件满足后--TODO 目前Redis返回结果不符合插入成功的事实，暂时去掉
+        if(mysqlResult1 > 0 && mysqlResult2 > 0
                 && responseResult != null && responseResult.getCode() == 200) {
             log.info("agreeAsAFriend:SUCCESS!");
             return jmRelationshipFriendship;
@@ -232,14 +241,17 @@ public class RelationshipServiceImpl implements RelationshipService {
         //更新对方类型为1（单方好友）
         int mysqlResult1 = jmRelationshipFriendshipMapper.update(jmRelationshipFriendshipOppsite);
         int mysqlResult2 = 0;
-        if(mysqlResult1 > 0) {
+        if(mysqlResult1 > 0) {//更新成功才删除,防止无对方记录而删除自身记录的情况
             //（逻辑）删除自身记录
             mysqlResult2 = jmRelationshipFriendshipMapper.delete(jmRelationshipFriendship);
         }
-        //到Redis中自己、对方（可不移除）的一度好友Zset集合中移除对方记录
-        long removeFriend = frientsUtil.removeFriend(jmRelationshipFriendship.getUserId(),jmRelationshipFriendship.getUserIdOpposite());
-        //各种分布式事务成功条件满足后
-        if(mysqlResult1 > 0 && mysqlResult2 > 0 && removeFriend > 0) {
+        if(mysqlResult1 > 0 && mysqlResult2 > 0) {//关系型数据库完全操作成功才操作Redis:防止更新不存在记录也会更新Redis的情况
+            //到Redis中自己、对方（可不移除）的一度好友Zset集合中移除对方记录
+            long removeFriend = frientsUtil.removeFriend(jmRelationshipFriendship.getUserId(),jmRelationshipFriendship.getUserIdOpposite());
+            log.info("Redis Remove:removeFriend/" + removeFriend);
+        }
+        //各种分布式事务成功条件满足后--TODO 目前Redis返回结果不符合成功的事实，暂时去掉
+        if(mysqlResult1 > 0 && mysqlResult2 > 0) {
             jmRelationshipFriendship.setType(1);//用于通知操作者删除好友成功
             return jmRelationshipFriendship;
         } else {
@@ -255,7 +267,20 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
     @Override
     public JmRelationshipFriendship findFriendRecord(JmRelationshipFriendship jmRelationshipFriendship) {
-        return jmRelationshipFriendshipMapper.findFriendRecord(jmRelationshipFriendship);
+        JmRelationshipFriendship record = jmRelationshipFriendshipMapper.findFriendRecord(jmRelationshipFriendship);
+        if(record != null) {
+            //优先返回正向关系：互为好友，或你请求待确认，或你请求已拒绝你
+        }else {
+            //如果没有正向关系，才反向查询，返回反向关系：请求你待确认，已被你拒绝，已被你删除的单向好友
+            JmRelationshipFriendship jmRelationshipFriendshipOppsite = new JmRelationshipFriendship();
+            jmRelationshipFriendshipOppsite.setUserId(jmRelationshipFriendship.getUserIdOpposite());
+            jmRelationshipFriendshipOppsite.setUserIdOpposite(jmRelationshipFriendship.getUserId());
+            record = jmRelationshipFriendshipMapper.findFriendRecord(jmRelationshipFriendshipOppsite);
+            if(record != null) {
+                record.setReverse(true);//代表反向关系，以示区分
+            }
+        }
+        return record;
     }
 
     /**
