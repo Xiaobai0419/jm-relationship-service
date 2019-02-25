@@ -1,7 +1,6 @@
 package com.sunfield.microframe.feign;
 
 import com.sunfield.microframe.common.response.ResponseBean;
-import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.domain.JmIndustries;
 import com.sunfield.microframe.feign.fallback.JmIndustriesFeignServiceFallback;
 import org.springframework.cloud.netflix.feign.FeignClient;

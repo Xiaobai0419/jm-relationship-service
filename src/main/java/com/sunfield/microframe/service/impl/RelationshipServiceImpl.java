@@ -11,9 +11,14 @@ import com.sunfield.microframe.mapper.JmRelationshipFriendshipMapper;
 import com.sunfield.microframe.service.RelationshipService;
 import io.rong.messages.TxtMessage;
 import io.rong.models.response.ResponseResult;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,7 +26,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * jm-relationship-service-impl
+ * @author Daniel Bai
+ * @date 2019/2/25
+ */
+@Slf4j
 @Service
+@CacheConfig(cacheNames = "jmRelationshipCache")//类级别公共缓存名配置
 public class RelationshipServiceImpl implements RelationshipService {
 
     @Autowired
@@ -32,7 +44,8 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Qualifier("jmAppUserFeignService")
     private JmAppUserFeignService jmAppUserFeignService;
 
-    private JmAppUser findUser(String userId) {
+    @Cacheable(key = "#p0")//缓存用户信息
+    public JmAppUser findUser(String userId) {
         return jmAppUserFeignService.findOne(userId).getData();
     }
 
@@ -53,6 +66,8 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @return
      */
     @TxTransaction
+    //对方好友请求列表缓存清除
+    @Caching(evict = {@CacheEvict(key = "#p0.userIdOpposite + '_findFriendRequestsOppsite'")})
     @Override
     public JmRelationshipFriendship addFriendRequest(JmRelationshipFriendship jmRelationshipFriendship) {
         //需要先查询好友关系，判断是更新还是插入
@@ -68,7 +83,7 @@ public class RelationshipServiceImpl implements RelationshipService {
             int mysqlResult = jmRelationshipFriendshipMapper.update(jmRelationshipFriendship);
             //调用融云sdk通知对方一个好友请求，要包含请求者昵称、userId信息--消息类型：系统消息
             TxtMessage txtMessage = null;
-            //待优化：从缓存直接获取用户信息
+            //已缓存：从缓存直接获取用户信息
             JmAppUser user = findUser(jmRelationshipFriendship.getUserId());
             if(user != null && StringUtils.isNotBlank(user.getNickName())) {
                 txtMessage = new TxtMessage(user.getNickName() + "请求加您为好友", jmRelationshipFriendship.getUserId());
@@ -117,6 +132,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
     @TxTransaction
     @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED,readOnly = false)
+    @Caching(evict = {@CacheEvict(key = "#p0.userId + '_findFriends'")})//缓存清除
     @Override
     public JmRelationshipFriendship agreeAsAFriend(JmRelationshipFriendship jmRelationshipFriendship) {
         jmRelationshipFriendship.preInsert();
@@ -133,11 +149,22 @@ public class RelationshipServiceImpl implements RelationshipService {
             //插入自身类型0记录
             mysqlResult2 = jmRelationshipFriendshipMapper.insert(jmRelationshipFriendship);
         }
-        //TODO 到Redis中向自己、对方的一度好友Zset集合各插入对方记录
-
+        //到Redis中向自己、对方的一度好友Zset集合各插入对方记录
+        JmAppUser user = findUser(jmRelationshipFriendship.getUserId());//自身信息
+        JmAppUser userOppsite = findUser(jmRelationshipFriendship.getUserIdOpposite());//对方信息
+        boolean addFriend = false,addFriendOppsite = false;
+        if(user != null && userOppsite != null) {
+            //如有任何异常，会在接口层抛出并记录到后台
+            double userIndustry = Double.parseDouble(user.getIndustry());
+            double userOppsiteIndustry = Double.parseDouble(userOppsite.getIndustry());
+            addFriend = frientsUtil.addFriend(jmRelationshipFriendship.getUserId(),
+                    jmRelationshipFriendship.getUserIdOpposite(),userOppsiteIndustry);
+            addFriendOppsite = frientsUtil.addFriend(jmRelationshipFriendship.getUserIdOpposite(),
+                    jmRelationshipFriendship.getUserId(),userIndustry);
+            log.info("Redis Input:addFriend/" + addFriend + ",addFriendOppsite/" + addFriendOppsite);
+        }
         //调用融云sdk通知对方已通过好友--消息类型：系统消息
         TxtMessage txtMessage = null;
-        JmAppUser user = findUser(jmRelationshipFriendship.getUserId());
         if(user != null && StringUtils.isNotBlank(user.getNickName())) {
             txtMessage = new TxtMessage(user.getNickName() + "已通过了您的好友请求", jmRelationshipFriendship.getUserId());
         }else {
@@ -145,11 +172,14 @@ public class RelationshipServiceImpl implements RelationshipService {
         }
         ResponseResult responseResult = MessageUtil.sendSystemTxtMessage(jmRelationshipFriendship.getUserId()
                 ,new String[]{jmRelationshipFriendship.getUserIdOpposite()},txtMessage);
+        log.info("RongCloud Send Result:" + responseResult.toString());
         //各种分布式事务成功条件满足后
-        if(mysqlResult1 > 0 && mysqlResult2 > 0
+        if(mysqlResult1 > 0 && mysqlResult2 > 0 && addFriend && addFriendOppsite
                 && responseResult != null && responseResult.getCode() == 200) {
+            log.info("agreeAsAFriend:SUCCESS!");
             return jmRelationshipFriendship;
         } else {
+            log.info("agreeAsAFriend:FAIL!");
             return null;
         }
     }
@@ -161,6 +191,8 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @return
      */
 //    @TxTransaction
+    //自身好友请求列表缓存清除
+    @Caching(evict = {@CacheEvict(key = "#p0.userId + '_findFriendRequestsOppsite'")})
     @Override
     public JmRelationshipFriendship rejectFriendRequest(JmRelationshipFriendship jmRelationshipFriendship) {
         JmRelationshipFriendship jmRelationshipFriendshipOppsite = new JmRelationshipFriendship();
@@ -189,6 +221,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
     @TxTransaction
     @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED,readOnly = false)
+    @Caching(evict = {@CacheEvict(key = "#p0.userId + '_findFriends'")})//缓存清除
     @Override
     public JmRelationshipFriendship removeFriend(JmRelationshipFriendship jmRelationshipFriendship) {
         JmRelationshipFriendship jmRelationshipFriendshipOppsite = new JmRelationshipFriendship();
@@ -203,10 +236,10 @@ public class RelationshipServiceImpl implements RelationshipService {
             //（逻辑）删除自身记录
             mysqlResult2 = jmRelationshipFriendshipMapper.delete(jmRelationshipFriendship);
         }
-        //TODO 到Redis中自己、对方的一度好友Zset集合中移除对方记录
-
+        //到Redis中自己、对方（可不移除）的一度好友Zset集合中移除对方记录
+        long removeFriend = frientsUtil.removeFriend(jmRelationshipFriendship.getUserId(),jmRelationshipFriendship.getUserIdOpposite());
         //各种分布式事务成功条件满足后
-        if(mysqlResult1 > 0 && mysqlResult2 > 0) {
+        if(mysqlResult1 > 0 && mysqlResult2 > 0 && removeFriend > 0) {
             jmRelationshipFriendship.setType(1);//用于通知操作者删除好友成功
             return jmRelationshipFriendship;
         } else {
@@ -231,6 +264,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @param jmRelationshipFriendship
      * @return
      */
+    @Cacheable(key = "#p0.userId + '_findFriends'")//缓存存储键名：每个用户的每个业务都该不同！！
     @Override
     public List<JmRelationshipFriendship> findFriends(JmRelationshipFriendship jmRelationshipFriendship) {
         return jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
@@ -242,6 +276,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @param jmRelationshipFriendship
      * @return
      */
+//    @Cacheable(key = "#p0.userId + '_findFriendsPage_' + #p0.pageNumber + '_' + #p0.pageSize")//缓存存储键名：每个用户的每个业务都该不同！！每页不同！！
     @Override
     public Page<JmRelationshipFriendship> findFriendsPage(JmRelationshipFriendship jmRelationshipFriendship) {
         List<JmRelationshipFriendship> resultList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
@@ -259,6 +294,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @param jmRelationshipFriendship
      * @return
      */
+    @Cacheable(key = "#p0.userId + '_findFriendRequestsOppsite'")//缓存存储键名：每个用户的每个业务都该不同！！
     @Override
     public List<JmRelationshipFriendship> findFriendRequestsOppsite(JmRelationshipFriendship jmRelationshipFriendship) {
         return jmRelationshipFriendshipMapper.findFriendRequestsOppsite(jmRelationshipFriendship);
@@ -270,6 +306,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @param jmRelationshipFriendship
      * @return
      */
+//    @Cacheable(key = "#p0.userId + '_findFriendRequestsOppsitePage_' + #p0.pageNumber + '_' + #p0.pageSize")//缓存存储键名：每个用户的每个业务都该不同！！每页不同！！
     @Override
     public Page<JmRelationshipFriendship> findFriendRequestsOppsitePage(JmRelationshipFriendship jmRelationshipFriendship) {
         List<JmRelationshipFriendship> resultList = jmRelationshipFriendshipMapper.findFriendRequestsOppsite(jmRelationshipFriendship);

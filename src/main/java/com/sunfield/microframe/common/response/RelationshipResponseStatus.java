@@ -8,6 +8,8 @@ public enum RelationshipResponseStatus {
     FAIL,
     //无数据
     NO_DATA,
+    //参数错误
+    PARAMS_ERROR,
     //ID为空
     ID_NULL,
     //系统繁忙
@@ -18,16 +20,10 @@ public enum RelationshipResponseStatus {
     OPPSITE_NULL,
     //类型为空
     TYPE_NULL,
-    //已经是好友
+    //已经是好友了
     ALREADY_FRIEND,
-    //已通过好友
-    ALREADY_AGREED,
-    //已删除好友
-    ALREADY_DELETED,
-    //已请求
+    //已请求过，待对方确认
     ALREADY_REQUESTED,
-    //已拒绝
-    ALREADY_REJECTED,
     //无关联
     NO_RELATIONSHIP;
 
@@ -39,6 +35,8 @@ public enum RelationshipResponseStatus {
                 return "FAIL";
             case NO_DATA:
                 return "NO_DATA";
+            case PARAMS_ERROR:
+                return "PARAMS_ERROR";
             case ID_NULL:
                 return "ID_NULL";
             case BUSY:
@@ -51,14 +49,8 @@ public enum RelationshipResponseStatus {
                 return "TYPE_NULL";
             case ALREADY_FRIEND:
                 return "ALREADY_FRIEND";
-            case ALREADY_AGREED:
-                return "ALREADY_AGREED";
-            case ALREADY_DELETED:
-                return "ALREADY_DELETED";
             case ALREADY_REQUESTED:
                 return "ALREADY_REQUESTED";
-            case ALREADY_REJECTED:
-                return "ALREADY_REJECTED";
             case NO_RELATIONSHIP:
                 return "NO_RELATIONSHIP";
             default:
@@ -74,6 +66,8 @@ public enum RelationshipResponseStatus {
                 return "请求失败";
             case NO_DATA:
                 return "无返回数据";
+            case PARAMS_ERROR:
+                return "参数错误";
             case ID_NULL:
                 return "ID为空";
             case BUSY:
@@ -86,16 +80,10 @@ public enum RelationshipResponseStatus {
                 return "好友关系类型不能为空";
             case ALREADY_FRIEND:
                 return "你们已经是好友了";
-            case ALREADY_AGREED:
-                return "对方已通过好友请求";
-            case ALREADY_DELETED:
-                return "已删除该好友";
             case ALREADY_REQUESTED:
-                return "好友请求已发出";
-            case ALREADY_REJECTED:
-                return "已拒绝好友请求";
+                return "已请求过好友，待对方确认";
             case NO_RELATIONSHIP:
-                return "无好友和请求关联";
+                return "无好友关系和请求关联";
             default:
                 return "未知错误";
         }

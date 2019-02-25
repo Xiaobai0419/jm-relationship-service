@@ -1,7 +1,6 @@
 package com.sunfield.microframe.provider;
 
 import com.sunfield.microframe.domain.JmRelationshipFriendship;
-import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.jdbc.SQL;
 
 /**
@@ -14,6 +13,7 @@ public class JmRelationshipFriendshipSqlProvider {
  									" id AS id,"+
  									" user_id AS userId,"+
  									" user_id_opposite AS userIdOpposite,"+
+									" type AS type,"+
  									" status AS status,"+
  									" create_by AS createBy,"+
  									" create_date AS createDate,"+
