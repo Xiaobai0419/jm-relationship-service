@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * jm-relationship-service-impl
@@ -291,8 +291,9 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
     @Cacheable(key = "#p0.userId + '_findFriends'")//缓存存储键名：每个用户的每个业务都该不同！！
     @Override
-    public List<JmRelationshipFriendship> findFriends(JmRelationshipFriendship jmRelationshipFriendship) {
-        return jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
+    public List<JmAppUser> findFriends(JmRelationshipFriendship jmRelationshipFriendship) {
+        List<JmRelationshipFriendship> relationshipList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
+        return userListHandle(relationshipList,false,jmRelationshipFriendship.getUserId());
     }
 
     /**
@@ -303,12 +304,13 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
 //    @Cacheable(key = "#p0.userId + '_findFriendsPage_' + #p0.pageNumber + '_' + #p0.pageSize")//缓存存储键名：每个用户的每个业务都该不同！！每页不同！！
     @Override
-    public Page<JmRelationshipFriendship> findFriendsPage(JmRelationshipFriendship jmRelationshipFriendship) {
+    public Page<JmAppUser> findFriendsPage(JmRelationshipFriendship jmRelationshipFriendship) {
         List<JmRelationshipFriendship> resultList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
         if(resultList != null && resultList.size() > 0) {
             List<JmRelationshipFriendship> pageList = jmRelationshipFriendshipMapper.findFriendsPage(jmRelationshipFriendship);
+            List<JmAppUser> userList = userListHandle(pageList,false,jmRelationshipFriendship.getUserId());
             return new Page<>(resultList.size(),jmRelationshipFriendship.getPageSize(),
-                    jmRelationshipFriendship.getPageNumber(),pageList);
+                    jmRelationshipFriendship.getPageNumber(),userList);
         }
         return new Page<>();
     }
@@ -321,8 +323,9 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
     @Cacheable(key = "#p0.userId + '_findFriendRequestsOppsite'")//缓存存储键名：每个用户的每个业务都该不同！！
     @Override
-    public List<JmRelationshipFriendship> findFriendRequestsOppsite(JmRelationshipFriendship jmRelationshipFriendship) {
-        return jmRelationshipFriendshipMapper.findFriendRequestsOppsite(jmRelationshipFriendship);
+    public List<JmAppUser> findFriendRequestsOppsite(JmRelationshipFriendship jmRelationshipFriendship) {
+        List<JmRelationshipFriendship> relationshipList = jmRelationshipFriendshipMapper.findFriendRequestsOppsite(jmRelationshipFriendship);
+        return userListHandle(relationshipList,true,jmRelationshipFriendship.getUserId());
     }
 
     /**
@@ -333,13 +336,53 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
 //    @Cacheable(key = "#p0.userId + '_findFriendRequestsOppsitePage_' + #p0.pageNumber + '_' + #p0.pageSize")//缓存存储键名：每个用户的每个业务都该不同！！每页不同！！
     @Override
-    public Page<JmRelationshipFriendship> findFriendRequestsOppsitePage(JmRelationshipFriendship jmRelationshipFriendship) {
+    public Page<JmAppUser> findFriendRequestsOppsitePage(JmRelationshipFriendship jmRelationshipFriendship) {
         List<JmRelationshipFriendship> resultList = jmRelationshipFriendshipMapper.findFriendRequestsOppsite(jmRelationshipFriendship);
         if(resultList != null && resultList.size() > 0) {
             List<JmRelationshipFriendship> pageList = jmRelationshipFriendshipMapper.findFriendRequestsOppsitePage(jmRelationshipFriendship);
+            List<JmAppUser> userList = userListHandle(pageList,true,jmRelationshipFriendship.getUserId());
             return new Page<>(resultList.size(),jmRelationshipFriendship.getPageSize(),
-                    jmRelationshipFriendship.getPageNumber(),pageList);
+                    jmRelationshipFriendship.getPageNumber(),userList);
         }
         return new Page<>();
+    }
+
+    /**
+     * 查询转换：将关系id对象列表转换为user列表，包含用户具体信息用于前端显示
+     * reverse参数为true代表被请求列表取userId,其他默认false取userIdOppsite
+     * 去重，且去掉自身
+     * @param relationshipList
+     * @param reverse
+     * @return
+     */
+    @Override
+    public List<JmAppUser> userListHandle(List<JmRelationshipFriendship> relationshipList,boolean reverse,String self) {
+        if(relationshipList == null) {
+            return null;
+        }else if(relationshipList.size() == 0) {
+            return new ArrayList<>();
+        }else {
+            //Set集合实现自动去重
+            Set<String> userIdList = new HashSet<>();
+            for(JmRelationshipFriendship jmRelationshipFriendship : relationshipList) {
+                if(StringUtils.isNotBlank(jmRelationshipFriendship.getUserId())
+                && StringUtils.isNotBlank(jmRelationshipFriendship.getUserIdOpposite())) {
+                    if(reverse) {//查找我作为对方的好友请求列表
+                        userIdList.add(jmRelationshipFriendship.getUserId());
+                    }else {//查找我作为主方的列表
+                        userIdList.add(jmRelationshipFriendship.getUserIdOpposite());
+                    }
+                }
+            }
+            if(StringUtils.isNotBlank(self)) {
+                userIdList.remove(self);//去掉自身
+            }
+            List<JmAppUser> userList = null;
+            if(userIdList.size() > 0) {
+                //远程批量查询用户信息
+                userList = jmAppUserFeignService.findListByIds((String[]) userIdList.toArray()).getData();
+            }
+            return userList;
+        }
     }
 }

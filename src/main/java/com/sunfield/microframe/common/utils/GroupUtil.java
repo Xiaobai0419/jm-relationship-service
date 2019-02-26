@@ -85,15 +85,13 @@ public class GroupUtil {
     /**
      * 退出部落--单个或多个成员
      * @param groupId
-     * @param groupName
      * @param members
      * @return
      */
-    public static Result quitFromGroup(String groupId,String groupName,GroupMember[] members) {
+    public static Result quitFromGroup(String groupId,GroupMember[] members) {
         GroupModel group = new GroupModel()
                 .setId(groupId)
-                .setMembers(members)
-                .setName(groupName);
+                .setMembers(members);
         try {
             return (Result)Group.quit(group);
         } catch (Exception e) {

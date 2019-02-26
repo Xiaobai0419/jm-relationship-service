@@ -20,8 +20,6 @@ public class JmRelationshipFriendship extends BaseDomain{
 	@ApiModelProperty(value="用户id，对方，关联用户表id", dataType="String")
 	private String userIdOpposite;//对方
 
-	private JmAppUser user;
-
 	private Boolean reverse = false;//反向关系，即操作者的对方作为主方和操作者的关系；默认为正向关系，即操作者作为主方和对方的关系
 
 	public Boolean getReverse() {
@@ -30,14 +28,6 @@ public class JmRelationshipFriendship extends BaseDomain{
 
 	public void setReverse(Boolean reverse) {
 		this.reverse = reverse;
-	}
-
-	public JmAppUser getUser() {
-		return user;
-	}
-
-	public void setUser(JmAppUser user) {
-		this.user = user;
 	}
 
 	public int getType() {

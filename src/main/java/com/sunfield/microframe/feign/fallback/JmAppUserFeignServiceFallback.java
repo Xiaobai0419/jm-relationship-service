@@ -6,10 +6,17 @@ import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.feign.JmAppUserFeignService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class JmAppUserFeignServiceFallback implements JmAppUserFeignService {
     @Override
     public ResponseBean<JmAppUser> findOne(String id) {
+        return new ResponseBean<>(ResponseStatus.BUSY);
+    }
+
+    @Override
+    public ResponseBean<List<JmAppUser>> findListByIds(String[] ids) {
         return new ResponseBean<>(ResponseStatus.BUSY);
     }
 }
