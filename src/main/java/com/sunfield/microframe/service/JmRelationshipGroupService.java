@@ -251,7 +251,9 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	}
 
 	/**
-	 * 查询与部落关系--是否是成员及创建者，特别用于好友列表中已加入某部落成员不再支持被加入该部落（置灰效果）
+	 * 查询与部落关系--是否是成员及创建者，TODO 特别用于好友列表中已加入某部落成员不再支持被加入该部落（置灰效果）
+	 * 用于显示发消息还是申请/申请中，和显示成员列表等成员特权
+	 * 用于显示编辑，拉人等群主特权
 	 * @param obj
 	 * @return
 	 */
@@ -303,7 +305,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	}
 
 	/**
-	 * 创建部落，并添加创建者自身、和至少两个其他成员
+	 * 创建部落，并添加创建者自身、和至少两个其他成员--从创建者好友列表加人
 	 * --TODO 通过融云给被添加人员、有人加入的群一个通知
 	 * @param obj
 	 * @return
@@ -382,9 +384,6 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 	}
 
-	//别忘了部落人数加减操作
-	//入群时间信息/申请加入部落/退出部落/发消息/@,公告，禁言等设置/编辑部落资料/拉人（拉多人）/踢人/拒绝/通过（单人请求通过）/某部落（及群主）申请加入列表/显示成员列表/解散部落/部落详情（包括行业具体信息，人数）/部落列表（按行业，不按行业，也要有行业具体信息用于后台管理）/某人加入的部落列表/某人创建部落列表/某人是否是成员/某人申请加入状态/某人是否是创建者
-
 	/**
 	 * 申请加入某部落--申请表操作，含部落id（需要判断是否已是成员，及是否被拒绝过，有记录）
 	 * @param obj
@@ -401,7 +400,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	}
 
 	/**
-	 * 通过某人入群--申请表删除或改状态操作，部落Redis，融云操作及通知，创建者特权（需要判断是否是创建者）
+	 * 通过某人入群--申请表删除或改状态操作，部落Redis，融云加人操作，及相关人员通知，创建者特权（需要判断是否是创建者）
 	 * @param obj
 	 * @return
 	 */
@@ -416,7 +415,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	}
 
 	/**
-	 * 拒绝某人入群--申请表删除或改状态操作，部落Redis，融云操作及通知，创建者特权（需要判断是否是创建者）
+	 * 拒绝某人入群--申请表改状态操作，部落Redis，融云操作及通知，创建者特权（需要判断是否是创建者）
 	 * @param obj
 	 * @return
 	 */
@@ -431,7 +430,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	}
 
 	/**
-	 * 邀请加入（是否有拒绝接受？）--融云通知，调查是否和拉人完全一样，邀请后就在群里了
+	 * 邀请加入（是否有拒绝接受？同意加入怎么操作？）--融云通知，调查是否和拉人完全一样，邀请后就在群里了
 	 * @param obj
 	 * @return
 	 */
@@ -447,6 +446,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 
 	/**
 	 * 某部落添加单个、多个成员--创建者特权（需要传入创建者id,判断是否是创建者），部落Redis，融云操作
+	 * 从创建者好友列表加人
 	 * --TODO 通过融云给被添加人员、有人加入的群一个通知
 	 * @param obj
 	 * @return
@@ -654,6 +654,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 
 	/**
 	 * 解散部落--同步融云、Redis操作--TODO 目前暂定创建者特权（需要判断是否是创建者），但后台马甲貌似有解散任何部落的特权，待定
+	 * 后台管理功能，需要使用部落创建者或任意成员马甲，真实用户创建的部落怎么后台解散，是否都有权解散待确认
 	 * --TODO 相关融云通知
 	 * @param obj
 	 * @return
@@ -697,7 +698,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 	}
 
-	//部落发消息，撤回，禁言等操作
+	//部落发消息，部落系统消息（一些操作对一些成员的通知），撤回，@,公告，禁言等操作
 
 
 }
