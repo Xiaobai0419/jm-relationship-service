@@ -25,7 +25,29 @@ public enum RelationshipResponseStatus {
     //已请求过，待对方确认
     ALREADY_REQUESTED,
     //无关联
-    NO_RELATIONSHIP;
+    NO_RELATIONSHIP,
+    //成员列表为空
+    MEMBERS_NULL,
+    //至少两个成员
+    MEMBERS_FEW,
+    //操作者ID为空
+    OPERATOR_NULL,
+    //创建者ID为空
+    CREATOR_NULL,
+    //部落名为空
+    NAME_NULL,
+    //非群主
+    NOT_CREATOR,
+    //群主，用于返回与部落关系
+    CREATOR,
+    //成员，用于返回与部落关系
+    MEMBER,
+    //非成员
+    NOT_MEMBER,
+    //非本人
+    NOT_SELF,
+    //群主不能退群
+    CREATOR_OUT;
 
     public static String getStatus(RelationshipResponseStatus rs){
         switch (rs) {
@@ -53,6 +75,28 @@ public enum RelationshipResponseStatus {
                 return "ALREADY_REQUESTED";
             case NO_RELATIONSHIP:
                 return "NO_RELATIONSHIP";
+            case MEMBERS_NULL:
+                return "MEMBERS_NULL";
+            case MEMBERS_FEW:
+                return "MEMBERS_FEW";
+            case OPERATOR_NULL:
+                return "OPERATOR_NULL";
+            case CREATOR_NULL:
+                return "CREATOR_NULL";
+            case NAME_NULL:
+                return "NAME_NULL";
+            case NOT_CREATOR:
+                return "NOT_CREATOR";
+            case CREATOR:
+                return "CREATOR";
+            case MEMBER:
+                return "MEMBER";
+            case NOT_MEMBER:
+                return "NOT_MEMBER";
+            case NOT_SELF:
+                return "NOT_SELF";
+            case CREATOR_OUT:
+                return "CREATOR_OUT";
             default:
                 return "UNKNOWN";
         }
@@ -84,6 +128,28 @@ public enum RelationshipResponseStatus {
                 return "已请求过好友，待对方确认";
             case NO_RELATIONSHIP:
                 return "无好友关系和请求关联";
+            case MEMBERS_NULL:
+                return "成员列表为空";
+            case MEMBERS_FEW:
+                return "必须选择至少两个成员";
+            case OPERATOR_NULL:
+                return "操作者ID为空";
+            case CREATOR_NULL:
+                return "部落创建者ID为空";
+            case NAME_NULL:
+                return "部落名为空";
+            case NOT_CREATOR:
+                return "非群主无此权限";
+            case CREATOR:
+                return "您是群主";
+            case MEMBER:
+                return "您是部落成员";
+            case NOT_MEMBER:
+                return "您不是部落成员";
+            case NOT_SELF:
+                return "您只能本人退出部落";
+            case CREATOR_OUT:
+                return "群主不能退出部落";
             default:
                 return "未知错误";
         }

@@ -2,7 +2,6 @@ package com.sunfield.microframe.domain;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.Date;
 import java.util.List;
 
 import com.sunfield.microframe.domain.base.BaseDomain;
@@ -22,9 +21,15 @@ public class JmRelationshipGroup extends BaseDomain{
 	
 	@ApiModelProperty(value="创建者用户id，关联用户表id", dataType="String")
 	private String creatorId;
+
+	@ApiModelProperty(value="操作用户id，关联用户表id", dataType="String")
+	private String operatorId;
 	
 	@ApiModelProperty(value="行业分类ID,关联行业分类表ID", dataType="String")
 	private String industryId;
+
+	@ApiModelProperty(value="行业分类名称,关联行业分类表name字段，冗余存储，提升查询效率", dataType="String")
+	private String industryName;
 	
 	@ApiModelProperty(value="成员人数", dataType="Integer")
 	private Integer members = 0;
@@ -34,6 +39,32 @@ public class JmRelationshipGroup extends BaseDomain{
 
 	@ApiModelProperty(value="成员列表", dataType="List<JmAppUser>")
 	private List<JmAppUser> memberList;//用于创建部落时添加成员，和部落创建者（一般从自身好友列表中）添加成员的操作，传递json数组，如果这里使用Set去重，要重写JmAppUser的equals和hashCode方法
+
+	private JmAppUser creator;
+
+	public JmAppUser getCreator() {
+		return creator;
+	}
+
+	public void setCreator(JmAppUser creator) {
+		this.creator = creator;
+	}
+
+	public String getIndustryName() {
+		return industryName;
+	}
+
+	public void setIndustryName(String industryName) {
+		this.industryName = industryName;
+	}
+
+	public String getOperatorId() {
+		return operatorId;
+	}
+
+	public void setOperatorId(String operatorId) {
+		this.operatorId = operatorId;
+	}
 
 	public List<JmAppUser> getMemberList() {
 		return memberList;

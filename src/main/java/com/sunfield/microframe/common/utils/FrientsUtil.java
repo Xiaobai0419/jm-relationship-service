@@ -6,7 +6,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 好友服务辅助类
@@ -103,11 +105,11 @@ public class FrientsUtil {
     /**
      * 群组移除单个成员
      * @param groupId
-     * @param userIds
+     * @param userId
      */
-    public long groupOut(String groupId, String userIds) {
+    public long groupOut(String groupId, String userId) {
         String grpKey = getGrpKey(groupId);
-        return redisTemplate.opsForHash().delete(grpKey,userIds);
+        return redisTemplate.opsForHash().delete(grpKey,userId);
     }
 
     /**
@@ -118,6 +120,36 @@ public class FrientsUtil {
     public long groupMembersNum(String groupId) {
         String grpKey = getGrpKey(groupId);
         return redisTemplate.opsForHash().size(grpKey);
+    }
+
+    /**
+     * 群组成员id列表
+     * @param groupId
+     * @return
+     */
+    public Set<Object> groupMembersKeys(String groupId) {
+        String grpKey = getGrpKey(groupId);
+        return redisTemplate.opsForHash().keys(groupId);//返回的Set<Object>无法转换为Set<String>
+    }
+
+    /**
+     * 群组成员具体信息列表
+     * @param groupId
+     * @return
+     */
+    public List<Object> groupMembersValues(String groupId) {
+        String grpKey = getGrpKey(groupId);
+        return redisTemplate.opsForHash().values(groupId);//hash结构，key不会重复，value可重复，但这里业务上不会重复，如要用Set需要强转，并重写JmAppUser的equals,hashCode方法
+    }
+
+    /**
+     * 单个群组成员具体信息列表
+     * @param groupId
+     * @return
+     */
+    public Object groupMemberSingleValue(String groupId,String memberId) {
+        String grpKey = getGrpKey(groupId);
+        return redisTemplate.opsForHash().get(grpKey,memberId);
     }
 
     /**

@@ -3,6 +3,7 @@ package com.sunfield.microframe.rest;
 import com.sunfield.microframe.common.response.Page;
 import com.sunfield.microframe.common.response.RelationshipResponseBean;
 import com.sunfield.microframe.common.response.RelationshipResponseStatus;
+import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.domain.JmRelationshipFriendship;
 import com.sunfield.microframe.service.RelationshipService;
 import io.swagger.annotations.Api;
@@ -167,14 +168,14 @@ public class RelationshipController {
     @ApiOperation(value="好友列表")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriends", method = RequestMethod.POST)
-    public RelationshipResponseBean<List<JmRelationshipFriendship>> findFriends(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
+    public RelationshipResponseBean<List<JmAppUser>> findFriends(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
             //必需参数判断
             if(jmRelationshipFriendship != null &&
                     StringUtils.isBlank(jmRelationshipFriendship.getUserId())) {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
             }
-            List<JmRelationshipFriendship> resultList = relationshipService.findFriends(jmRelationshipFriendship);
+            List<JmAppUser> resultList = relationshipService.findFriends(jmRelationshipFriendship);
             if(resultList == null) {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
             }
@@ -190,7 +191,7 @@ public class RelationshipController {
     @ApiOperation(value="好友列表--分页")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendsPage", method = RequestMethod.POST)
-    public RelationshipResponseBean<Page<JmRelationshipFriendship>> findFriendsPage(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
+    public RelationshipResponseBean<Page<JmAppUser>> findFriendsPage(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
             //必需参数判断
             if(jmRelationshipFriendship != null &&
@@ -209,14 +210,14 @@ public class RelationshipController {
     @ApiOperation(value="待处理（好友）请求列表")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendRequestsOppsite", method = RequestMethod.POST)
-    public RelationshipResponseBean<List<JmRelationshipFriendship>> findFriendRequestsOppsite(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
+    public RelationshipResponseBean<List<JmAppUser>> findFriendRequestsOppsite(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
             //必需参数判断
             if(jmRelationshipFriendship != null &&
                     StringUtils.isBlank(jmRelationshipFriendship.getUserId())) {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
             }
-            List<JmRelationshipFriendship> resultList = relationshipService.findFriendRequestsOppsite(jmRelationshipFriendship);
+            List<JmAppUser> resultList = relationshipService.findFriendRequestsOppsite(jmRelationshipFriendship);
             if(resultList == null) {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
             }
@@ -232,7 +233,7 @@ public class RelationshipController {
     @ApiOperation(value="待处理（好友）请求列表--分页")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendRequestsOppsitePage", method = RequestMethod.POST)
-    public RelationshipResponseBean<Page<JmRelationshipFriendship>> findFriendRequestsOppsitePage(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
+    public RelationshipResponseBean<Page<JmAppUser>> findFriendRequestsOppsitePage(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
             //必需参数判断
             if(jmRelationshipFriendship != null &&

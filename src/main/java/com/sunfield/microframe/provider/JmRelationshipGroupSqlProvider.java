@@ -17,6 +17,7 @@ public class JmRelationshipGroupSqlProvider{
  									" icon_url AS iconUrl,"+
  									" creator_id AS creatorId,"+
  									" industry_id AS industryId,"+
+									" industry_name AS industryName,"+
  									" members AS members,"+
  									" content AS content,"+
  									" status AS status,"+
@@ -33,8 +34,14 @@ public class JmRelationshipGroupSqlProvider{
 				FROM("jm_relationship_group");
 				
 				WHERE("status = '0'");
-				
-				
+				//前台按行业分类的部落
+				if(StringUtils.isNotBlank(obj.getIndustryId())) {
+					WHERE("industry_id = #{industryId}");
+				}
+				//我创建的部落
+				if(StringUtils.isNotBlank(obj.getCreatorId())) {
+					WHERE("creator_id = #{creatorId}");
+				}
 				
 			}
 		}.toString();
@@ -70,6 +77,7 @@ public class JmRelationshipGroupSqlProvider{
 				VALUES("icon_url", "#{iconUrl}");
 				VALUES("creator_id", "#{creatorId}");
 				VALUES("industry_id", "#{industryId}");
+				VALUES("industry_name", "#{industryName}");//冗余存储
 				VALUES("members", "#{members}");//创建时至少包含创建者和两个其他成员的成员个数信息
 				VALUES("content", "#{content}");
 				VALUES("status", "0");
@@ -90,6 +98,7 @@ public class JmRelationshipGroupSqlProvider{
 				SET("name = #{name}");
 				SET("icon_url = #{iconUrl}");
 				SET("industry_id = #{industryId}");//行业也可以改
+				SET("industry_name = #{industryName}");//冗余更新
 				SET("content = #{content}");
 				SET("update_by = #{updateBy}");
 				SET("update_date = #{updateDate}");
