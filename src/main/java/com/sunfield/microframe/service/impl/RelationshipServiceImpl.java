@@ -126,7 +126,7 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
 
     /**
-     * 同意添加好友--并通过融云发消息（推送）给请求者
+     * 同意添加好友--并通过融云发消息（推送）给请求者 TODO 给双方各发一个单聊消息，告知对方你们已经成为好友
      * 分布式事务：更新、插入关系型数据库记录，同时插入Redis记录
      * 参数统一传入：userId是操作者自己，userIdOpposite是对方，方法内部需要交叉主对方的，新建Bean使用传入参数的各字段交叉赋值
      * @param jmRelationshipFriendship
