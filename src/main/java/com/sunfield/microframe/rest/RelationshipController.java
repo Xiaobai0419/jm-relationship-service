@@ -247,10 +247,4 @@ public class RelationshipController {
             return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
         }
     }
-
-    //单个用户间发消息，服务端需要调融云
-
-
-    //单个用户间消息撤回，服务端需要调融云--需求没有可以不做
-
 }

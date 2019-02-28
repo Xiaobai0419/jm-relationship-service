@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -145,11 +146,23 @@ public class FrientsUtil {
     /**
      * 单个群组成员具体信息列表
      * @param groupId
+     * @param memberId
      * @return
      */
     public Object groupMemberSingleValue(String groupId,String memberId) {
         String grpKey = getGrpKey(groupId);
         return redisTemplate.opsForHash().get(grpKey,memberId);
+    }
+
+    /**
+     * 特定一组群组成员具体信息列表
+     * @param groupId
+     * @param memberIds
+     * @return
+     */
+    public List<Object> groupMembersValues(String groupId, Collection memberIds) {
+        String grpKey = getGrpKey(groupId);
+        return redisTemplate.opsForHash().multiGet(grpKey,memberIds);
     }
 
     /**

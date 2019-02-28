@@ -238,6 +238,5 @@ public class JmRelationshipGroupRequestService implements ITxTransaction{
 			return new RelationshipResponseBean(RelationshipResponseStatus.FAIL);
 		}
 	}
-
 	//邀请加入（是否有拒绝接受？同意加入怎么操作？）--融云通知，调查是否和拉人完全一样，邀请后就在群里了，无此需求可以不做
 }

@@ -49,8 +49,6 @@ public class RelationshipServiceImpl implements RelationshipService {
         return jmAppUserFeignService.findOne(userId).getData();
     }
 
-    //TODO 好友间发消息、推送等接口
-
     //TODO 三度人脉搜索、三度人脉关系变动相关
 
     //TODO 能源圈相关，根据人脉变动重建时间线能源圈相关
@@ -383,4 +381,5 @@ public class RelationshipServiceImpl implements RelationshipService {
             return userList;
         }
     }
+    //单个用户间发消息、消息撤回、推送等，服务端需要调融云--前台可做，需求没有可以不做
 }
