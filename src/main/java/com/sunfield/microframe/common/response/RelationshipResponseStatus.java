@@ -47,7 +47,9 @@ public enum RelationshipResponseStatus {
     //非本人
     NOT_SELF,
     //群主不能退群
-    CREATOR_OUT;
+    CREATOR_OUT,
+    //无此部落
+    GROUP_NOT_EXIST;
 
     public static String getStatus(RelationshipResponseStatus rs){
         switch (rs) {
@@ -97,6 +99,8 @@ public enum RelationshipResponseStatus {
                 return "NOT_SELF";
             case CREATOR_OUT:
                 return "CREATOR_OUT";
+            case GROUP_NOT_EXIST:
+                return "GROUP_NOT_EXIST";
             default:
                 return "UNKNOWN";
         }
@@ -150,6 +154,8 @@ public enum RelationshipResponseStatus {
                 return "您只能本人退出部落";
             case CREATOR_OUT:
                 return "群主不能退出部落";
+            case GROUP_NOT_EXIST:
+                return "无此部落";
             default:
                 return "未知错误";
         }

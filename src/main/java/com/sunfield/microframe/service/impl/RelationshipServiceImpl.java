@@ -51,8 +51,6 @@ public class RelationshipServiceImpl implements RelationshipService {
 
     //TODO 好友间发消息、推送等接口
 
-    //TODO 部落相关
-
     //TODO 三度人脉搜索、三度人脉关系变动相关
 
     //TODO 能源圈相关，根据人脉变动重建时间线能源圈相关

@@ -2,7 +2,9 @@ package com.sunfield.microframe.rest;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import com.sunfield.microframe.common.response.*;
+import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,10 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 
-import com.sunfield.microframe.common.response.Page;
-import com.sunfield.microframe.common.response.ResponseBean;
-import com.sunfield.microframe.common.response.ResponseStatus;
-
 import com.sunfield.microframe.domain.JmRelationshipGroupRequest;
 import com.sunfield.microframe.service.JmRelationshipGroupRequestService;
 
@@ -23,6 +21,8 @@ import com.sunfield.microframe.service.JmRelationshipGroupRequestService;
  * jm_relationship_group_request rest
  * @author sunfield coder
  */
+@Api(tags = "jm-relationship-group-request")
+@Slf4j
 @RestController
 @RequestMapping(value = "/JmRelationshipGroupRequest")
 public class JmRelationshipGroupRequestRest{
@@ -30,79 +30,81 @@ public class JmRelationshipGroupRequestRest{
 	@Autowired
 	private JmRelationshipGroupRequestService service;
 	
-	@ApiOperation(value="查询列表")
+	@ApiOperation(value="部落的请求列表（不包括已拒绝）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
-	@RequestMapping(value = "/findList", method = RequestMethod.POST)
-    public ResponseBean<List<JmRelationshipGroupRequest>> findList(@RequestBody JmRelationshipGroupRequest obj) {
-		List<JmRelationshipGroupRequest> list = service.findList(obj);
-		if(!list.isEmpty()) {
-			return new ResponseBean<List<JmRelationshipGroupRequest>>(ResponseStatus.SUCCESS, list);
-		} else {
-			return new ResponseBean<List<JmRelationshipGroupRequest>>(ResponseStatus.NO_DATA);
+	@RequestMapping(value = "/groupRequestList", method = RequestMethod.POST)
+    public RelationshipResponseBean<List<JmRelationshipGroupRequest>> groupRequestList(@RequestBody JmRelationshipGroupRequest obj) {
+		try {
+			return service.groupRequestList(obj);
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
 		}
     }
 	
-	@ApiOperation(value="分页查询")
+	@ApiOperation(value="分页查询：部落的请求列表（不包括已拒绝）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
-	@RequestMapping(value = "/findPage", method = RequestMethod.POST)
-    public ResponseBean<Page<JmRelationshipGroupRequest>> findPage(@RequestBody JmRelationshipGroupRequest obj) {
-    	return new ResponseBean<Page<JmRelationshipGroupRequest>>(ResponseStatus.SUCCESS, service.findPage(obj));
-    }
-	
-	@ApiOperation(value="根据主键查询")
-	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
-	@RequestMapping(value = "/findOne", method = RequestMethod.POST)
-    public ResponseBean<JmRelationshipGroupRequest> findOne(@RequestBody JmRelationshipGroupRequest obj) {
-    	if(StringUtils.isBlank(obj.getId())) {
-			return new ResponseBean<JmRelationshipGroupRequest>(ResponseStatus.PARAMS_ERROR);
-    	}
-    	JmRelationshipGroupRequest object = service.findOne(obj.getId());
-    	if(object != null) {
-    		return new ResponseBean<JmRelationshipGroupRequest>(ResponseStatus.SUCCESS, object);
-    	} else {
-    		return new ResponseBean<JmRelationshipGroupRequest>(ResponseStatus.NO_DATA);
+	@RequestMapping(value = "/groupRequestPage", method = RequestMethod.POST)
+    public RelationshipResponseBean<Page<JmRelationshipGroupRequest>> groupRequestPage(@RequestBody JmRelationshipGroupRequest obj) {
+		try {
+			return service.groupRequestPage(obj);
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
 		}
     }
 	
-	@ApiOperation(value="新增")
+	@ApiOperation(value="用户查询对某部落的请求状态")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
-	@RequestMapping(value = "/insert", method = RequestMethod.POST)
-    public ResponseBean<JmRelationshipGroupRequest> insert(@RequestBody JmRelationshipGroupRequest obj) {
-		JmRelationshipGroupRequest object = service.insert(obj);
-		if(object != null) {
-			return new ResponseBean<JmRelationshipGroupRequest>(ResponseStatus.SUCCESS, object);
-		} else {
-			return new ResponseBean<JmRelationshipGroupRequest>(ResponseStatus.FAIL);
+	@RequestMapping(value = "/groupRequestStatus", method = RequestMethod.POST)
+    public RelationshipResponseBean<JmRelationshipGroupRequest> groupRequestStatus(@RequestBody JmRelationshipGroupRequest obj) {
+		try {
+			return service.groupRequestStatus(obj);
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
 		}
     }
 	
-	@ApiOperation(value="更新")
+	@ApiOperation(value="请求加入部落")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
-	@RequestMapping(value = "/update", method = RequestMethod.POST)
-    public ResponseBean<JmRelationshipGroupRequest> update(@RequestBody JmRelationshipGroupRequest obj) {
-    	if(StringUtils.isBlank(obj.getId())) {
-			return new ResponseBean<JmRelationshipGroupRequest>(ResponseStatus.PARAMS_ERROR);
-    	}
-    	JmRelationshipGroupRequest object = service.update(obj);
-    	if(object != null) {
-			return new ResponseBean<JmRelationshipGroupRequest>(ResponseStatus.SUCCESS, object);
-		} else {
-			return new ResponseBean<JmRelationshipGroupRequest>(ResponseStatus.FAIL);
+	@RequestMapping(value = "/groupRequest", method = RequestMethod.POST)
+    public RelationshipResponseBean<JmRelationshipGroupRequest> groupRequest(@RequestBody JmRelationshipGroupRequest obj) {
+		try {
+			return service.groupRequest(obj);
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
 		}
     }
 	
-	@ApiOperation(value="删除")
+	@ApiOperation(value="群主拒绝请求")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
-	@RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public ResponseBean<JmRelationshipGroupRequest> delete(@RequestBody JmRelationshipGroupRequest obj) {
-    	if(StringUtils.isBlank(obj.getId())) {
-			return new ResponseBean<JmRelationshipGroupRequest>(ResponseStatus.PARAMS_ERROR);
-    	}
-    	if(service.delete(obj.getId()) > 0) {
-    		return new ResponseBean<JmRelationshipGroupRequest>();
-    	} else {
-    		return new ResponseBean<JmRelationshipGroupRequest>(ResponseStatus.NO_DATA);
+	@RequestMapping(value = "/groupReject", method = RequestMethod.POST)
+    public RelationshipResponseBean<JmRelationshipGroupRequest> groupReject(@RequestBody JmRelationshipGroupRequest obj) {
+		try {
+			return service.groupReject(obj);
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
 		}
     }
-    
+	
+	@ApiOperation(value="通过请求并将请求用户加入部落")
+	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
+	@RequestMapping(value = "/groupAgreed", method = RequestMethod.POST)
+    public RelationshipResponseBean<JmRelationshipGroupRequest> groupAgreed(@RequestBody JmRelationshipGroupRequest obj) {
+		try {
+			return service.groupAgreed(obj);
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
+		}
+    }
 }

@@ -35,11 +35,11 @@ public interface JmRelationshipGroupRequestMapper{
 
 	/**
 	 * 单行查询
-	 * @param id
+	 * @param obj
 	 * @return
 	 */
 	@SelectProvider(type=JmRelationshipGroupRequestSqlProvider.class, method="generateFindOneSql")
-	public JmRelationshipGroupRequest findOne(String id);
+	public JmRelationshipGroupRequest findOne(JmRelationshipGroupRequest obj);
 
 	/**
 	 * 插入单行
@@ -50,7 +50,7 @@ public interface JmRelationshipGroupRequestMapper{
 	public int insert(JmRelationshipGroupRequest obj);
 
 	/**
-	 * 更新单行
+	 * 更新单行--请求者更新自己已有记录
 	 * @param obj
 	 * @return
 	 */
@@ -58,11 +58,19 @@ public interface JmRelationshipGroupRequestMapper{
 	public int update(JmRelationshipGroupRequest obj);
 
 	/**
+	 * 更新单行--群主操作
+	 * @param obj
+	 * @return
+	 */
+	@UpdateProvider(type=JmRelationshipGroupRequestSqlProvider.class, method="generateUpdateTypeSql")
+	public int updateType(JmRelationshipGroupRequest obj);
+
+	/**
 	 * 删除单行（一般为逻辑删除）
-	 * @param id
+	 * @param obj
 	 * @return
 	 */
 	@UpdateProvider(type=JmRelationshipGroupRequestSqlProvider.class, method="generateDeleteSql")
-	public int delete(String id);
+	public int delete(JmRelationshipGroupRequest obj);
 
 }

@@ -8,23 +8,37 @@ public class RelationshipResponseBean<T> {
 
     private T data;
 
+    private RelationshipResponseStatus relationshipResponseStatus;
+
+    public RelationshipResponseStatus getRelationshipResponseStatus() {
+        return relationshipResponseStatus;
+    }
+
+    public void setRelationshipResponseStatus(RelationshipResponseStatus relationshipResponseStatus) {
+        this.relationshipResponseStatus = relationshipResponseStatus;
+    }
+
     public RelationshipResponseBean(RelationshipResponseStatus status){
+        this.relationshipResponseStatus = status;
         this.status = RelationshipResponseStatus.getStatus(status);
         this.msg = RelationshipResponseStatus.getMsg(status);
     }
 
     public RelationshipResponseBean(RelationshipResponseStatus status, T data) {
+        this.relationshipResponseStatus = status;
         this.status = RelationshipResponseStatus.getStatus(status);
         this.msg = RelationshipResponseStatus.getMsg(status);
         this.data = data;
     }
 
     public RelationshipResponseBean(RelationshipResponseStatus status, String msg){
+        this.relationshipResponseStatus = status;
         this.status = RelationshipResponseStatus.getStatus(status);
         this.msg = msg;
     }
 
     public RelationshipResponseBean(RelationshipResponseStatus status, String msg, T data) {
+        this.relationshipResponseStatus = status;
         this.status = RelationshipResponseStatus.getStatus(status);
         this.msg = msg;
         this.data = data;

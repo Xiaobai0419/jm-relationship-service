@@ -28,7 +28,7 @@ import com.sunfield.microframe.mapper.JmRelationshipGroupMapper;
 
 /**
  * jm_relationship_group service
- * @author sunfield coder
+ * @author Daniel Bai
  */
 @Service
 public class JmRelationshipGroupService implements ITxTransaction{
@@ -49,13 +49,13 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	}
 
 	/**
-	 * 应用层分页
+	 * 应用层分页--静态方法支持泛型
 	 * @param list
 	 * @param pageNumber
 	 * @param pageSize
 	 * @return
 	 */
-	private Page<JmRelationshipGroup> pageList(List<JmRelationshipGroup> list,int pageNumber,int pageSize) {
+	private static <T> Page<T> pageList(List<T> list,int pageNumber,int pageSize) {
 		int total = list.size();
 		int fromIndex = (pageNumber - 1) * pageSize;
 		if (fromIndex >= total) {
@@ -251,6 +251,30 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	}
 
 	/**
+	 * 查询部落成员列表--分页
+	 * @param obj
+	 * @return
+	 */
+	public RelationshipResponseBean<Page<Object>> findMemberListPage(JmRelationshipGroup obj){
+		if(StringUtils.isBlank(obj.getId())) {
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.ID_NULL);
+		}
+		//操作者id
+		String operatorId = obj.getOperatorId();
+		if(StringUtils.isBlank(operatorId)) {
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.OPERATOR_NULL);
+		}
+		//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
+		Set<Object> allMembers = frientsUtil.groupMembersKeys(obj.getId());
+		//非成员禁止查看
+		if(!allMembers.contains(operatorId)) {
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
+		}
+		return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
+				pageList(frientsUtil.groupMembersValues(obj.getId()),obj.getPageNumber(),obj.getPageSize()));
+	}
+
+	/**
 	 * 查询与部落关系--是否是成员及创建者，TODO 特别用于好友列表中已加入某部落成员不再支持被加入该部落（置灰效果）
 	 * 用于显示发消息还是申请/申请中，和显示成员列表等成员特权
 	 * 用于显示编辑，拉人等群主特权
@@ -284,24 +308,6 @@ public class JmRelationshipGroupService implements ITxTransaction{
 				return new RelationshipResponseBean<>(RelationshipResponseStatus.MEMBER,obj);
 			}
 		}
-	}
-
-	/**
-	 * 某人查询自己对某部落的申请状态--维护另一个数据库表
-	 * @param obj
-	 * @return
-	 */
-	public JmRelationshipGroup findApplyGroup(JmRelationshipGroup obj){
-		return mapper.findOne(obj.getId());
-	}
-
-	/**
-	 * 查询某部落申请加入列表（不包括已拒绝，已通过，已通过的需要逻辑删除，加入到部落成员列表）--维护另一个数据库表（有部落id字段），部落创建者特权
-	 * @param obj
-	 * @return
-	 */
-	public JmRelationshipGroup findGroupApplications(JmRelationshipGroup obj){
-		return mapper.findOne(obj.getId());
 	}
 
 	/**
@@ -381,66 +387,6 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,obj);
 		} else {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
-		}
-	}
-
-	/**
-	 * 申请加入某部落--申请表操作，含部落id（需要判断是否已是成员，及是否被拒绝过，有记录）
-	 * @param obj
-	 * @return
-	 */
-	@Transactional
-	public JmRelationshipGroup applyToGroup(JmRelationshipGroup obj){
-		obj.preUpdate();
-		if(mapper.update(obj) > 0) {
-			return obj;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * 通过某人入群--申请表删除或改状态操作，部落Redis，融云加人操作，及相关人员通知，创建者特权（需要判断是否是创建者）
-	 * @param obj
-	 * @return
-	 */
-	@Transactional
-	public JmRelationshipGroup agreeAddToGroup(JmRelationshipGroup obj){
-		obj.preUpdate();
-		if(mapper.update(obj) > 0) {
-			return obj;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * 拒绝某人入群--申请表改状态操作，部落Redis，融云操作及通知，创建者特权（需要判断是否是创建者）
-	 * @param obj
-	 * @return
-	 */
-	@Transactional
-	public JmRelationshipGroup rejectAddToGroup(JmRelationshipGroup obj){
-		obj.preUpdate();
-		if(mapper.update(obj) > 0) {
-			return obj;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * 邀请加入（是否有拒绝接受？同意加入怎么操作？）--融云通知，调查是否和拉人完全一样，邀请后就在群里了
-	 * @param obj
-	 * @return
-	 */
-	@Transactional
-	public JmRelationshipGroup inviteToGroup(JmRelationshipGroup obj){
-		obj.preUpdate();
-		if(mapper.update(obj) > 0) {
-			return obj;
-		} else {
-			return null;
 		}
 	}
 
