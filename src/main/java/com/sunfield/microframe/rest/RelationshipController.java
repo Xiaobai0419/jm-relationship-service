@@ -34,8 +34,9 @@ public class RelationshipController {
     private RelationshipService relationshipService;
 
     //好友请求
-    @ApiOperation(value="好友请求")
-    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite", required = true, dataType = "JmRelationshipFriendship")
+    @ApiOperation(value="好友请求，返回数据type字段5代表请求成功，其他值见返回提示")
+    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite," +
+            "其中userId为操作者用户id,userIdOpposite为对方用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/addFriendRequest", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipFriendship> addFriendRequest(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
@@ -53,6 +54,7 @@ public class RelationshipController {
                     case 0:case 1:return new RelationshipResponseBean<>(RelationshipResponseStatus.ALREADY_FRIEND,result);
                     case 2:return new RelationshipResponseBean<>(RelationshipResponseStatus.ALREADY_REQUESTED,result);
                     case 5:return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
+                    case 6:return new RelationshipResponseBean<>(RelationshipResponseStatus.SELF_FRIEND,result);
                     default:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
                 }
             }
@@ -65,7 +67,8 @@ public class RelationshipController {
 
     //同意添加，成为好友
     @ApiOperation(value="同意添加，成为好友")
-    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite", required = true, dataType = "JmRelationshipFriendship")
+    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite," +
+            "其中userId为操作者用户id,userIdOpposite为对方用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/agreeAsAFriend", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipFriendship> agreeAsAFriend(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
@@ -78,6 +81,8 @@ public class RelationshipController {
             JmRelationshipFriendship result = relationshipService.agreeAsAFriend(jmRelationshipFriendship);
             if(result == null) {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
+            }else if(result.getType() == 6){
+                return new RelationshipResponseBean<>(RelationshipResponseStatus.SELF_FRIEND,result);
             }else {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
             }
@@ -90,7 +95,8 @@ public class RelationshipController {
 
     //拒绝好友请求
     @ApiOperation(value="拒绝好友请求")
-    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite", required = true, dataType = "JmRelationshipFriendship")
+    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite," +
+            "其中userId为操作者用户id,userIdOpposite为对方用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/rejectFriendRequest", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipFriendship> rejectFriendRequest(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
@@ -115,7 +121,8 @@ public class RelationshipController {
 
     //删除好友
     @ApiOperation(value="删除好友")
-    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite", required = true, dataType = "JmRelationshipFriendship")
+    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite," +
+            "其中userId为操作者用户id,userIdOpposite为对方用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/removeFriend", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipFriendship> removeFriend(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
@@ -140,8 +147,9 @@ public class RelationshipController {
 
     //单个用户查询与另一个用户的好友状态（用于用户详情页、人脉搜索列表显示已请求状态，显示不同按钮，特别：已请求尚未通过的置灰显示请求中，已拒绝的可重新显示加好友按钮）
     //双向查询，你可能请求过对方，或与对方是好友；对方可能请求过你好友，待通过或已被拒绝，或你已删除对方，对方保持单向好友关系
-    @ApiOperation(value="查询与另一个用户的好友状态，返回数据的reverse字段为true代表是反向关系")
-    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite", required = true, dataType = "JmRelationshipFriendship")
+    @ApiOperation(value="查询与另一个用户的好友状态，返回数据的reverse字段为true代表是反向关系，无返回数据代表无好友和请求关联")
+    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite," +
+            "其中userId为操作者用户id,userIdOpposite为对方用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendRecord", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipFriendship> findFriendRecord(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
@@ -155,7 +163,24 @@ public class RelationshipController {
             if(result == null) {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.NO_RELATIONSHIP);//无好友和请求关联
             }else {
-                return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS, result);//可能是任意一个方向的任意关系，方向根据reverse字段进行区分
+                //可能是任意一个方向的任意关系，方向根据reverse字段进行区分
+                if(result.getReverse()) {
+                    //反向关系
+                    switch (result.getType()) {
+                        case 0:case 1:return new RelationshipResponseBean<>(RelationshipResponseStatus.NO_RELATIONSHIP);//删除了对方好友，显示无关联
+                        case 2:return new RelationshipResponseBean<>(RelationshipResponseStatus.REQUESTING_OPPSITE,result);
+                        case 3:return new RelationshipResponseBean<>(RelationshipResponseStatus.REJECTED_OPPSITE,result);
+                        default:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
+                    }
+                }else {
+                    //正向关系
+                    switch (result.getType()) {
+                        case 0:case 1:return new RelationshipResponseBean<>(RelationshipResponseStatus.FRIEND,result);
+                        case 2:return new RelationshipResponseBean<>(RelationshipResponseStatus.REQUESTING,result);
+                        case 3:return new RelationshipResponseBean<>(RelationshipResponseStatus.REJECTED,result);
+                        default:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
+                    }
+                }
             }
         }catch (Exception e) {
             e.printStackTrace();
@@ -166,7 +191,7 @@ public class RelationshipController {
 
     //单个用户好友列表
     @ApiOperation(value="好友列表")
-    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId", required = true, dataType = "JmRelationshipFriendship")
+    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId,为操作者用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriends", method = RequestMethod.POST)
     public RelationshipResponseBean<List<JmAppUser>> findFriends(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
@@ -189,7 +214,7 @@ public class RelationshipController {
 
     //单个用户好友列表--分页
     @ApiOperation(value="好友列表--分页")
-    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId", required = true, dataType = "JmRelationshipFriendship")
+    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId,为操作者用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendsPage", method = RequestMethod.POST)
     public RelationshipResponseBean<Page<JmAppUser>> findFriendsPage(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
@@ -208,7 +233,7 @@ public class RelationshipController {
 
     //单个用户待处理（好友）请求列表
     @ApiOperation(value="待处理（好友）请求列表")
-    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId", required = true, dataType = "JmRelationshipFriendship")
+    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId,为操作者用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendRequestsOppsite", method = RequestMethod.POST)
     public RelationshipResponseBean<List<JmAppUser>> findFriendRequestsOppsite(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {
@@ -231,7 +256,7 @@ public class RelationshipController {
 
     //单个用户待处理（好友）请求列表--分页
     @ApiOperation(value="待处理（好友）请求列表--分页")
-    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId", required = true, dataType = "JmRelationshipFriendship")
+    @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId,为操作者用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendRequestsOppsitePage", method = RequestMethod.POST)
     public RelationshipResponseBean<Page<JmAppUser>> findFriendRequestsOppsitePage(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
         try {

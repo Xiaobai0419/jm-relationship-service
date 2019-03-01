@@ -66,6 +66,11 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Caching(evict = {@CacheEvict(key = "#p0.userIdOpposite + '_findFriendRequestsOppsite'")})
     @Override
     public JmRelationshipFriendship addFriendRequest(JmRelationshipFriendship jmRelationshipFriendship) {
+        //添加自己为好友的情况
+        if(jmRelationshipFriendship.getUserId().equals(jmRelationshipFriendship.getUserIdOpposite())) {
+            jmRelationshipFriendship.setType(6);
+            return jmRelationshipFriendship;
+        }
         //需要先查询好友关系，判断是更新还是插入
         JmRelationshipFriendship record = jmRelationshipFriendshipMapper.findFriendRecord(jmRelationshipFriendship);
         if(record != null && (record.getType() == 0 || record.getType() == 1 || record.getType() == 2)) {
@@ -97,6 +102,8 @@ public class RelationshipServiceImpl implements RelationshipService {
             } else {
                 return null;
             }
+        }else if(record != null) {
+            return null;
         }else {
             //无记录，插入
             jmRelationshipFriendship.preInsert();
@@ -137,6 +144,11 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Caching(evict = {@CacheEvict(key = "#p0.userId + '_findFriends'")})//缓存清除
     @Override
     public JmRelationshipFriendship agreeAsAFriend(JmRelationshipFriendship jmRelationshipFriendship) {
+        //通过自己为好友的情况
+        if(jmRelationshipFriendship.getUserId().equals(jmRelationshipFriendship.getUserIdOpposite())) {
+            jmRelationshipFriendship.setType(6);
+            return jmRelationshipFriendship;
+        }
         jmRelationshipFriendship.preInsert();
         JmRelationshipFriendship jmRelationshipFriendshipOppsite = new JmRelationshipFriendship();
         jmRelationshipFriendshipOppsite.preUpdate();//注意是更新！！
@@ -148,13 +160,20 @@ public class RelationshipServiceImpl implements RelationshipService {
         int mysqlResult2 = 0;
         if(mysqlResult1 > 0) {//更新成功才插入，防止更新不存在记录也插入的情况
             jmRelationshipFriendship.setType(0);
-            //插入自身类型0记录
-            mysqlResult2 = jmRelationshipFriendshipMapper.insert(jmRelationshipFriendship);
+            //需要先查询好友关系，避免多次通过造成插入多次
+            JmRelationshipFriendship record = jmRelationshipFriendshipMapper.findFriendRecord(jmRelationshipFriendship);
+            if(record != null) {
+                //已有记录，更新为类型0记录
+                mysqlResult2 = jmRelationshipFriendshipMapper.update(jmRelationshipFriendship);
+            }else {
+                //插入自身类型0记录
+                mysqlResult2 = jmRelationshipFriendshipMapper.insert(jmRelationshipFriendship);
+            }
         }
         boolean addFriend = false,addFriendOppsite = false;
         ResponseResult responseResult = null;
         if(mysqlResult1 > 0 && mysqlResult2 > 0) {//关系型数据库完全操作成功才操作Redis:防止更新不存在记录也会更新Redis的情况
-            //到Redis中向自己、对方的一度好友Zset集合各插入对方记录
+            //到Redis中向自己、对方的一度好友Zset集合各插入对方记录--ZSet结构多次操作幂等
             JmAppUser user = findUser(jmRelationshipFriendship.getUserId());//自身信息
             JmAppUser userOppsite = findUser(jmRelationshipFriendship.getUserIdOpposite());//对方信息
             if(user != null && userOppsite != null) {
@@ -242,7 +261,7 @@ public class RelationshipServiceImpl implements RelationshipService {
             mysqlResult2 = jmRelationshipFriendshipMapper.delete(jmRelationshipFriendship);
         }
         if(mysqlResult1 > 0 && mysqlResult2 > 0) {//关系型数据库完全操作成功才操作Redis:防止更新不存在记录也会更新Redis的情况
-            //到Redis中自己、对方（可不移除）的一度好友Zset集合中移除对方记录
+            //到Redis中自己、对方（可不移除）的一度好友Zset集合中移除对方记录--ZSet结构多次操作幂等
             long removeFriend = frientsUtil.removeFriend(jmRelationshipFriendship.getUserId(),jmRelationshipFriendship.getUserIdOpposite());
             log.info("Redis Remove:removeFriend/" + removeFriend);
         }
@@ -376,7 +395,8 @@ public class RelationshipServiceImpl implements RelationshipService {
             List<JmAppUser> userList = null;
             if(userIdList.size() > 0) {
                 //远程批量查询用户信息
-                userList = jmAppUserFeignService.findListByIds((String[]) userIdList.toArray()).getData();
+                //使用无参toArray强转数组的方式会报错
+                userList = jmAppUserFeignService.findListByIds(userIdList.toArray(new String[userIdList.size()])).getData();
             }
             return userList;
         }

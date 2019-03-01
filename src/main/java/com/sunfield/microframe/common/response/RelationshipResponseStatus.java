@@ -20,6 +20,18 @@ public enum RelationshipResponseStatus {
     OPPSITE_NULL,
     //类型为空
     TYPE_NULL,
+    //好友
+    FRIEND,
+    //好友请求中
+    REQUESTING,
+    //反向好友请求中
+    REQUESTING_OPPSITE,
+    //已拒绝好友请求
+    REJECTED,
+    //反向已拒绝好友请求
+    REJECTED_OPPSITE,
+    //添加自己为好友
+    SELF_FRIEND,
     //已经是好友了
     ALREADY_FRIEND,
     //已请求过，待对方确认
@@ -71,6 +83,18 @@ public enum RelationshipResponseStatus {
                 return "OPPSITE_NULL";
             case TYPE_NULL:
                 return "TYPE_NULL";
+            case FRIEND:
+                return "FRIEND";
+            case REQUESTING:
+                return "REQUESTING";
+            case REQUESTING_OPPSITE:
+                return "REQUESTING_OPPSITE";
+            case REJECTED:
+                return "REJECTED";
+            case REJECTED_OPPSITE:
+                return "REJECTED_OPPSITE";
+            case SELF_FRIEND:
+                return "SELF_FRIEND";
             case ALREADY_FRIEND:
                 return "ALREADY_FRIEND";
             case ALREADY_REQUESTED:
@@ -126,6 +150,18 @@ public enum RelationshipResponseStatus {
                 return "对方用户ID不能为空";
             case TYPE_NULL:
                 return "好友关系类型不能为空";
+            case FRIEND:
+                return "你们是好友";
+            case REQUESTING:
+                return "好友请求中";
+            case REQUESTING_OPPSITE:
+                return "对方请求加您为好友";
+            case REJECTED:
+                return "对方已拒绝您的好友请求";
+            case REJECTED_OPPSITE:
+                return "您已拒绝对方的好友请求";
+            case SELF_FRIEND:
+                return "您不能添加自己为好友";
             case ALREADY_FRIEND:
                 return "你们已经是好友了";
             case ALREADY_REQUESTED:

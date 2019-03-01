@@ -368,11 +368,11 @@ public class JmRelationshipGroupService implements ITxTransaction{
 				groupMembers.add(new GroupMember().setId(memberId));
 			}
 			//调用融云创建群组接口
-			groupCreateResult = GroupUtil.createGroup(obj.getId(),obj.getName(), (GroupMember[]) groupMembers.toArray());
+			groupCreateResult = GroupUtil.createGroup(obj.getId(),obj.getName(), groupMembers.toArray(new GroupMember[groupMembers.size()]));
 
 			//创建Redis hash结构，维护部落成员具体信息
 			//先一次性查询所有成员信息
-			List<JmAppUser> userList = jmAppUserFeignService.findListByIds((String[]) memberIds.toArray()).getData();
+			List<JmAppUser> userList = jmAppUserFeignService.findListByIds(memberIds.toArray(new String[memberIds.size()])).getData();
 			Map<String,JmAppUser> userMap = new HashMap<>();
 			if(userList != null && userList.size() >0) {
 				for(JmAppUser jmAppUser : userList) {
@@ -388,7 +388,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			//调用融云给被添加者和群一个系统通知
 			TxtMessage txtMessage = new TxtMessage("您已被添加到'" + name + "'部落",
 					"部落添加成员通知");
-			MessageUtil.sendSystemTxtMessage(creatorId, (String[]) memberIds.toArray(),txtMessage);
+			MessageUtil.sendSystemTxtMessage(creatorId, memberIds.toArray(new String[memberIds.size()]),txtMessage);
 			for(JmAppUser user : userList) {
 				txtMessage = new TxtMessage("'" + user.getNickName() + "'已加入部落", "部落添加成员通知");
 				MessageUtil.sendGroupTxtMessage(creatorId,new String[]{obj.getId()},txtMessage);
@@ -445,7 +445,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//先存入Redis,相同的键直接覆盖，与部落中原有成员间去重
 		//先一次性查询所有成员信息
-		List<JmAppUser> userList = jmAppUserFeignService.findListByIds((String[]) memberIds.toArray()).getData();
+		List<JmAppUser> userList = jmAppUserFeignService.findListByIds(memberIds.toArray(new String[memberIds.size()])).getData();
 		Map<String,JmAppUser> userMap = new HashMap<>();
 		if(userList != null && userList.size() >0) {
 			for(JmAppUser jmAppUser : userList) {
@@ -463,12 +463,12 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			groupMembers.add(new GroupMember().setId(memberId));
 		}
 		//调用融云添加成员接口
-		Result groupResult = GroupUtil.joinToGroup(obj.getId(),obj.getName(), (GroupMember[]) groupMembers.toArray());
+		Result groupResult = GroupUtil.joinToGroup(obj.getId(),obj.getName(), groupMembers.toArray(new GroupMember[groupMembers.size()]));
 		//融云相关通知
 		//调用融云给被添加者和群一个系统通知
 		TxtMessage txtMessage = new TxtMessage("您已被添加到'" + thisGroup.getName() + "'部落",
 				"部落添加成员通知");
-		MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), (String[]) memberIds.toArray(),txtMessage);
+		MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), memberIds.toArray(new String[memberIds.size()]),txtMessage);
 		for(JmAppUser user : userList) {
 			txtMessage = new TxtMessage("'" + user.getNickName() + "'已加入部落", "部落添加成员通知");
 			MessageUtil.sendGroupTxtMessage(thisGroup.getCreatorId(),new String[]{thisGroup.getId()},txtMessage);
@@ -550,7 +550,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			groupMembers.add(new GroupMember().setId(memberId));
 		}
 		//调用融云退出群组接口
-		Result groupResult = GroupUtil.quitFromGroup(obj.getId(),(GroupMember[]) groupMembers.toArray());
+		Result groupResult = GroupUtil.quitFromGroup(obj.getId(),groupMembers.toArray(new GroupMember[groupMembers.size()]));
 		//查询Redis被移除成员具体信息
 		List<Object> userList = frientsUtil.groupMembersValues(obj.getId(),memberIds);
 		//融云相关通知--涉及成员id退出群，所以统一用群主id发消息
@@ -559,7 +559,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			//调用融云给被移除者和群一个系统通知
 			TxtMessage txtMessage = new TxtMessage("您已被群主移出'" + thisGroup.getName() + "'部落",
 					"部落移除成员通知");
-			MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), (String[]) memberIds.toArray(),txtMessage);
+			MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), memberIds.toArray(new String[memberIds.size()]),txtMessage);
 			for(Object object : userList) {
 				JmAppUser user = (JmAppUser) object;
 				txtMessage = new TxtMessage("'" + user.getNickName() + "'已被群主移出部落", "部落移除成员通知");
