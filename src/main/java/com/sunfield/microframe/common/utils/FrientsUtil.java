@@ -130,7 +130,7 @@ public class FrientsUtil {
      */
     public Set<Object> groupMembersKeys(String groupId) {
         String grpKey = getGrpKey(groupId);
-        return redisTemplate.opsForHash().keys(groupId);//返回的Set<Object>无法转换为Set<String>
+        return redisTemplate.opsForHash().keys(grpKey);//返回的Set<Object>无法转换为Set<String>
     }
 
     /**
@@ -140,7 +140,7 @@ public class FrientsUtil {
      */
     public List<Object> groupMembersValues(String groupId) {
         String grpKey = getGrpKey(groupId);
-        return redisTemplate.opsForHash().values(groupId);//hash结构，key不会重复，value可重复，但这里业务上不会重复，如要用Set需要强转，并重写JmAppUser的equals,hashCode方法
+        return redisTemplate.opsForHash().values(grpKey);//hash结构，key不会重复，value可重复，但这里业务上不会重复，如要用Set需要强转，并重写JmAppUser的equals,hashCode方法
     }
 
     /**
@@ -162,7 +162,8 @@ public class FrientsUtil {
      */
     public List<Object> groupMembersValues(String groupId, Collection memberIds) {
         String grpKey = getGrpKey(groupId);
-        return redisTemplate.opsForHash().multiGet(grpKey,memberIds);
+        List<Object> list = redisTemplate.opsForHash().multiGet(grpKey,memberIds);
+        return list;
     }
 
     /**

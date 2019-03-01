@@ -141,7 +141,8 @@ public class JmRelationshipGroupRest{
 		}
 	}
 
-	@ApiOperation(value="创建部落")
+	@ApiOperation(value="创建部落：必需参数：creatorId，创建者id；name，content，industryId，iconUrl；" +
+			"memberList中需要至少两个成员用户，只传递其用户id字段即可，如不重复的少于2个会失败")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/groupCreate", method = RequestMethod.POST)
 	public RelationshipResponseBean<JmRelationshipGroup> groupCreate(@RequestBody JmRelationshipGroup obj) {
@@ -154,7 +155,8 @@ public class JmRelationshipGroupRest{
 		}
 	}
 
-	@ApiOperation(value="部落添加单个、多个成员")
+	@ApiOperation(value="部落添加单个、多个成员：必需参数：operatorId，操作者id,必需是群主才可操作；id，部落id；" +
+			"memberList中需要至少有一个成员用户，只传递其用户id字段即可")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/groupAdd", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipGroup> groupAdd(@RequestBody JmRelationshipGroup obj) {
@@ -180,7 +182,8 @@ public class JmRelationshipGroupRest{
 		}
 	}
 
-	@ApiOperation(value="编辑部落信息")
+	@ApiOperation(value="编辑部落信息：必需参数：operatorId，操作者id,必需是群主才可操作；id，部落id；" +
+			"其他除群主和成员个数外均可更新")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipGroup> update(@RequestBody JmRelationshipGroup obj) {

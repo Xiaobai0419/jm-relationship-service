@@ -331,10 +331,6 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		if(StringUtils.isBlank(name)) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.NAME_NULL);
 		}
-		//必须选择至少两个其他成员成立部落
-		if(obj.getMemberList() == null || obj.getMemberList().size() < 2) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.MEMBERS_FEW);
-		}
 
 		//Set集合自动去重
 		Set<String> memberIds = new HashSet<>();
@@ -345,6 +341,10 @@ public class JmRelationshipGroupService implements ITxTransaction{
 					memberIds.add(jmAppUser.getId());
 				}
 			}
+		}
+		//必须选择至少两个其他不重复成员成立部落
+		if(memberIds.size() < 3) {
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.MEMBERS_FEW);
 		}
 		//注意：设置部落成员个数！！
 		obj.setMembers(memberIds.size());
@@ -383,15 +383,16 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			}
 			//Redis直接存储所有成员（至少包括部落创建者）具体信息（其中有成员所属行业信息），不再维护关系型中间表，而部落信息（包括所属行业）维护在关系型表
 			frientsUtil.groupAdd(obj.getId(),userMap);
-
-			//融云相关通知
-			//调用融云给被添加者和群一个系统通知
-			TxtMessage txtMessage = new TxtMessage("您已被添加到'" + name + "'部落",
-					"部落添加成员通知");
-			MessageUtil.sendSystemTxtMessage(creatorId, memberIds.toArray(new String[memberIds.size()]),txtMessage);
-			for(JmAppUser user : userList) {
-				txtMessage = new TxtMessage("'" + user.getNickName() + "'已加入部落", "部落添加成员通知");
-				MessageUtil.sendGroupTxtMessage(creatorId,new String[]{obj.getId()},txtMessage);
+			if(userList != null && userList.size() >0) {
+				//融云相关通知
+				//调用融云给被添加者和群一个系统通知
+				TxtMessage txtMessage = new TxtMessage("您已被添加到'" + name + "'部落",
+						"部落添加成员通知");
+				MessageUtil.sendSystemTxtMessage(creatorId, memberIds.toArray(new String[memberIds.size()]),txtMessage);
+				for(JmAppUser user : userList) {
+					txtMessage = new TxtMessage("'" + user.getNickName() + "'已加入部落", "部落添加成员通知");
+					MessageUtil.sendGroupTxtMessage(creatorId,new String[]{obj.getId()},txtMessage);
+				}
 			}
 		}
 		//各种分布式事务成功后
@@ -462,18 +463,19 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		for(String memberId : memberIds) {
 			groupMembers.add(new GroupMember().setId(memberId));
 		}
-		//调用融云添加成员接口
-		Result groupResult = GroupUtil.joinToGroup(obj.getId(),obj.getName(), groupMembers.toArray(new GroupMember[groupMembers.size()]));
+		//调用融云添加成员接口--需要传递部落id和name,从查询结果获取，不从传入参数传递！！
+		Result groupResult = GroupUtil.joinToGroup(thisGroup.getId(),thisGroup.getName(), groupMembers.toArray(new GroupMember[groupMembers.size()]));
 		//融云相关通知
-		//调用融云给被添加者和群一个系统通知
-		TxtMessage txtMessage = new TxtMessage("您已被添加到'" + thisGroup.getName() + "'部落",
-				"部落添加成员通知");
-		MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), memberIds.toArray(new String[memberIds.size()]),txtMessage);
-		for(JmAppUser user : userList) {
-			txtMessage = new TxtMessage("'" + user.getNickName() + "'已加入部落", "部落添加成员通知");
-			MessageUtil.sendGroupTxtMessage(thisGroup.getCreatorId(),new String[]{thisGroup.getId()},txtMessage);
+		if(userList != null && userList.size() >0) {
+			//调用融云给被添加者和群一个系统通知
+			TxtMessage txtMessage = new TxtMessage("您已被添加到'" + thisGroup.getName() + "'部落",
+					"部落添加成员通知");
+			MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), memberIds.toArray(new String[memberIds.size()]),txtMessage);
+			for(JmAppUser user : userList) {
+				txtMessage = new TxtMessage("'" + user.getNickName() + "'已加入部落", "部落添加成员通知");
+				MessageUtil.sendGroupTxtMessage(thisGroup.getCreatorId(),new String[]{thisGroup.getId()},txtMessage);
+			}
 		}
-
 		//从Redis反向获取自动去重的部落成员个数，更新部到关系型数据库！
 		obj.setMembers((int) frientsUtil.groupMembersNum(obj.getId()));
 
@@ -551,31 +553,46 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//调用融云退出群组接口
 		Result groupResult = GroupUtil.quitFromGroup(obj.getId(),groupMembers.toArray(new GroupMember[groupMembers.size()]));
-		//查询Redis被移除成员具体信息
+		//查询Redis被移除成员具体信息 TODO 这里的Redis查询有问题
 		List<Object> userList = frientsUtil.groupMembersValues(obj.getId(),memberIds);
 		//融云相关通知--涉及成员id退出群，所以统一用群主id发消息
-		//操作者是群主本人--踢人
-		if(operatorId.equals(thisGroup.getCreatorId())) {
-			//调用融云给被移除者和群一个系统通知
-			TxtMessage txtMessage = new TxtMessage("您已被群主移出'" + thisGroup.getName() + "'部落",
-					"部落移除成员通知");
-			MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), memberIds.toArray(new String[memberIds.size()]),txtMessage);
-			for(Object object : userList) {
-				JmAppUser user = (JmAppUser) object;
-				txtMessage = new TxtMessage("'" + user.getNickName() + "'已被群主移出部落", "部落移除成员通知");
-				MessageUtil.sendGroupTxtMessage(thisGroup.getCreatorId(),new String[]{thisGroup.getId()},txtMessage);
-			}
-		}else {//退群
-			//调用融云给群和群主一个通知
-			for(Object object : userList) {
-				JmAppUser user = (JmAppUser) object;
-				TxtMessage txtMessage = new TxtMessage("'" + user.getNickName() + "'已退出部落", "部落成员退出通知");
-				//能否发给自己？
-				MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), new String[]{thisGroup.getCreatorId()},txtMessage);
-				MessageUtil.sendGroupTxtMessage(thisGroup.getCreatorId(),new String[]{thisGroup.getId()},txtMessage);
+		if(userList != null && userList.size() > 0) {
+			//操作者是群主本人--踢人
+			if(operatorId.equals(thisGroup.getCreatorId())) {
+				//调用融云给被移除者和群一个系统通知
+				TxtMessage txtMessage = new TxtMessage("您已被群主移出'" + thisGroup.getName() + "'部落",
+						"部落移除成员通知");
+				MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), memberIds.toArray(new String[memberIds.size()]),txtMessage);
+				for(Object object : userList) {
+					JmAppUser user = null;
+					//解决Redis返回空集列表成员个数为1的问题
+					try {
+						user = (JmAppUser) object;
+					}catch (Exception e) {
+
+					}
+					txtMessage = new TxtMessage("'" + (user != null && StringUtils.isNotBlank(user.getNickName()) ?
+							user.getNickName() : "") + "'已被群主移出部落", "部落移除成员通知");
+					MessageUtil.sendGroupTxtMessage(thisGroup.getCreatorId(),new String[]{thisGroup.getId()},txtMessage);
+				}
+			}else {//退群
+				//调用融云给群和群主一个通知
+				for(Object object : userList) {
+					JmAppUser user = null;
+					//解决Redis返回空集列表成员个数为1的问题
+					try {
+						user = (JmAppUser) object;
+					}catch (Exception e) {
+
+					}
+					TxtMessage txtMessage = new TxtMessage("'" + (user != null && StringUtils.isNotBlank(user.getNickName()) ?
+							user.getNickName() : "") + "'已退出部落", "部落成员退出通知");
+					//能否发给自己？
+					MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), new String[]{thisGroup.getCreatorId()},txtMessage);
+					MessageUtil.sendGroupTxtMessage(thisGroup.getCreatorId(),new String[]{thisGroup.getId()},txtMessage);
+				}
 			}
 		}
-
 		//从Redis反向获取自动去重的部落成员个数，更新部到关系型数据库！
 		obj.setMembers((int) frientsUtil.groupMembersNum(obj.getId()));
 
