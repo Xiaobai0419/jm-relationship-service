@@ -404,7 +404,7 @@ public class RelationshipServiceImpl implements RelationshipService {
     //单个用户间发消息、消息撤回、推送等，服务端需要调融云--前台可做，需求没有可以不做
 
     /**
-     * 实时获取某行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）
+     * 实时获取某行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）--不能缓存！每次必须实时获取
      * @param user
      * @return
      */
@@ -445,7 +445,7 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
 
     /**
-     * 实时获取所有（包括一度好友）三度人脉列表，用于能源圈时间线构建、用户信息显示
+     * 实时获取所有（包括一度好友）三度人脉列表，用于能源圈时间线构建、用户信息显示--TODO 考虑是否缓存用户信息、能源圈信息
      * @param user
      * @return
      */
