@@ -402,4 +402,76 @@ public class RelationshipServiceImpl implements RelationshipService {
         }
     }
     //单个用户间发消息、消息撤回、推送等，服务端需要调融云--前台可做，需求没有可以不做
+
+    /**
+     * 实时获取某行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）
+     * @param user
+     * @return
+     */
+    @Override
+    public List<JmAppUser> industryRelationship(JmAppUser user) {
+        String userId = user.getId();
+        String industryId = user.getIndustry();
+        //有序集合
+        List<String> industryRelationshipList = new LinkedList<>();
+        //行业通讯录好友推荐
+        industryRelationshipList.addAll(frientsUtil.getNoteBookFriends(userId,Double.parseDouble(industryId)));
+        //行业二度好友推荐
+        industryRelationshipList.addAll(frientsUtil.getSecFriends(userId,frientsUtil.getFriendKeys(userId),Double.parseDouble(industryId)));
+        //行业三度好友推荐
+        industryRelationshipList.addAll(frientsUtil.getThrFriends(userId,frientsUtil.getSecFriendKeys(userId),Double.parseDouble(industryId)));
+        //TODO 查询该行业所有用户集合
+        Set<String> industryUserIds = new HashSet<>();
+
+        //行业陌生人推荐
+        industryRelationshipList.addAll(frientsUtil.getStrangers(userId,industryUserIds));
+
+        //按用户id批量查询所有推荐人脉信息
+        String[] userIds = industryRelationshipList.toArray(new String[industryRelationshipList.size()]);
+        List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
+        //需要按industryRelationshipList中的顺序重新排序
+        List<JmAppUser> sortedUsers = new LinkedList<>();
+        if(users != null && users.size() > 0) {
+            Map<String,JmAppUser> userMap = new HashMap<>();
+            for(JmAppUser jmAppUser : users) {
+                userMap.put(jmAppUser.getId(),jmAppUser);
+            }
+            for(String industryUserId : industryRelationshipList) {
+                JmAppUser industryUser = userMap.get(industryUserId);
+                sortedUsers.add(industryUser);
+            }
+        }
+        return sortedUsers;
+    }
+
+    /**
+     * 实时获取所有（包括一度好友）三度人脉列表，用于能源圈时间线构建、用户信息显示
+     * @param user
+     * @return
+     */
+    @Override
+    public List<JmAppUser> friendshipRelationship(JmAppUser user) {
+        String userId = user.getId();
+        //去重
+        Set<String> relationshipSet = new HashSet<>();
+        //好友
+        relationshipSet.addAll(frientsUtil.getFriends(userId));
+        //通讯录好友
+        relationshipSet.addAll(frientsUtil.getNoteBookFriends(userId));
+        //二度好友
+        relationshipSet.addAll(frientsUtil.getSecFriends(userId,frientsUtil.getFriendKeys(userId)));
+        //三度好友
+        relationshipSet.addAll(frientsUtil.getThrFriends(userId,frientsUtil.getSecFriendKeys(userId)));
+        //TODO 查询所有用户集合
+        Set<String> allUserIds = new HashSet<>();
+
+        //陌生人
+        relationshipSet.addAll(frientsUtil.getStrangers(userId,allUserIds));
+
+        //按用户id批量查询所有推荐人脉信息
+        String[] userIds = relationshipSet.toArray(new String[relationshipSet.size()]);
+        List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
+        return users;
+    }
+
 }
