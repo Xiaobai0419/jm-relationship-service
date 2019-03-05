@@ -15,6 +15,15 @@ public class JmRelationshipFriendlife extends BaseDomain{
 
 	@ApiModelProperty(value="发布者用户id，关联用户表id", dataType="String")
 	private String userId;
+
+	@ApiModelProperty(value="发布者昵称，冗余存储", dataType="String")
+	private String nickName;
+
+	@ApiModelProperty(value="发布者头像url，冗余存储", dataType="String")
+	private String headPicUrl;
+
+	@ApiModelProperty(value="发布者手机号（账号），冗余存储", dataType="String")
+	private String mobile;
 	
 	@ApiModelProperty(value="能源圈内容", dataType="String")
 	private String content;
@@ -24,8 +33,53 @@ public class JmRelationshipFriendlife extends BaseDomain{
 	
 	@ApiModelProperty(value="点赞数", dataType="Integer")
 	private Integer ayes = 0;
-	
-	
+
+	@ApiModelProperty(value="评论数", dataType="Integer")
+	private Integer comments = 0;
+
+	@ApiModelProperty(value="登录用户id", dataType="String")
+	private String visitedUserId;
+
+	public String getVisitedUserId() {
+		return visitedUserId;
+	}
+
+	public void setVisitedUserId(String visitedUserId) {
+		this.visitedUserId = visitedUserId;
+	}
+
+	public String getNickName() {
+		return nickName;
+	}
+
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
+
+	public String getHeadPicUrl() {
+		return headPicUrl;
+	}
+
+	public void setHeadPicUrl(String headPicUrl) {
+		this.headPicUrl = headPicUrl;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public Integer getComments() {
+		return comments;
+	}
+
+	public void setComments(Integer comments) {
+		this.comments = comments;
+	}
+
 	public String getUserId() {
 		return userId;
 	}

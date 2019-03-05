@@ -49,6 +49,16 @@ public class RelationshipServiceImpl implements RelationshipService {
         return jmAppUserFeignService.findOne(userId).getData();
     }
 
+//    @Cacheable(key = "'allUsersInfo'")//缓存所有用户信息--注意用户更新和增减问题，可能造成一些信息错误或加载不到！！
+    public List<JmAppUser> findUsers() {
+        return jmAppUserFeignService.findList().getData();
+    }
+
+//    @Cacheable(key = "'allUsersInfo_industry_'+ #p0")//缓存该行业所有用户信息
+    public List<JmAppUser> findUsers(String industry) {
+        return jmAppUserFeignService.findListByIndustry(industry).getData();
+    }
+
     //TODO 三度人脉搜索、三度人脉关系变动相关
 
     //TODO 能源圈相关，根据人脉变动重建时间线能源圈相关
@@ -283,18 +293,18 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Override
     public JmRelationshipFriendship findFriendRecord(JmRelationshipFriendship jmRelationshipFriendship) {
         JmRelationshipFriendship record = jmRelationshipFriendshipMapper.findFriendRecord(jmRelationshipFriendship);
-        if(record != null) {
-            //优先返回正向关系：互为好友，或你请求待确认，或你请求已拒绝你
-        }else {
-            //如果没有正向关系，才反向查询，返回反向关系：请求你待确认，已被你拒绝，已被你删除的单向好友
-            JmRelationshipFriendship jmRelationshipFriendshipOppsite = new JmRelationshipFriendship();
-            jmRelationshipFriendshipOppsite.setUserId(jmRelationshipFriendship.getUserIdOpposite());
-            jmRelationshipFriendshipOppsite.setUserIdOpposite(jmRelationshipFriendship.getUserId());
-            record = jmRelationshipFriendshipMapper.findFriendRecord(jmRelationshipFriendshipOppsite);
-            if(record != null) {
-                record.setReverse(true);//代表反向关系，以示区分
-            }
-        }
+//        if(record != null) {
+//            //优先返回正向关系：互为好友，或你请求待确认，或你请求已拒绝你
+//        }else {
+//            //如果没有正向关系，才反向查询，返回反向关系：请求你待确认，已被你拒绝，已被你删除的单向好友
+//            JmRelationshipFriendship jmRelationshipFriendshipOppsite = new JmRelationshipFriendship();
+//            jmRelationshipFriendshipOppsite.setUserId(jmRelationshipFriendship.getUserIdOpposite());
+//            jmRelationshipFriendshipOppsite.setUserIdOpposite(jmRelationshipFriendship.getUserId());
+//            record = jmRelationshipFriendshipMapper.findFriendRecord(jmRelationshipFriendshipOppsite);
+//            if(record != null) {
+//                record.setReverse(true);//代表反向关系，以示区分
+//            }
+//        }
         return record;
     }
 
@@ -420,9 +430,14 @@ public class RelationshipServiceImpl implements RelationshipService {
         industryRelationshipList.addAll(frientsUtil.getSecFriends(userId,frientsUtil.getFriendKeys(userId),Double.parseDouble(industryId)));
         //行业三度好友推荐
         industryRelationshipList.addAll(frientsUtil.getThrFriends(userId,frientsUtil.getSecFriendKeys(userId),Double.parseDouble(industryId)));
-        //TODO 查询该行业所有用户集合
+        //查询该行业所有用户集合
         Set<String> industryUserIds = new HashSet<>();
-
+        List<JmAppUser> industryUsers = findUsers(industryId);
+        if(industryUsers != null && industryUsers.size() > 0) {
+            for(JmAppUser userInfo :industryUsers) {
+                industryUserIds.add(userInfo.getId());
+            }
+        }
         //行业陌生人推荐
         industryRelationshipList.addAll(frientsUtil.getStrangers(userId,industryUserIds));
 
@@ -445,12 +460,12 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
 
     /**
-     * 实时获取所有（包括一度好友）三度人脉列表，用于能源圈时间线构建、用户信息显示--TODO 考虑是否缓存用户信息、能源圈信息
+     * 实时获取所有（包括一度好友）三度人脉列表，用于能源圈时间线构建
      * @param user
      * @return
      */
     @Override
-    public List<JmAppUser> friendshipRelationship(JmAppUser user) {
+    public String[] friendshipRelationship(JmAppUser user) {
         String userId = user.getId();
         //去重
         Set<String> relationshipSet = new HashSet<>();
@@ -462,16 +477,19 @@ public class RelationshipServiceImpl implements RelationshipService {
         relationshipSet.addAll(frientsUtil.getSecFriends(userId,frientsUtil.getFriendKeys(userId)));
         //三度好友
         relationshipSet.addAll(frientsUtil.getThrFriends(userId,frientsUtil.getSecFriendKeys(userId)));
-        //TODO 查询所有用户集合
+        //查询所有用户集合
         Set<String> allUserIds = new HashSet<>();
-
+        List<JmAppUser> allUsers = findUsers();
+        if(allUsers != null && allUsers.size() > 0) {
+            for(JmAppUser userInfo :allUsers) {
+                allUserIds.add(userInfo.getId());
+            }
+        }
         //陌生人
         relationshipSet.addAll(frientsUtil.getStrangers(userId,allUserIds));
 
-        //按用户id批量查询所有推荐人脉信息
         String[] userIds = relationshipSet.toArray(new String[relationshipSet.size()]);
-        List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
-        return users;
+        return userIds;
     }
 
 }

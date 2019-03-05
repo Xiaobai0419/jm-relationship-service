@@ -48,7 +48,7 @@ public interface RelationshipService {
     List<JmAppUser> industryRelationship(JmAppUser user);
 
     //实时获取所有（不分行业，包括一度好友）三度人脉列表，用于能源圈时间线构建
-    List<JmAppUser> friendshipRelationship(JmAppUser user);
+    String[] friendshipRelationship(JmAppUser user);
 
     //发布能源圈，以用户id,能源圈信息id存入关系型数据库能源圈内容表（还要有点赞数字段，初始0），存入基于该用户id独立ZSet，以发布时间戳为分值，能源圈信息id为value
 

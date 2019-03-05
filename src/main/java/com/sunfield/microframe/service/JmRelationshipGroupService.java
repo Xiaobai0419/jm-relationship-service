@@ -57,7 +57,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	 * @param pageSize
 	 * @return
 	 */
-	private static <T> Page<T> pageList(List<T> list,int pageNumber,int pageSize) {
+	public static <T> Page<T> pageList(List<T> list,int pageNumber,int pageSize) {
 		int total = list.size();
 		int fromIndex = (pageNumber - 1) * pageSize;
 		if (fromIndex >= total) {

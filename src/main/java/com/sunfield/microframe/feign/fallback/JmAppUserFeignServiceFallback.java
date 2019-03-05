@@ -19,4 +19,14 @@ public class JmAppUserFeignServiceFallback implements JmAppUserFeignService {
     public ResponseBean<List<JmAppUser>> findListByIds(String[] ids) {
         return new ResponseBean<>(ResponseStatus.BUSY);
     }
+
+    @Override
+    public ResponseBean<List<JmAppUser>> findList() {
+        return new ResponseBean<>(ResponseStatus.BUSY);
+    }
+
+    @Override
+    public ResponseBean<List<JmAppUser>> findListByIndustry(String industry) {
+        return new ResponseBean<>(ResponseStatus.BUSY);
+    }
 }

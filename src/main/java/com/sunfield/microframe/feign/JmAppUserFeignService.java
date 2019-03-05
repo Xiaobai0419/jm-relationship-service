@@ -28,4 +28,19 @@ public interface JmAppUserFeignService {
      */
     @RequestMapping(value = "/JmAppUserSupport/findListByIds", method = RequestMethod.POST)
     ResponseBean<List<JmAppUser>> findListByIds(@RequestParam("ids") String[] ids);//key/value形式传递数组对象，必须使用@RequestParam注解，且指定的数组名不！要！带[]，名字与服务端一样，因为key/value必须要有一个key名
+
+    /**
+     * 远程获取所有用户列表
+     * @return
+     */
+    @RequestMapping(value = "/JmAppUserSupport/findList", method = RequestMethod.POST)
+    ResponseBean<List<JmAppUser>> findList();
+
+    /**
+     * 远程获取某行业所有用户列表
+     * @param industry
+     * @return
+     */
+    @RequestMapping(value = "/JmAppUserSupport/findListByIndustry", method = RequestMethod.POST)
+    ResponseBean<List<JmAppUser>> findListByIndustry(@RequestParam("industry") String industry);
 }//经测试，非@RequestBody（一般为json）方式的Rest参数，即传递key/value方式，Feign客户端方法参数需要加上@RequestParam注解标注所传字段名，否则无法向Rest服务端传递key/value参数（获取到null），自然也无法调用成功
