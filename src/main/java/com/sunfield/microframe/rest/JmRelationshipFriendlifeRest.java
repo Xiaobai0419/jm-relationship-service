@@ -186,7 +186,7 @@ public class JmRelationshipFriendlifeRest {
 
 	@ApiOperation(value="删除：用户删除自己所发朋友圈，必需参数：id：朋友圈id；visitedUserId：当前登录用户id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
-	@RequestMapping(value = "/delete", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteSelf", method = RequestMethod.POST)
 	public ResponseBean<JmRelationshipFriendlife> deleteSelf(@RequestBody JmRelationshipFriendlife obj) {
 		try {
 			if(StringUtils.isBlank(obj.getId()) || StringUtils.isBlank(obj.getVisitedUserId())) {
