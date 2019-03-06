@@ -43,7 +43,7 @@ public class JmRelationshipFriendlifeRest {
 		}
     }
 
-	@ApiOperation(value="查询列表：某用户能源圈")
+	@ApiOperation(value="查询列表：某用户能源圈：必需参数：userId，用户id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findOnesList", method = RequestMethod.POST)
 	public ResponseBean<List<JmRelationshipFriendlife>> findOnesList(@RequestBody JmRelationshipFriendlife obj) {
@@ -55,7 +55,7 @@ public class JmRelationshipFriendlifeRest {
 		}
 	}
 
-	@ApiOperation(value="查询列表：某用户个人发布的能源圈")
+	@ApiOperation(value="查询列表：某用户个人发布的能源圈：必需参数：userId，用户id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findSelfList", method = RequestMethod.POST)
 	public ResponseBean<List<JmRelationshipFriendlife>> findSelfList(@RequestBody JmRelationshipFriendlife obj) {
@@ -74,21 +74,21 @@ public class JmRelationshipFriendlifeRest {
     	return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findPage(obj));
     }
 
-	@ApiOperation(value="分页查询：某用户能源圈")
+	@ApiOperation(value="分页查询：某用户能源圈：必需参数：userId，用户id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findOnesPage", method = RequestMethod.POST)
 	public ResponseBean<Page<JmRelationshipFriendlife>> findOnesPage(@RequestBody JmRelationshipFriendlife obj) {
 		return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findOnesPage(obj));
 	}
 
-	@ApiOperation(value="分页查询：某用户个人发布的能源圈")
+	@ApiOperation(value="分页查询：某用户个人发布的能源圈：必需参数：userId，用户id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findSelfPage", method = RequestMethod.POST)
 	public ResponseBean<Page<JmRelationshipFriendlife>> findSelfPage(@RequestBody JmRelationshipFriendlife obj) {
 		return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findSelfPage(obj));
 	}
 
-	@ApiOperation(value="根据主键查询")
+	@ApiOperation(value="根据主键查询：必需参数：id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findOne", method = RequestMethod.POST)
     public ResponseBean<JmRelationshipFriendlife> findOne(@RequestBody JmRelationshipFriendlife obj) {
@@ -103,7 +103,7 @@ public class JmRelationshipFriendlifeRest {
 		}
     }
 	
-	@ApiOperation(value="新增")
+	@ApiOperation(value="新增：必需参数：userId，发布者id；content，内容；picUrls，最多9张图片的OSS地址，多个逗号分隔")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/insert", method = RequestMethod.POST)
     public ResponseBean<JmRelationshipFriendlife> insert(@RequestBody JmRelationshipFriendlife obj) {
@@ -115,7 +115,7 @@ public class JmRelationshipFriendlifeRest {
 		}
     }
 	
-	@ApiOperation(value="更新：后台功能，且只能更新管理员自己发的")
+	@ApiOperation(value="更新：后台功能，且只能更新管理员自己发的：content，内容；picUrls，最多9张图片的OSS地址，多个逗号分隔")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
     public ResponseBean<JmRelationshipFriendlife> update(@RequestBody JmRelationshipFriendlife obj) {
@@ -130,7 +130,7 @@ public class JmRelationshipFriendlifeRest {
 		}
     }
 
-	@ApiOperation(value="删除：用户删除自己所发朋友圈，必需参数：id：朋友圈id,visitedUserId：当前登录用户id")
+	@ApiOperation(value="删除：用户删除自己所发朋友圈，必需参数：id：朋友圈id；visitedUserId：当前登录用户id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)
 	public ResponseBean<JmRelationshipFriendlife> deleteSelf(@RequestBody JmRelationshipFriendlife obj) {
@@ -144,7 +144,7 @@ public class JmRelationshipFriendlifeRest {
 		}
 	}
 
-	@ApiOperation(value="删除：后台功能")
+	@ApiOperation(value="删除：后台功能：必需参数：id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)
     public ResponseBean<JmRelationshipFriendlife> delete(@RequestBody JmRelationshipFriendlife obj) {

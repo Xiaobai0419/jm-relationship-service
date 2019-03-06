@@ -30,33 +30,33 @@ public class JmRelationshipGroupRequestRest{
 	@Autowired
 	private JmRelationshipGroupRequestService service;
 	
-	@ApiOperation(value="部落的请求列表（不包括已拒绝）")
-	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
-	@RequestMapping(value = "/groupRequestList", method = RequestMethod.POST)
-    public RelationshipResponseBean<List<JmRelationshipGroupRequest>> groupRequestList(@RequestBody JmRelationshipGroupRequest obj) {
-		try {
-			return service.groupRequestList(obj);
-		}catch (Exception e) {
-			e.printStackTrace();
-			log.info("系统异常：" + e.getMessage());
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
-		}
-    }
+//	@ApiOperation(value="部落的请求列表（不包括已拒绝）")
+//	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
+//	@RequestMapping(value = "/groupRequestList", method = RequestMethod.POST)
+//    public RelationshipResponseBean<List<JmRelationshipGroupRequest>> groupRequestList(@RequestBody JmRelationshipGroupRequest obj) {
+//		try {
+//			return service.groupRequestList(obj);
+//		}catch (Exception e) {
+//			e.printStackTrace();
+//			log.info("系统异常：" + e.getMessage());
+//			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
+//		}
+//    }
+//
+//	@ApiOperation(value="分页查询：部落的请求列表（不包括已拒绝）")
+//	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
+//	@RequestMapping(value = "/groupRequestPage", method = RequestMethod.POST)
+//    public RelationshipResponseBean<Page<JmRelationshipGroupRequest>> groupRequestPage(@RequestBody JmRelationshipGroupRequest obj) {
+//		try {
+//			return service.groupRequestPage(obj);
+//		}catch (Exception e) {
+//			e.printStackTrace();
+//			log.info("系统异常：" + e.getMessage());
+//			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
+//		}
+//    }
 	
-	@ApiOperation(value="分页查询：部落的请求列表（不包括已拒绝）")
-	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
-	@RequestMapping(value = "/groupRequestPage", method = RequestMethod.POST)
-    public RelationshipResponseBean<Page<JmRelationshipGroupRequest>> groupRequestPage(@RequestBody JmRelationshipGroupRequest obj) {
-		try {
-			return service.groupRequestPage(obj);
-		}catch (Exception e) {
-			e.printStackTrace();
-			log.info("系统异常：" + e.getMessage());
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
-		}
-    }
-	
-	@ApiOperation(value="用户查询对某部落的请求状态")
+	@ApiOperation(value="用户查询对某部落的请求状态：必需参数：requestorId，请求者id；groupId，部落id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
 	@RequestMapping(value = "/groupRequestStatus", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipGroupRequest> groupRequestStatus(@RequestBody JmRelationshipGroupRequest obj) {
@@ -69,7 +69,7 @@ public class JmRelationshipGroupRequestRest{
 		}
     }
 	
-	@ApiOperation(value="请求加入部落")
+	@ApiOperation(value="请求加入部落：必需参数：requestorId，请求者id；groupId，部落id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
 	@RequestMapping(value = "/groupRequest", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipGroupRequest> groupRequest(@RequestBody JmRelationshipGroupRequest obj) {
@@ -82,7 +82,7 @@ public class JmRelationshipGroupRequestRest{
 		}
     }
 	
-	@ApiOperation(value="群主拒绝请求")
+	@ApiOperation(value="群主拒绝请求：必需参数：requestorId，群主的请求列表中的请求者id；groupId，部落id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
 	@RequestMapping(value = "/groupReject", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipGroupRequest> groupReject(@RequestBody JmRelationshipGroupRequest obj) {
@@ -95,7 +95,7 @@ public class JmRelationshipGroupRequestRest{
 		}
     }
 	
-	@ApiOperation(value="通过请求并将请求用户加入部落")
+	@ApiOperation(value="通过请求并将请求用户加入部落：必需参数：requestorId，群主的请求列表中的请求者id；groupId，部落id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroupRequest")
 	@RequestMapping(value = "/groupAgreed", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipGroupRequest> groupAgreed(@RequestBody JmRelationshipGroupRequest obj) {

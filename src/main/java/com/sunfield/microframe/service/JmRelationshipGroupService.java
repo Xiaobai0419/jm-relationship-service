@@ -8,6 +8,7 @@ import com.sunfield.microframe.common.response.RelationshipResponseStatus;
 import com.sunfield.microframe.common.utils.FrientsUtil;
 import com.sunfield.microframe.common.utils.GroupUtil;
 import com.sunfield.microframe.common.utils.MessageUtil;
+import com.sunfield.microframe.common.utils.PageUtils;
 import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.domain.JmIndustries;
 import com.sunfield.microframe.feign.JmAppUserFeignService;
@@ -48,29 +49,6 @@ public class JmRelationshipGroupService implements ITxTransaction{
 
 	private JmIndustries findIndustry(JmIndustries industry) {
 		return jmIndustriesFeignService.findOne(industry).getData();
-	}
-
-	/**
-	 * 应用层分页--静态方法支持泛型
-	 * @param list
-	 * @param pageNumber
-	 * @param pageSize
-	 * @return
-	 */
-	public static <T> Page<T> pageList(List<T> list,int pageNumber,int pageSize) {
-		int total = list.size();
-		int fromIndex = (pageNumber - 1) * pageSize;
-		if (fromIndex >= total) {
-			return new Page<>();
-		}
-		if(fromIndex < 0){
-			return new Page<>();
-		}
-		int toIndex = pageNumber * pageSize;
-		if (toIndex > total) {
-			toIndex = total;
-		}
-		return new Page<>(list.size(),pageSize,pageNumber,list.subList(fromIndex, toIndex));
 	}
 
 	/**
@@ -205,7 +183,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//应用层分页
 		return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
-				pageList(groupList,obj.getPageNumber(),obj.getPageSize()));
+				PageUtils.pageList(groupList,obj.getPageNumber(),obj.getPageSize()));
 	}
 
 	/**
@@ -273,7 +251,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
 		}
 		return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
-				pageList(frientsUtil.groupMembersValues(obj.getId()),obj.getPageNumber(),obj.getPageSize()));
+				PageUtils.pageList(frientsUtil.groupMembersValues(obj.getId()),obj.getPageNumber(),obj.getPageSize()));
 	}
 
 	/**

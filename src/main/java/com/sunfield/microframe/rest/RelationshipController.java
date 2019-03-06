@@ -3,9 +3,9 @@ package com.sunfield.microframe.rest;
 import com.sunfield.microframe.common.response.Page;
 import com.sunfield.microframe.common.response.RelationshipResponseBean;
 import com.sunfield.microframe.common.response.RelationshipResponseStatus;
+import com.sunfield.microframe.common.utils.PageUtils;
 import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.domain.JmRelationshipFriendship;
-import com.sunfield.microframe.service.JmRelationshipGroupService;
 import com.sunfield.microframe.service.RelationshipService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -35,7 +35,8 @@ public class RelationshipController {
     private RelationshipService relationshipService;
 
     //好友请求
-    @ApiOperation(value="好友请求，根据type字段判断：5 请求成功 0或1 已经是好友了 2 已请求过了，待确认 6 不能请求自己为好友")
+    @ApiOperation(value="好友请求，根据type字段判断：5 请求成功 0或1 已经是好友了 2 已请求过了，待确认 " +
+            "6 不能请求自己为好友 7 该用户设置了不允许添加好友")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite," +
             "其中userId为操作者用户id,userIdOpposite为对方用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/addFriendRequest", method = RequestMethod.POST)
@@ -52,10 +53,8 @@ public class RelationshipController {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
             }else {
                 switch (result.getType()) {
-                    case 0:case 1:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
-                    case 2:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
+                    case 0:case 1:case 2:case 6:case 7:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
                     case 5:return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
-                    case 6:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
                     default:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
                 }
             }
@@ -167,9 +166,7 @@ public class RelationshipController {
             }else {
                 //正向关系
                 switch (result.getType()) {
-                    case 0:case 1:return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
-                    case 2:return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
-                    case 3:return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
+                    case 0:case 1:case 2:case 3:return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
                     default:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
                 }
             }
@@ -222,8 +219,8 @@ public class RelationshipController {
         }
     }
 
-    //单个用户待处理（好友）请求列表
-    @ApiOperation(value="待处理（好友）请求列表")
+    //查询所有加好友（不包括已拒绝）+该用户作为群主的所有群的请求加入请求（不包括已拒绝）
+    @ApiOperation(value="待处理请求列表")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId,为操作者用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendRequestsOppsite", method = RequestMethod.POST)
     public RelationshipResponseBean<List<JmAppUser>> findFriendRequestsOppsite(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
@@ -245,8 +242,8 @@ public class RelationshipController {
         }
     }
 
-    //单个用户待处理（好友）请求列表--分页
-    @ApiOperation(value="待处理（好友）请求列表--分页")
+    //查询所有加好友（不包括已拒绝）+该用户作为群主的所有群的请求加入请求（不包括已拒绝）--分页
+    @ApiOperation(value="待处理请求列表--分页")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId,为操作者用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendRequestsOppsitePage", method = RequestMethod.POST)
     public RelationshipResponseBean<Page<JmAppUser>> findFriendRequestsOppsitePage(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
@@ -298,7 +295,7 @@ public class RelationshipController {
             }
             //应用层分页
             return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
-                    JmRelationshipGroupService.pageList(relationshipService.industryRelationship(user),user.getPageNumber(),user.getPageSize()));
+                    PageUtils.pageList(relationshipService.industryRelationship(user),user.getPageNumber(),user.getPageSize()));
         }catch (Exception e) {
             e.printStackTrace();
             log.info("系统异常：" + e.getMessage());

@@ -133,6 +133,8 @@ public class JmRelationshipFriendshipSqlProvider {
 				AND();
 				//查询好友请求关系
 				WHERE("type = 2");
+				//按时间倒序排列请求
+				ORDER_BY("update_date desc");
 			}
 		}.toString();
 	}

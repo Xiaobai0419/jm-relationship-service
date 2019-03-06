@@ -40,10 +40,18 @@ public class JmRelationshipGroupRequestSqlProvider{
 					WHERE("group_id = #{groupId}");
 					WHERE("type = '1'");
 				}
+				//按创建者id查询该创建者创建的所有群所有请求（不包括已拒绝）列表
+				if(StringUtils.isNotBlank(obj.getGroupId())) {
+					WHERE("creator_id = #{creatorId}");
+					WHERE("type = '1'");
+				}
 				//按请求者id查询该请求者对所有群发出的所有请求（包括被拒）列表
 				if(StringUtils.isNotBlank(obj.getRequestorId())) {
 					WHERE("requestor_id = #{requestorId}");
 				}
+
+				//均按时间倒序
+				ORDER_BY("update_date desc");
 			}
 		}.toString();
 	}

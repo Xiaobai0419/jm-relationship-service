@@ -3,6 +3,7 @@ package com.sunfield.microframe.service;
 import com.sunfield.microframe.common.response.Page;
 import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.domain.JmRelationshipFriendship;
+import com.sunfield.microframe.domain.JmRelationshipGroupRequest;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public interface RelationshipService {
     //查询转换：将关系id对象列表转换为user列表，包含用户具体信息用于前端显示，并实现去重，去掉操作者自身
     List<JmAppUser> userListHandle(List<JmRelationshipFriendship> relationshipList,boolean reverse,String self);//reverse参数为true代表被请求列表取userId,其他默认false取userIdOppsite
 
+    List<JmAppUser> userListHandle(List<JmRelationshipGroupRequest> groupRequestList, String self);
     //单个用户间发消息，服务端需要调融云
 
     //单个用户间消息撤回，服务端需要调融云--需求没有可以不做

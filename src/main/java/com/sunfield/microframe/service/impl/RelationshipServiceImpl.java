@@ -4,10 +4,14 @@ import com.codingapi.tx.annotation.TxTransaction;
 import com.sunfield.microframe.common.response.Page;
 import com.sunfield.microframe.common.utils.FrientsUtil;
 import com.sunfield.microframe.common.utils.MessageUtil;
+import com.sunfield.microframe.common.utils.PageUtils;
 import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.domain.JmRelationshipFriendship;
+import com.sunfield.microframe.domain.JmRelationshipGroupRequest;
+import com.sunfield.microframe.domain.base.BaseDomain;
 import com.sunfield.microframe.feign.JmAppUserFeignService;
 import com.sunfield.microframe.mapper.JmRelationshipFriendshipMapper;
+import com.sunfield.microframe.mapper.JmRelationshipGroupRequestMapper;
 import com.sunfield.microframe.service.RelationshipService;
 import io.rong.messages.TxtMessage;
 import io.rong.models.response.ResponseResult;
@@ -41,6 +45,8 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Autowired
     private JmRelationshipFriendshipMapper jmRelationshipFriendshipMapper;
     @Autowired
+    private JmRelationshipGroupRequestMapper jmRelationshipGroupRequestMapper;
+    @Autowired
     @Qualifier("jmAppUserFeignService")
     private JmAppUserFeignService jmAppUserFeignService;
 
@@ -59,11 +65,6 @@ public class RelationshipServiceImpl implements RelationshipService {
         return jmAppUserFeignService.findListByIndustry(industry).getData();
     }
 
-    //TODO 三度人脉搜索、三度人脉关系变动相关
-
-    //TODO 能源圈相关，根据人脉变动重建时间线能源圈相关
-
-
     /**
      * 好友请求--并通过融云发消息（推送）给被请求者一个通知，里面或应有同意/拒绝好友的链接，并带上请求者用户id信息--必须！这样被请求者才可能看到，并有下面的通过或拒绝操作！
      * 调用融云相关暂无法做成分布式事务
@@ -79,6 +80,12 @@ public class RelationshipServiceImpl implements RelationshipService {
         //添加自己为好友的情况
         if(jmRelationshipFriendship.getUserId().equals(jmRelationshipFriendship.getUserIdOpposite())) {
             jmRelationshipFriendship.setType(6);
+            return jmRelationshipFriendship;
+        }
+        //修正需求：如果该用户不允许加好友，在加好友时返回不允许提示
+        JmAppUser userOppsite = findUser(jmRelationshipFriendship.getUserIdOpposite());
+        if(userOppsite != null && userOppsite.getFriendStatus() == 1) {
+            jmRelationshipFriendship.setType(7);
             return jmRelationshipFriendship;
         }
         //需要先查询好友关系，判断是更新还是插入
@@ -341,7 +348,7 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
 
     /**
-     * 查询所有加好友（不包括已拒绝）请求
+     * 查询所有加好友（不包括已拒绝）+该用户作为群主的所有群的请求加入请求（不包括已拒绝）
      * 参数统一传入：userId是操作者自己，userIdOpposite是对方，方法内部需要交叉主对方的，新建Bean使用传入参数的各字段交叉赋值
      * @param jmRelationshipFriendship
      * @return
@@ -349,12 +356,63 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Cacheable(key = "#p0.userId + '_findFriendRequestsOppsite'")//缓存存储键名：每个用户的每个业务都该不同！！
     @Override
     public List<JmAppUser> findFriendRequestsOppsite(JmRelationshipFriendship jmRelationshipFriendship) {
+        //时间倒序列表
         List<JmRelationshipFriendship> relationshipList = jmRelationshipFriendshipMapper.findFriendRequestsOppsite(jmRelationshipFriendship);
-        return userListHandle(relationshipList,true,jmRelationshipFriendship.getUserId());
+        //将id暂设置成userId的值，用于优先队列排序后的用户id排列
+        for(JmRelationshipFriendship friendshipReqeust : relationshipList) {
+            friendshipReqeust.setId(friendshipReqeust.getUserId());
+            //BaseDomain的备用字段中加入区分好友请求和群组请求的额外信息
+            friendshipReqeust.setCreateBy("1");
+            friendshipReqeust.setRemarks("请求加您为好友");
+        }
+
+        //时间倒序列表
+        JmRelationshipGroupRequest jmRelationshipGroupRequest = new JmRelationshipGroupRequest();
+        jmRelationshipGroupRequest.setCreatorId(jmRelationshipFriendship.getUserId());
+        //查询该用户作为创建者的所有群请求
+        List<JmRelationshipGroupRequest> groupRequestList = jmRelationshipGroupRequestMapper.findList(jmRelationshipGroupRequest);
+        //将id暂设置成requestorId的值，用于优先队列排序后的用户id排列
+        for(JmRelationshipGroupRequest groupInRequest : groupRequestList) {
+            groupInRequest.setId(groupInRequest.getRequestorId());
+            //BaseDomain的备用字段中加入区分好友请求和群组请求的额外信息
+            groupInRequest.setCreateBy("2");
+            groupInRequest.setRemarks("请求加入'" + groupInRequest.getGroupName() + "'部落");
+        }
+
+        //优先队列按时间倒序排序--优先队列是可以有“重复”数据的
+        Queue<BaseDomain> dateDescPriority = new PriorityQueue<>(new Comparator<BaseDomain>() {
+            @Override
+            public int compare(BaseDomain o1, BaseDomain o2) {
+                return (int)(o2.getUpdateDate().getTime() - o1.getUpdateDate().getTime());
+            }
+        });
+        for(JmRelationshipFriendship friendRequest : relationshipList) {
+            dateDescPriority.add(friendRequest);
+        }
+        for(JmRelationshipGroupRequest groupRequest : groupRequestList) {
+            dateDescPriority.add(groupRequest);
+        }
+
+        //取出按时间倒序的优先队列中的id字段即按时间倒序的所有好友、群请求用户id进行循环单个查询，可能有重复的，因为
+        //有同一个用户同时请求好友、入群和入该群主创建的多个群的情况！！
+        //无法以批量查询的方式进行查询，因为有同一个用户同时请求该群主创建的好几个群的情况！！而批量查询不会查出重复id
+        List<JmAppUser> requestUserList = new LinkedList<>();
+        for(BaseDomain baseDomain : dateDescPriority) {
+            //id字段被统一设置成了用户id,所以按该字段查询用户
+            JmAppUser user = findUser(baseDomain.getId());//映射中新创建的对象
+            //设置返回的JmAppUser的备用字段为BaseDomain中事先存储的好友或群组请求信息
+            if(user != null) {
+                user.setCreateBy(baseDomain.getCreateBy());
+                user.setRemarks(baseDomain.getRemarks());
+                requestUserList.add(user);
+            }
+        }
+        //返回按时间倒序的所有用户请求信息
+        return requestUserList;
     }
 
     /**
-     * 查询所有加好友（不包括已拒绝）请求--分页
+     * 查询所有加好友（不包括已拒绝）+该用户作为群主的所有群的请求加入请求（不包括已拒绝）--应用层分页
      * 参数统一传入：userId是操作者自己，userIdOpposite是对方，方法内部需要交叉主对方的，新建Bean使用传入参数的各字段交叉赋值
      * @param jmRelationshipFriendship
      * @return
@@ -362,14 +420,9 @@ public class RelationshipServiceImpl implements RelationshipService {
 //    @Cacheable(key = "#p0.userId + '_findFriendRequestsOppsitePage_' + #p0.pageNumber + '_' + #p0.pageSize")//缓存存储键名：每个用户的每个业务都该不同！！每页不同！！
     @Override
     public Page<JmAppUser> findFriendRequestsOppsitePage(JmRelationshipFriendship jmRelationshipFriendship) {
-        List<JmRelationshipFriendship> resultList = jmRelationshipFriendshipMapper.findFriendRequestsOppsite(jmRelationshipFriendship);
-        if(resultList != null && resultList.size() > 0) {
-            List<JmRelationshipFriendship> pageList = jmRelationshipFriendshipMapper.findFriendRequestsOppsitePage(jmRelationshipFriendship);
-            List<JmAppUser> userList = userListHandle(pageList,true,jmRelationshipFriendship.getUserId());
-            return new Page<>(resultList.size(),jmRelationshipFriendship.getPageSize(),
-                    jmRelationshipFriendship.getPageNumber(),userList);
-        }
-        return new Page<>();
+        List<JmAppUser> requestUsers = findFriendRequestsOppsite(jmRelationshipFriendship);
+        //应用层分页
+        return PageUtils.pageList(requestUsers,jmRelationshipFriendship.getPageNumber(),jmRelationshipFriendship.getPageSize());
     }
 
     /**
@@ -378,6 +431,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      * 去重，且去掉自身
      * @param relationshipList
      * @param reverse
+     * @param self
      * @return
      */
     @Override
@@ -397,6 +451,40 @@ public class RelationshipServiceImpl implements RelationshipService {
                     }else {//查找我作为主方的列表
                         userIdList.add(jmRelationshipFriendship.getUserIdOpposite());
                     }
+                }
+            }
+            if(StringUtils.isNotBlank(self)) {
+                userIdList.remove(self);//去掉自身
+            }
+            List<JmAppUser> userList = null;
+            if(userIdList.size() > 0) {
+                //远程批量查询用户信息
+                //使用无参toArray强转数组的方式会报错
+                userList = jmAppUserFeignService.findListByIds(userIdList.toArray(new String[userIdList.size()])).getData();
+            }
+            return userList;
+        }
+    }
+
+    /**
+     * 查询转换：将关系id对象列表转换为user列表，包含用户具体信息用于前端显示
+     * 去重，且去掉自身
+     * @param groupRequestList
+     * @param self
+     * @return
+     */
+    @Override
+    public List<JmAppUser> userListHandle(List<JmRelationshipGroupRequest> groupRequestList,String self) {
+        if(groupRequestList == null) {
+            return null;
+        }else if(groupRequestList.size() == 0) {
+            return new ArrayList<>();
+        }else {
+            //Set集合实现自动去重
+            Set<String> userIdList = new HashSet<>();
+            for(JmRelationshipGroupRequest groupRequest : groupRequestList) {
+                if(StringUtils.isNotBlank(groupRequest.getRequestorId())) {
+                    userIdList.add(groupRequest.getRequestorId());
                 }
             }
             if(StringUtils.isNotBlank(self)) {
