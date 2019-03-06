@@ -316,7 +316,7 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
 
     /**
-     * 查询自己的所有好友
+     * 查询自己的所有好友 TODO 好友搜索
      * 参数统一传入：userId是操作者自己，userIdOpposite是对方，方法内部需要交叉主对方的，新建Bean使用传入参数的各字段交叉赋值
      * @param jmRelationshipFriendship
      * @return
@@ -501,7 +501,7 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
     //单个用户间发消息、消息撤回、推送等，服务端需要调融云--前台可做，需求没有可以不做
 
-    /**
+    /** TODO 人脉搜索
      * 实时获取某行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）--不能缓存！每次必须实时获取
      * @param user
      * @return

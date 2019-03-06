@@ -109,7 +109,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		//传入操作者id，其他不能传！否则不能获取全量部落列表
 		String operatorId = obj.getOperatorId();
 		if(StringUtils.isBlank(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.OPERATOR_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//到关系型数据库查询所有部落id
 		List<JmRelationshipGroup> groupList = mapper.findList(obj);
@@ -151,7 +151,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		//传入操作者id，其他不能传！否则不能获取全量部落列表
 		String operatorId = obj.getOperatorId();
 		if(StringUtils.isBlank(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.OPERATOR_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//到关系型数据库查询所有部落id
 		List<JmRelationshipGroup> groupList = mapper.findList(obj);
@@ -193,7 +193,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	 */
 	public RelationshipResponseBean<JmRelationshipGroup> findOne(JmRelationshipGroup obj){
 		if(StringUtils.isBlank(obj.getId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.ID_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		JmRelationshipGroup jmRelationshipGroup = mapper.findOne(obj.getId());
 		//以部落id,创建者id到Redis获取创建者全量信息，目前用于后台展示
@@ -214,18 +214,18 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	 */
 	public RelationshipResponseBean<List<Object>> findMemberList(JmRelationshipGroup obj){
 		if(StringUtils.isBlank(obj.getId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.ID_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//操作者id
 		String operatorId = obj.getOperatorId();
 		if(StringUtils.isBlank(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.OPERATOR_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
 		Set<Object> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 		//非成员禁止查看
 		if(!allMembers.contains(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,frientsUtil.groupMembersValues(obj.getId()));
 	}
@@ -237,18 +237,18 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	 */
 	public RelationshipResponseBean<Page<Object>> findMemberListPage(JmRelationshipGroup obj){
 		if(StringUtils.isBlank(obj.getId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.ID_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//操作者id
 		String operatorId = obj.getOperatorId();
 		if(StringUtils.isBlank(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.OPERATOR_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
 		Set<Object> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 		//非成员禁止查看
 		if(!allMembers.contains(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
 				PageUtils.pageList(frientsUtil.groupMembersValues(obj.getId()),obj.getPageNumber(),obj.getPageSize()));
@@ -263,29 +263,32 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	 */
 	public RelationshipResponseBean<JmRelationshipGroup> findGroupRelation(JmRelationshipGroup obj){
 		if(StringUtils.isBlank(obj.getId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.ID_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//操作者id
 		String operatorId = obj.getOperatorId();
 		if(StringUtils.isBlank(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.OPERATOR_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//按部落id查询部落，判断传入操作者是否是该部落创建者
 		JmRelationshipGroup thisGroup = mapper.findOne(obj.getId());
 		if(thisGroup == null || StringUtils.isBlank(thisGroup.getCreatorId())
 				|| StringUtils.isBlank(thisGroup.getId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.NO_DATA);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.NO_DATA);//无此部落
 		}
 		//操作者是群主本人
 		if(operatorId.equals(thisGroup.getCreatorId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.CREATOR,obj);
+			obj.setResponseStatus(1);//群主
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,obj);
 		}else {//非群主，需要判断他是不是成员
 			//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
 			Set<Object> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 			if(!allMembers.contains(operatorId)) {
-				return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER,obj);
+				obj.setResponseStatus(3);//非成员
+				return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,obj);
 			}else {
-				return new RelationshipResponseBean<>(RelationshipResponseStatus.MEMBER,obj);
+				obj.setResponseStatus(2);//成员
+				return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,obj);
 			}
 		}
 	}
@@ -303,11 +306,11 @@ public class JmRelationshipGroupService implements ITxTransaction{
 
 		String creatorId = obj.getCreatorId();
 		if(StringUtils.isBlank(creatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.CREATOR_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		String name = obj.getName();
 		if(StringUtils.isBlank(name)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.NAME_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 
 		//Set集合自动去重
@@ -322,7 +325,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//必须选择至少两个其他不重复成员成立部落
 		if(memberIds.size() < 3) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.MEMBERS_FEW);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//注意：设置部落成员个数！！
 		obj.setMembers(memberIds.size());
@@ -394,15 +397,15 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		obj.preUpdate();
 
 		if(StringUtils.isBlank(obj.getId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.ID_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		if(obj.getMemberList() == null || obj.getMemberList().size() == 0) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.MEMBERS_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//操作者id
 		String operatorId = obj.getOperatorId();
 		if(StringUtils.isBlank(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.OPERATOR_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//按部落id查询部落，判断传入操作者是否是该部落创建者
 		JmRelationshipGroup thisGroup = mapper.findOne(obj.getId());
@@ -412,7 +415,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//操作者非群主本人
 		if(!operatorId.equals(thisGroup.getCreatorId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_CREATOR);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 
 		//Set集合自动去重
@@ -480,15 +483,15 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		obj.preUpdate();
 
 		if(StringUtils.isBlank(obj.getId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.ID_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		if(obj.getMemberList() == null || obj.getMemberList().size() == 0) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.MEMBERS_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//操作者id
 		String operatorId = obj.getOperatorId();
 		if(StringUtils.isBlank(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.OPERATOR_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//Set集合自动去重--基础是String已重新了其equals,hashCode方法
 		Set<String> memberIds = new HashSet<>();
@@ -507,16 +510,16 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		if(operatorId.equals(thisGroup.getCreatorId())) {
 			//判断有没有踢自己
 			if(memberIds.contains(operatorId)) {
-				return new RelationshipResponseBean<>(RelationshipResponseStatus.CREATOR_OUT);
+				return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 			}
 		}else {//非群主，需要判断他是不是成员且是自己退出
 			//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
 			Set<Object> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 			if(!allMembers.contains(operatorId)) {
-				return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
+				return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 			}else {
 				if(memberIds.size() > 1 || !memberIds.contains(operatorId)) {
-					return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_SELF);//群成员只能退本人
+					return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);//群成员只能退本人
 				}
 			}
 		}
@@ -596,12 +599,12 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		obj.preUpdate();
 
 		if(StringUtils.isBlank(obj.getId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.ID_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//操作者id
 		String operatorId = obj.getOperatorId();
 		if(StringUtils.isBlank(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.OPERATOR_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//按部落id查询部落，判断传入操作者是否是该部落创建者
 		JmRelationshipGroup thisGroup = mapper.findOne(obj.getId());
@@ -611,7 +614,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//操作者非群主本人
 		if(!operatorId.equals(thisGroup.getCreatorId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_CREATOR);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//冗余更新行业分类名
 		if(StringUtils.isNotBlank(obj.getIndustryId())) {
@@ -649,12 +652,12 @@ public class JmRelationshipGroupService implements ITxTransaction{
 //	@Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED,readOnly = false)
 	public RelationshipResponseBean<JmRelationshipGroup> delete(JmRelationshipGroup obj){
 		if(StringUtils.isBlank(obj.getId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.ID_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//操作者id
 		String operatorId = obj.getOperatorId();
 		if(StringUtils.isBlank(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.OPERATOR_NULL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//按部落id查询部落，判断传入操作者是否是该部落创建者
 		JmRelationshipGroup thisGroup = mapper.findOne(obj.getId());
@@ -664,7 +667,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//操作者非群主本人
 		if(!operatorId.equals(thisGroup.getCreatorId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_CREATOR);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 
 		int mysqlResult = mapper.delete(obj.getId());

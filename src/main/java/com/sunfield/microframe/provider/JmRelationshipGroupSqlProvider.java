@@ -38,6 +38,10 @@ public class JmRelationshipGroupSqlProvider{
 				if(StringUtils.isNotBlank(obj.getIndustryId())) {
 					WHERE("industry_id = #{industryId}");
 				}
+				//前台按部落名模糊搜索功能
+				if(StringUtils.isNotBlank(obj.getName())) {
+					WHERE("name like concat(concat('%',#{name}),'%')");
+				}
 				//我创建的部落
 				if(StringUtils.isNotBlank(obj.getCreatorId())) {
 					WHERE("creator_id = #{creatorId}");

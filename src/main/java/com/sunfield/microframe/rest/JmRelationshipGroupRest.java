@@ -31,7 +31,8 @@ public class JmRelationshipGroupRest{
 	@Autowired
 	private JmRelationshipGroupService service;
 	
-	@ApiOperation(value="所有部落列表（后台管理）/部落按行业列表：传递industryId/个人创建的部落列表：传递creatorId")
+	@ApiOperation(value="所有部落列表（后台管理）/部落按行业列表：传递industryId/个人创建的部落列表：传递creatorId" +
+			"/部落搜索功能：传递name作为模糊查找条件，如需返回特定行业的搜索结果就同时传递industryId")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/findList", method = RequestMethod.POST)
     public RelationshipResponseBean<List<JmRelationshipGroup>> findList(@RequestBody JmRelationshipGroup obj) {
@@ -45,7 +46,7 @@ public class JmRelationshipGroupRest{
     }
 	
 	@ApiOperation(value="分页查询：所有部落列表（后台管理）/部落按行业列表：传递industryId" +
-			"/个人创建的部落列表：传递creatorId")
+			"/个人创建的部落列表：传递creatorId/部落搜索功能：传递name作为模糊查找条件，如需返回特定行业的搜索结果就同时传递industryId")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/findPage", method = RequestMethod.POST)
     public RelationshipResponseBean<Page<JmRelationshipGroup>> findPage(@RequestBody JmRelationshipGroup obj) {
@@ -100,7 +101,7 @@ public class JmRelationshipGroupRest{
 		}
     }
 
-	@ApiOperation(value="查询部落成员列表：必需参数：id,部落id；operatorId，操作者用户id（非成员不允许查看）")
+	@ApiOperation(value="查询部落成员列表：必需参数：id,部落id；operatorId，操作者用户id（非成员不允许查看，返回参数错误信息）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/findMemberList", method = RequestMethod.POST)
 	public RelationshipResponseBean<List<Object>> findMemberList(@RequestBody JmRelationshipGroup obj) {
@@ -113,7 +114,7 @@ public class JmRelationshipGroupRest{
 		}
 	}
 
-	@ApiOperation(value="分页查询：查询部落成员列表：必需参数：id,部落id；operatorId，操作者用户id（非成员不允许查看）")
+	@ApiOperation(value="分页查询：查询部落成员列表：必需参数：id,部落id；operatorId，操作者用户id（非成员不允许查看，返回参数错误信息）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/findMemberListPage", method = RequestMethod.POST)
 	public RelationshipResponseBean<Page<Object>> findMemberListPage(@RequestBody JmRelationshipGroup obj) {
@@ -156,8 +157,8 @@ public class JmRelationshipGroupRest{
 		}
 	}
 
-	@ApiOperation(value="部落添加单个、多个成员：必需参数：operatorId，操作者id,必须是群主才可操作；id，部落id；" +
-			"memberList中需要至少有一个成员用户，只传递其用户id字段即可")
+	@ApiOperation(value="部落添加单个、多个成员：必需参数：operatorId，操作者id,必须是群主才可操作（否则返回参数错误信息）" +
+			"；id，部落id；memberList中需要至少有一个成员用户，只传递其用户id字段即可")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/groupAdd", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipGroup> groupAdd(@RequestBody JmRelationshipGroup obj) {
@@ -170,8 +171,8 @@ public class JmRelationshipGroupRest{
 		}
     }
 
-	@ApiOperation(value="群主踢人、成员退群：必需参数：operatorId，操作者id；id，部落id；" +
-			"memberList中需要至少有一个成员用户，只传递其用户id字段即可")
+	@ApiOperation(value="群主踢人、成员退群：必需参数：operatorId，操作者id（群主不能退群，成员只能退自己，非成员不能调用，" +
+			"否则返回参数错误信息）；id，部落id；memberList中需要至少有一个成员用户，只传递其用户id字段即可")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/groupOut", method = RequestMethod.POST)
 	public RelationshipResponseBean<JmRelationshipGroup> groupOut(@RequestBody JmRelationshipGroup obj) {
@@ -184,7 +185,7 @@ public class JmRelationshipGroupRest{
 		}
 	}
 
-	@ApiOperation(value="编辑部落信息：必需参数：operatorId，操作者id,必须是群主才可操作；id，部落id；" +
+	@ApiOperation(value="编辑部落信息：必需参数：operatorId，操作者id,必须是群主才可操作（否则返回参数错误信息）；id，部落id；" +
 			"其他除群主和成员个数外均可更新")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
@@ -201,7 +202,7 @@ public class JmRelationshipGroupRest{
 		}
     }
 	
-	@ApiOperation(value="解散部落：必需参数：operatorId，操作者id,必须是群主才可操作；id，部落id")
+	@ApiOperation(value="解散部落：必需参数：operatorId，操作者id,必须是群主才可操作（否则返回参数错误信息）；id，部落id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipGroup> delete(@RequestBody JmRelationshipGroup obj) {

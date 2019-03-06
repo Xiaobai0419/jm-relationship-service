@@ -2,6 +2,9 @@ package com.sunfield.microframe.rest;
 
 import java.util.List;
 
+import com.sunfield.microframe.common.response.*;
+import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,11 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.sunfield.microframe.common.response.Page;
-import com.sunfield.microframe.common.response.ResponseBean;
-import com.sunfield.microframe.common.response.ResponseStatus;
-
 import com.sunfield.microframe.domain.JmRelationshipFriendlife;
 import com.sunfield.microframe.service.JmRelationshipFriendlifeService;
 
@@ -24,6 +22,8 @@ import com.sunfield.microframe.service.JmRelationshipFriendlifeService;
  * jm_relationship_friendlife rest
  * @author sunfield coder
  */
+@Api(tags = "jm-relationship-friendlife")
+@Slf4j
 @RestController
 @RequestMapping(value = "/JmRelationshipFriendlife")
 public class JmRelationshipFriendlifeRest {
@@ -35,11 +35,17 @@ public class JmRelationshipFriendlifeRest {
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findList", method = RequestMethod.POST)
     public ResponseBean<List<JmRelationshipFriendlife>> findList(@RequestBody JmRelationshipFriendlife obj) {
-		List<JmRelationshipFriendlife> list = service.findList(obj);
-		if(!list.isEmpty()) {
-			return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, list);
-		} else {
-			return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.NO_DATA);
+		try {
+			List<JmRelationshipFriendlife> list = service.findList(obj);
+			if(!list.isEmpty()) {
+				return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, list);
+			} else {
+				return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.NO_DATA);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
 		}
     }
 
@@ -47,11 +53,17 @@ public class JmRelationshipFriendlifeRest {
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findOnesList", method = RequestMethod.POST)
 	public ResponseBean<List<JmRelationshipFriendlife>> findOnesList(@RequestBody JmRelationshipFriendlife obj) {
-		List<JmRelationshipFriendlife> list = service.findOnesList(obj);
-		if(!list.isEmpty()) {
-			return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, list);
-		} else {
-			return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.NO_DATA);
+		try {
+			List<JmRelationshipFriendlife> list = service.findOnesList(obj);
+			if(!list.isEmpty()) {
+				return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, list);
+			} else {
+				return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.NO_DATA);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
 		}
 	}
 
@@ -59,11 +71,17 @@ public class JmRelationshipFriendlifeRest {
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findSelfList", method = RequestMethod.POST)
 	public ResponseBean<List<JmRelationshipFriendlife>> findSelfList(@RequestBody JmRelationshipFriendlife obj) {
-		List<JmRelationshipFriendlife> list = service.findSelfList(obj);
-		if(!list.isEmpty()) {
-			return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, list);
-		} else {
-			return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.NO_DATA);
+		try {
+			List<JmRelationshipFriendlife> list = service.findSelfList(obj);
+			if(!list.isEmpty()) {
+				return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, list);
+			} else {
+				return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.NO_DATA);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
 		}
 	}
 
@@ -71,35 +89,59 @@ public class JmRelationshipFriendlifeRest {
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findPage", method = RequestMethod.POST)
     public ResponseBean<Page<JmRelationshipFriendlife>> findPage(@RequestBody JmRelationshipFriendlife obj) {
-    	return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findPage(obj));
+		try {
+			return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findPage(obj));
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
+		}
     }
 
 	@ApiOperation(value="分页查询：某用户能源圈：必需参数：userId，用户id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findOnesPage", method = RequestMethod.POST)
 	public ResponseBean<Page<JmRelationshipFriendlife>> findOnesPage(@RequestBody JmRelationshipFriendlife obj) {
-		return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findOnesPage(obj));
+		try {
+			return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findOnesPage(obj));
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
+		}
 	}
 
 	@ApiOperation(value="分页查询：某用户个人发布的能源圈：必需参数：userId，用户id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findSelfPage", method = RequestMethod.POST)
 	public ResponseBean<Page<JmRelationshipFriendlife>> findSelfPage(@RequestBody JmRelationshipFriendlife obj) {
-		return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findSelfPage(obj));
+		try {
+			return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findSelfPage(obj));
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
+		}
 	}
 
 	@ApiOperation(value="根据主键查询：必需参数：id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findOne", method = RequestMethod.POST)
     public ResponseBean<JmRelationshipFriendlife> findOne(@RequestBody JmRelationshipFriendlife obj) {
-    	if(StringUtils.isBlank(obj.getId())) {
-			return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
-    	}
-    	JmRelationshipFriendlife object = service.findOne(obj.getId());
-    	if(object != null) {
-    		return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
-    	} else {
-    		return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.NO_DATA);
+		try {
+			if(StringUtils.isBlank(obj.getId())) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
+			}
+			JmRelationshipFriendlife object = service.findOne(obj.getId());
+			if(object != null) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
+			} else {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.NO_DATA);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
 		}
     }
 	
@@ -107,11 +149,17 @@ public class JmRelationshipFriendlifeRest {
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/insert", method = RequestMethod.POST)
     public ResponseBean<JmRelationshipFriendlife> insert(@RequestBody JmRelationshipFriendlife obj) {
-		JmRelationshipFriendlife object = service.insert(obj);
-		if(object != null) {
-			return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
-		} else {
-			return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.FAIL);
+		try {
+			JmRelationshipFriendlife object = service.insert(obj);
+			if(object != null) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
+			} else {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.FAIL);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
 		}
     }
 	
@@ -119,14 +167,20 @@ public class JmRelationshipFriendlifeRest {
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
     public ResponseBean<JmRelationshipFriendlife> update(@RequestBody JmRelationshipFriendlife obj) {
-    	if(StringUtils.isBlank(obj.getId())) {
-			return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
-    	}
-    	JmRelationshipFriendlife object = service.update(obj);
-    	if(object != null) {
-			return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
-		} else {
-			return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.FAIL);
+		try {
+			if(StringUtils.isBlank(obj.getId())) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
+			}
+			JmRelationshipFriendlife object = service.update(obj);
+			if(object != null) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
+			} else {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.FAIL);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
 		}
     }
 
@@ -134,13 +188,19 @@ public class JmRelationshipFriendlifeRest {
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)
 	public ResponseBean<JmRelationshipFriendlife> deleteSelf(@RequestBody JmRelationshipFriendlife obj) {
-		if(StringUtils.isBlank(obj.getId()) || StringUtils.isBlank(obj.getVisitedUserId())) {
-			return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
-		}
-		if(service.deleteSelf(obj) > 0) {
-			return new ResponseBean<JmRelationshipFriendlife>();
-		} else {
-			return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.NO_DATA);
+		try {
+			if(StringUtils.isBlank(obj.getId()) || StringUtils.isBlank(obj.getVisitedUserId())) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
+			}
+			if(service.deleteSelf(obj) > 0) {
+				return new ResponseBean<JmRelationshipFriendlife>();
+			} else {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.NO_DATA);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
 		}
 	}
 
@@ -148,14 +208,19 @@ public class JmRelationshipFriendlifeRest {
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/delete", method = RequestMethod.POST)
     public ResponseBean<JmRelationshipFriendlife> delete(@RequestBody JmRelationshipFriendlife obj) {
-    	if(StringUtils.isBlank(obj.getId())) {
-			return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
-    	}
-    	if(service.delete(obj.getId()) > 0) {
-    		return new ResponseBean<JmRelationshipFriendlife>();
-    	} else {
-    		return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.NO_DATA);
+		try {
+			if(StringUtils.isBlank(obj.getId())) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
+			}
+			if(service.delete(obj.getId()) > 0) {
+				return new ResponseBean<JmRelationshipFriendlife>();
+			} else {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.NO_DATA);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
 		}
     }
-    
 }

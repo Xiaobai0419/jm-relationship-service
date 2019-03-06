@@ -109,7 +109,7 @@ public class JmRelationshipGroupRequestService implements ITxTransaction{
 		String groupId = obj.getGroupId();
 		JmRelationshipGroup jmRelationshipGroup = jmRelationshipGroupMapper.findOne(groupId);
 		if(jmRelationshipGroup == null) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.GROUP_NOT_EXIST);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.NO_DATA);//部落不存在
 		}
 		obj.setCreatorId(jmRelationshipGroup.getCreatorId());
 		obj.setGroupName(jmRelationshipGroup.getName());
@@ -165,7 +165,7 @@ public class JmRelationshipGroupRequestService implements ITxTransaction{
 		//查询这条记录，里面包含请求者和群主的所有冗余信息，用于融云通知（请求者插入或更新时全量存储的，现在直接用，不需要再远程调用或查询）
 		JmRelationshipGroupRequest record = mapper.findOne(obj);
 		if(record == null) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.NO_DATA,obj);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.NO_DATA,obj);//请求记录不存在
 		}
 		obj.setType(2);//2代表拒绝请求
 		int mysqlResult = mapper.updateType(obj);//调用只更改类型的方法
@@ -198,7 +198,7 @@ public class JmRelationshipGroupRequestService implements ITxTransaction{
 		//查询这条记录，里面包含请求者和群主的所有冗余信息，用于融云通知（请求者插入或更新时全量存储的，现在直接用，不需要再远程调用或查询）
 		JmRelationshipGroupRequest record = mapper.findOne(obj);
 		if(record == null) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.NO_DATA,obj);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.NO_DATA,obj);//请求记录不存在
 		}
 		//移除请求记录
 		int mysqlResult = mapper.delete(obj);
