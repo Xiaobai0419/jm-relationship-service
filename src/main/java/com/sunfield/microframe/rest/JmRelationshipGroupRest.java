@@ -127,7 +127,8 @@ public class JmRelationshipGroupRest{
 		}
 	}
 
-	@ApiOperation(value="查询与部落关系：必需参数：id,部落id；operatorId，操作者用户id")
+	@ApiOperation(value="查询与部落关系：必需参数：id,部落id；operatorId，操作者用户id" +
+			"返回：根据responseStatus字段值判断：1 群主 2 成员 3 非成员")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/findGroupRelation", method = RequestMethod.POST)
 	public RelationshipResponseBean<JmRelationshipGroup> findGroupRelation(@RequestBody JmRelationshipGroup obj) {
