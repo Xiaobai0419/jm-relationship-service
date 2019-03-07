@@ -49,11 +49,14 @@ public class JmRelationshipFriendlifeRest {
 		}
     }
 
-	@ApiOperation(value="查询列表：某用户能源圈：必需参数：userId，用户id")
+	@ApiOperation(value="查询列表：某用户能源圈：必需参数：userId，用户id（访问者一定是该用户自己）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findOnesList", method = RequestMethod.POST)
 	public ResponseBean<List<JmRelationshipFriendlife>> findOnesList(@RequestBody JmRelationshipFriendlife obj) {
 		try {
+			if(StringUtils.isBlank(obj.getUserId())) {
+				return new ResponseBean<>(ResponseStatus.PARAMS_ERROR);
+			}
 			List<JmRelationshipFriendlife> list = service.findOnesList(obj);
 			if(!list.isEmpty()) {
 				return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, list);
@@ -67,11 +70,15 @@ public class JmRelationshipFriendlifeRest {
 		}
 	}
 
-	@ApiOperation(value="查询列表：某用户个人发布的能源圈：必需参数：userId，用户id")
+	@ApiOperation(value="查询列表：某用户个人发布的能源圈：必需参数：userId，用户id；" +
+			"visitedUserId：当前访问用户id（与被查看用户可能是同一个人，也可能不是同一个人，用于显示点赞状态）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findSelfList", method = RequestMethod.POST)
 	public ResponseBean<List<JmRelationshipFriendlife>> findSelfList(@RequestBody JmRelationshipFriendlife obj) {
 		try {
+			if(StringUtils.isBlank(obj.getUserId()) || StringUtils.isBlank(obj.getVisitedUserId())) {
+				return new ResponseBean<>(ResponseStatus.PARAMS_ERROR);
+			}
 			List<JmRelationshipFriendlife> list = service.findSelfList(obj);
 			if(!list.isEmpty()) {
 				return new ResponseBean<List<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, list);
@@ -98,11 +105,14 @@ public class JmRelationshipFriendlifeRest {
 		}
     }
 
-	@ApiOperation(value="分页查询：某用户能源圈：必需参数：userId，用户id")
+	@ApiOperation(value="分页查询：某用户能源圈列表：必需参数：userId，用户id（访问者一定是该用户自己）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findOnesPage", method = RequestMethod.POST)
 	public ResponseBean<Page<JmRelationshipFriendlife>> findOnesPage(@RequestBody JmRelationshipFriendlife obj) {
 		try {
+			if(StringUtils.isBlank(obj.getUserId())) {
+				return new ResponseBean<>(ResponseStatus.PARAMS_ERROR);
+			}
 			return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findOnesPage(obj));
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -111,11 +121,15 @@ public class JmRelationshipFriendlifeRest {
 		}
 	}
 
-	@ApiOperation(value="分页查询：某用户个人发布的能源圈：必需参数：userId，用户id")
+	@ApiOperation(value="分页查询：某用户个人发布的能源圈列表：必需参数：userId，用户id；" +
+			"visitedUserId：当前访问用户id（与被查看用户可能是同一个人，也可能不是同一个人，用于显示点赞状态）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findSelfPage", method = RequestMethod.POST)
 	public ResponseBean<Page<JmRelationshipFriendlife>> findSelfPage(@RequestBody JmRelationshipFriendlife obj) {
 		try {
+			if(StringUtils.isBlank(obj.getUserId()) || StringUtils.isBlank(obj.getVisitedUserId())) {
+				return new ResponseBean<>(ResponseStatus.PARAMS_ERROR);
+			}
 			return new ResponseBean<Page<JmRelationshipFriendlife>>(ResponseStatus.SUCCESS, service.findSelfPage(obj));
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -124,15 +138,16 @@ public class JmRelationshipFriendlifeRest {
 		}
 	}
 
-	@ApiOperation(value="根据主键查询：必需参数：id")
+	@ApiOperation(value="根据主键查询：必需参数：id；" +
+			"visitedUserId：当前访问用户id（与被查看用户可能是同一个人，也可能不是同一个人，用于显示点赞状态）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/findOne", method = RequestMethod.POST)
     public ResponseBean<JmRelationshipFriendlife> findOne(@RequestBody JmRelationshipFriendlife obj) {
 		try {
-			if(StringUtils.isBlank(obj.getId())) {
+			if(StringUtils.isBlank(obj.getId()) || StringUtils.isBlank(obj.getVisitedUserId())) {
 				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
 			}
-			JmRelationshipFriendlife object = service.findOne(obj.getId());
+			JmRelationshipFriendlife object = service.findOne(obj);
 			if(object != null) {
 				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
 			} else {

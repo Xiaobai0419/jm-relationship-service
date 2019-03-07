@@ -40,6 +40,17 @@ public class JmRelationshipFriendlife extends BaseDomain{
 	@ApiModelProperty(value="登录用户id", dataType="String")
 	private String visitedUserId;
 
+	@ApiModelProperty(value="登录用户对该朋友圈点赞状态 0 无赞 1 赞", dataType="String")
+	private Integer visitedUserYesOrNo = 0;
+
+	public Integer getVisitedUserYesOrNo() {
+		return visitedUserYesOrNo;
+	}
+
+	public void setVisitedUserYesOrNo(Integer visitedUserYesOrNo) {
+		this.visitedUserYesOrNo = visitedUserYesOrNo;
+	}
+
 	public String getVisitedUserId() {
 		return visitedUserId;
 	}

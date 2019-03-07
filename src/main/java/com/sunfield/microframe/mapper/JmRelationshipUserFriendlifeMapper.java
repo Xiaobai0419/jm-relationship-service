@@ -42,6 +42,24 @@ public interface JmRelationshipUserFriendlifeMapper{
 	public JmRelationshipUserFriendlife findOne(String id);
 
 	/**
+	 * 单行查询--获取某用户对某条朋友圈的点赞状态
+	 * @param userId
+	 * @param friendlifeId
+	 * @return
+	 */
+	@SelectProvider(type=JmRelationshipUserFriendlifeSqlProvider.class, method="generateFindSelfOneSql")
+	public JmRelationshipUserFriendlife findSelfOne(String userId,String friendlifeId);
+
+	/**
+	 * 查询--获取某用户对一组朋友圈列表的点赞状态
+	 * @param userId
+	 * @param friendlifeIds
+	 * @return
+	 */
+	@SelectProvider(type=JmRelationshipUserFriendlifeSqlProvider.class, method="generateFindSelfOnesSql")
+	public List<JmRelationshipUserFriendlife> findSelfOnes(String userId,String[] friendlifeIds);
+
+	/**
 	 * 插入单行
 	 * @param obj
 	 * @return
@@ -65,4 +83,12 @@ public interface JmRelationshipUserFriendlifeMapper{
 	@UpdateProvider(type=JmRelationshipUserFriendlifeSqlProvider.class, method="generateDeleteSql")
 	public int delete(String id);
 
+	/**
+	 * 删除单行（一般为逻辑删除）--用户取消对某条朋友圈点赞
+	 * @param userId
+	 * @param friendlifeId
+	 * @return
+	 */
+	@UpdateProvider(type=JmRelationshipUserFriendlifeSqlProvider.class, method="generateDeleteSelfSql")
+	public int deleteSelf(String userId,String friendlifeId);
 }

@@ -2,6 +2,7 @@ package com.sunfield.microframe.common.utils;
 
 import com.sunfield.microframe.domain.JmAppUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -56,9 +57,9 @@ public class FrientsUtil {
     }
 
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;//这个应该是Spring Boot默认的
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;//这个RedisTemplate<String, Object>是在RedisConfig里使用@Bean指定的，并指定序列化方式是Jackson，别的类型的不会自动创建，需要自己@Bean实例化
 
     //好友及人脉存储，使用ZSet,只存储String类型userId,主要考虑使用分值存储人脉行业分类，使用交、并、差集进行轻量级三级人脉划分操作
     /**
@@ -358,9 +359,10 @@ public class FrientsUtil {
      * @param groupId
      * @return
      */
-    public Set<Object> groupMembersKeys(String groupId) {
+    public Set<String> groupMembersKeys(String groupId) {
         String grpKey = getGrpKey(groupId);
-        return redisTemplate.opsForHash().keys(grpKey);//返回的Set<Object>无法转换为Set<String>
+        HashOperations<String, String, JmAppUser>  op = redisTemplate.opsForHash();
+        return op.keys(grpKey);//返回的Set<Object>无法转换为Set<String>
     }
 
     /**
@@ -368,9 +370,11 @@ public class FrientsUtil {
      * @param groupId
      * @return
      */
-    public List<Object> groupMembersValues(String groupId) {
+    public List<JmAppUser> groupMembersValues(String groupId) {
         String grpKey = getGrpKey(groupId);
-        return redisTemplate.opsForHash().values(grpKey);//hash结构，key不会重复，value可重复，但这里业务上不会重复，如要用Set需要强转，并重写JmAppUser的equals,hashCode方法
+        //在这里指定Hash结构的field,value类型，才能正常返回你所需类型（插入时类型）的结构
+        HashOperations<String, String, JmAppUser>  op = redisTemplate.opsForHash();
+        return op.values(grpKey);//hash结构，key不会重复，value可重复，但这里业务上不会重复，如要用Set需要强转，并重写JmAppUser的equals,hashCode方法
     }
 
     /**
@@ -379,9 +383,10 @@ public class FrientsUtil {
      * @param memberId
      * @return
      */
-    public Object groupMemberSingleValue(String groupId,String memberId) {
+    public JmAppUser groupMemberSingleValue(String groupId,String memberId) {
         String grpKey = getGrpKey(groupId);
-        return redisTemplate.opsForHash().get(grpKey,memberId);
+        HashOperations<String, String, JmAppUser>  op = redisTemplate.opsForHash();
+        return op.get(grpKey,memberId);
     }
 
     /**
@@ -390,9 +395,10 @@ public class FrientsUtil {
      * @param memberIds
      * @return
      */
-    public List<Object> groupMembersValues(String groupId, Collection memberIds) {
+    public List<JmAppUser> groupMembersValues(String groupId, Collection<String> memberIds) {
         String grpKey = getGrpKey(groupId);
-        List<Object> list = redisTemplate.opsForHash().multiGet(grpKey,memberIds);
+        HashOperations<String, String, JmAppUser>  op = redisTemplate.opsForHash();
+        List<JmAppUser> list = op.multiGet(grpKey,memberIds);
         return list;
     }
 

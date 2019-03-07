@@ -3,6 +3,7 @@ package com.sunfield.microframe.rest;
 import java.util.List;
 
 import com.sunfield.microframe.common.response.*;
+import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.service.JmRelationshipGroupService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -104,7 +105,7 @@ public class JmRelationshipGroupRest{
 	@ApiOperation(value="查询部落成员列表：必需参数：id,部落id；operatorId，操作者用户id（非成员不允许查看，返回参数错误信息）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/findMemberList", method = RequestMethod.POST)
-	public RelationshipResponseBean<List<Object>> findMemberList(@RequestBody JmRelationshipGroup obj) {
+	public RelationshipResponseBean<List<JmAppUser>> findMemberList(@RequestBody JmRelationshipGroup obj) {
 		try {
 			return service.findMemberList(obj);
 		}catch (Exception e) {
@@ -117,7 +118,7 @@ public class JmRelationshipGroupRest{
 	@ApiOperation(value="分页查询：查询部落成员列表：必需参数：id,部落id；operatorId，操作者用户id（非成员不允许查看，返回参数错误信息）")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/findMemberListPage", method = RequestMethod.POST)
-	public RelationshipResponseBean<Page<Object>> findMemberListPage(@RequestBody JmRelationshipGroup obj) {
+	public RelationshipResponseBean<Page<JmAppUser>> findMemberListPage(@RequestBody JmRelationshipGroup obj) {
 		try {
 			return service.findMemberListPage(obj);
 		}catch (Exception e) {

@@ -212,7 +212,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	 * @param obj
 	 * @return
 	 */
-	public RelationshipResponseBean<List<Object>> findMemberList(JmRelationshipGroup obj){
+	public RelationshipResponseBean<List<JmAppUser>> findMemberList(JmRelationshipGroup obj){
 		if(StringUtils.isBlank(obj.getId())) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
@@ -222,7 +222,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
-		Set<Object> allMembers = frientsUtil.groupMembersKeys(obj.getId());
+		Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 		//非成员禁止查看
 		if(!allMembers.contains(operatorId)) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
@@ -235,7 +235,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	 * @param obj
 	 * @return
 	 */
-	public RelationshipResponseBean<Page<Object>> findMemberListPage(JmRelationshipGroup obj){
+	public RelationshipResponseBean<Page<JmAppUser>> findMemberListPage(JmRelationshipGroup obj){
 		if(StringUtils.isBlank(obj.getId())) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
@@ -245,7 +245,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
-		Set<Object> allMembers = frientsUtil.groupMembersKeys(obj.getId());
+		Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 		//非成员禁止查看
 		if(!allMembers.contains(operatorId)) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
@@ -282,7 +282,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,obj);
 		}else {//非群主，需要判断他是不是成员
 			//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
-			Set<Object> allMembers = frientsUtil.groupMembersKeys(obj.getId());
+			Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 			if(!allMembers.contains(operatorId)) {
 				obj.setResponseStatus(3);//非成员
 				return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,obj);
@@ -514,7 +514,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			}
 		}else {//非群主，需要判断他是不是成员且是自己退出
 			//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
-			Set<Object> allMembers = frientsUtil.groupMembersKeys(obj.getId());
+			Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 			if(!allMembers.contains(operatorId)) {
 				return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 			}else {
@@ -534,8 +534,8 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//调用融云退出群组接口
 		Result groupResult = GroupUtil.quitFromGroup(obj.getId(),groupMembers.toArray(new GroupMember[groupMembers.size()]));
-		//查询Redis被移除成员具体信息 TODO 这里的Redis查询有问题
-		List<Object> userList = frientsUtil.groupMembersValues(obj.getId(),memberIds);
+		//查询Redis被移除成员具体信息 TODO 这里的Redis查询有问题--已解决，待测试
+		List<JmAppUser> userList = frientsUtil.groupMembersValues(obj.getId(),memberIds);
 		//融云相关通知--涉及成员id退出群，所以统一用群主id发消息
 		if(userList != null && userList.size() > 0) {
 			//操作者是群主本人--踢人
@@ -544,28 +544,14 @@ public class JmRelationshipGroupService implements ITxTransaction{
 				TxtMessage txtMessage = new TxtMessage("您已被群主移出'" + thisGroup.getName() + "'部落",
 						"部落移除成员通知");
 				MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), memberIds.toArray(new String[memberIds.size()]),txtMessage);
-				for(Object object : userList) {
-					JmAppUser user = null;
-					//解决Redis返回空集列表成员个数为1的问题
-					try {
-						user = (JmAppUser) object;
-					}catch (Exception e) {
-
-					}
+				for(JmAppUser user : userList) {
 					txtMessage = new TxtMessage("'" + (user != null && StringUtils.isNotBlank(user.getNickName()) ?
 							user.getNickName() : "") + "'已被群主移出部落", "部落移除成员通知");
 					MessageUtil.sendGroupTxtMessage(thisGroup.getCreatorId(),new String[]{thisGroup.getId()},txtMessage);
 				}
 			}else {//退群
 				//调用融云给群和群主一个通知
-				for(Object object : userList) {
-					JmAppUser user = null;
-					//解决Redis返回空集列表成员个数为1的问题
-					try {
-						user = (JmAppUser) object;
-					}catch (Exception e) {
-
-					}
+				for(JmAppUser user : userList) {
 					TxtMessage txtMessage = new TxtMessage("'" + (user != null && StringUtils.isNotBlank(user.getNickName()) ?
 							user.getNickName() : "") + "'已退出部落", "部落成员退出通知");
 					//能否发给自己？

@@ -57,7 +57,45 @@ public class JmRelationshipUserFriendlifeSqlProvider{
 			}
 		}.toString();
 	}
-	
+
+	//获取某用户对某条朋友圈的点赞状态
+	public String generateFindSelfOneSql(String userId,String friendlifeId){
+		String sql = new SQL(){
+			{
+				SELECT(COLUMNS);
+				FROM("jm_relationship_user_friendlife");
+
+				WHERE("user_id = #{userId}");
+				WHERE("friendlife_id = #{friendlifeId}");
+
+				ORDER_BY("update_date desc");
+			}
+		}.toString();
+		sql += " limit 0,1 ";//获取时间倒序第一条，用户对该朋友圈最终点赞，防止一个用户对同一个朋友圈多次点赞造成返回多条数据的错误情况
+		return sql;
+	}
+
+	//获取某用户对一组朋友圈列表的点赞状态
+	public String generateFindSelfOnesSql(String userId,String[] friendlifeIds){
+		return new SQL(){
+			{
+				SELECT(COLUMNS);
+				FROM("jm_relationship_user_friendlife");
+
+				WHERE("user_id = #{userId}");
+				if(friendlifeIds != null && friendlifeIds.length > 0) {
+					StringBuilder inSql = new StringBuilder("friendlife_id in(");
+					for(String friendlifeId : friendlifeIds) {
+						inSql.append("'").append(friendlifeId).append("',");
+					}
+					inSql.deleteCharAt(inSql.length() - 1);
+					inSql.append(")");
+					WHERE(inSql.toString());
+				}
+			}
+		}.toString();
+	}
+
 	public String generateInsertSql(JmRelationshipUserFriendlife obj){
 		return new SQL(){
 			{
@@ -104,6 +142,20 @@ public class JmRelationshipUserFriendlifeSqlProvider{
 				SET("status = '1'");
 				
 				WHERE("id = #{id}");
+			}
+		}.toString();
+	}
+
+	//用户取消对某条朋友圈点赞
+	public String generateDeleteSelfSql(String userId,String friendlifeId){
+		return new SQL(){
+			{
+				UPDATE("jm_relationship_user_friendlife");
+
+				SET("status = '1'");
+
+				WHERE("user_id = #{userId}");
+				WHERE("friendlife_id = #{friendlifeId}");
 			}
 		}.toString();
 	}
