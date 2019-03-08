@@ -325,7 +325,16 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Override
     public List<JmAppUser> findFriends(JmRelationshipFriendship jmRelationshipFriendship) {
         List<JmRelationshipFriendship> relationshipList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
-        return userListHandle(relationshipList,false,jmRelationshipFriendship.getUserId());
+        List<JmAppUser> users = userListHandle(relationshipList,false,jmRelationshipFriendship.getUserId());
+        //业务修正：去掉返回好友的一切时间字段，避免从中获取进行群成员添加时回传的时间格式错误导致的失败
+        for(JmAppUser user : users) {
+            user.setGroupAddDate(null);
+            user.setMemberEndTime(null);
+            user.setMemberStartTime(null);
+            user.setCreateDate(null);
+            user.setUpdateDate(null);
+        }
+        return users;
     }
 
     /**
@@ -341,6 +350,14 @@ public class RelationshipServiceImpl implements RelationshipService {
         if(resultList != null && resultList.size() > 0) {
             List<JmRelationshipFriendship> pageList = jmRelationshipFriendshipMapper.findFriendsPage(jmRelationshipFriendship);
             List<JmAppUser> userList = userListHandle(pageList,false,jmRelationshipFriendship.getUserId());
+            //业务修正：去掉返回好友的一切时间字段，避免从中获取进行群成员添加时回传的时间格式错误导致的失败
+            for(JmAppUser user : userList) {
+                user.setGroupAddDate(null);
+                user.setMemberEndTime(null);
+                user.setMemberStartTime(null);
+                user.setCreateDate(null);
+                user.setUpdateDate(null);
+            }
             return new Page<>(resultList.size(),jmRelationshipFriendship.getPageSize(),
                     jmRelationshipFriendship.getPageNumber(),userList);
         }
@@ -362,8 +379,8 @@ public class RelationshipServiceImpl implements RelationshipService {
         for(JmRelationshipFriendship friendshipReqeust : relationshipList) {
             friendshipReqeust.setId(friendshipReqeust.getUserId());
             //BaseDomain的备用字段中加入区分好友请求和群组请求的额外信息
-            friendshipReqeust.setCreateBy("1");
-            friendshipReqeust.setRemarks("请求加您为好友");
+            friendshipReqeust.setCreateBy("");
+            friendshipReqeust.setRemarks("申请加您为好友");
         }
 
         //时间倒序列表
@@ -375,8 +392,8 @@ public class RelationshipServiceImpl implements RelationshipService {
         for(JmRelationshipGroupRequest groupInRequest : groupRequestList) {
             groupInRequest.setId(groupInRequest.getRequestorId());
             //BaseDomain的备用字段中加入区分好友请求和群组请求的额外信息
-            groupInRequest.setCreateBy("2");
-            groupInRequest.setRemarks("请求加入'" + groupInRequest.getGroupName() + "'部落");
+            groupInRequest.setCreateBy(groupInRequest.getGroupName());
+            groupInRequest.setRemarks("请求加入您创建的部落");
         }
 
         //优先队列按时间倒序排序--优先队列是可以有“重复”数据的
@@ -395,7 +412,8 @@ public class RelationshipServiceImpl implements RelationshipService {
 
         //取出按时间倒序的优先队列中的id字段即按时间倒序的所有好友、群请求用户id进行循环单个查询，可能有重复的，因为
         //有同一个用户同时请求好友、入群和入该群主创建的多个群的情况！！
-        //无法以批量查询的方式进行查询，因为有同一个用户同时请求该群主创建的好几个群的情况！！而批量查询不会查出重复id
+        //无法以批量查询的方式进行查询，因为有同一个用户同时请求该群主创建的好几个群的情况！！
+        //还有同一个用户同时请求加好友和请求该好友创建的群的情况，都属于同一个用户id的不同请求，而批量查询不会查出重复id的用户
         List<JmAppUser> requestUserList = new LinkedList<>();
         for(BaseDomain baseDomain : dateDescPriority) {
             //id字段被统一设置成了用户id,所以按该字段查询用户
