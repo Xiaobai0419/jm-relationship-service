@@ -2,10 +2,7 @@ package com.sunfield.microframe.mapper;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.InsertProvider;
-import org.apache.ibatis.annotations.SelectProvider;
-import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.annotations.*;
 
 import com.sunfield.microframe.domain.JmRelationshipUserFriendlife;
 import com.sunfield.microframe.provider.JmRelationshipUserFriendlifeSqlProvider;
@@ -48,16 +45,16 @@ public interface JmRelationshipUserFriendlifeMapper{
 	 * @return
 	 */
 	@SelectProvider(type=JmRelationshipUserFriendlifeSqlProvider.class, method="generateFindSelfOneSql")
-	public JmRelationshipUserFriendlife findSelfOne(String userId,String friendlifeId);
+	public JmRelationshipUserFriendlife findSelfOne(@Param("userId") String userId, @Param("friendlifeId") String friendlifeId);
 
 	/**
-	 * 查询--获取某用户对一组朋友圈列表的点赞状态
+	 * 查询--获取某用户对一组朋友圈列表的点赞状态--注意多参数要用@Param注解，否则Mapper参数与sql参数绑定失败！！
 	 * @param userId
 	 * @param friendlifeIds
 	 * @return
 	 */
 	@SelectProvider(type=JmRelationshipUserFriendlifeSqlProvider.class, method="generateFindSelfOnesSql")
-	public List<JmRelationshipUserFriendlife> findSelfOnes(String userId,String[] friendlifeIds);
+	public List<JmRelationshipUserFriendlife> findSelfOnes(@Param("userId") String userId,@Param("friendlifeIds") String[] friendlifeIds);
 
 	/**
 	 * 插入单行
@@ -90,5 +87,5 @@ public interface JmRelationshipUserFriendlifeMapper{
 	 * @return
 	 */
 	@UpdateProvider(type=JmRelationshipUserFriendlifeSqlProvider.class, method="generateDeleteSelfSql")
-	public int deleteSelf(String userId,String friendlifeId);
+	public int deleteSelf(@Param("userId") String userId,@Param("friendlifeId") String friendlifeId);
 }

@@ -6,10 +6,12 @@ import com.sunfield.microframe.common.utils.FrientsUtil;
 import com.sunfield.microframe.common.utils.MessageUtil;
 import com.sunfield.microframe.common.utils.PageUtils;
 import com.sunfield.microframe.domain.JmAppUser;
+import com.sunfield.microframe.domain.JmIndustries;
 import com.sunfield.microframe.domain.JmRelationshipFriendship;
 import com.sunfield.microframe.domain.JmRelationshipGroupRequest;
 import com.sunfield.microframe.domain.base.BaseDomain;
 import com.sunfield.microframe.feign.JmAppUserFeignService;
+import com.sunfield.microframe.feign.JmIndustriesFeignService;
 import com.sunfield.microframe.mapper.JmRelationshipFriendshipMapper;
 import com.sunfield.microframe.mapper.JmRelationshipGroupRequestMapper;
 import com.sunfield.microframe.service.RelationshipService;
@@ -49,10 +51,17 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Autowired
     @Qualifier("jmAppUserFeignService")
     private JmAppUserFeignService jmAppUserFeignService;
+    @Autowired
+    @Qualifier("jmIndustriesFeignService")
+    private JmIndustriesFeignService jmIndustriesFeignService;
 
     @Cacheable(key = "#p0")//缓存用户信息
     public JmAppUser findUser(String userId) {
         return jmAppUserFeignService.findOne(userId).getData();
+    }
+
+    private JmIndustries findIndustry(JmIndustries industry) {
+        return jmIndustriesFeignService.findOne(industry).getData();
     }
 
 //    @Cacheable(key = "'allUsersInfo'")//缓存所有用户信息--注意用户更新和增减问题，可能造成一些信息错误或加载不到！！
@@ -194,9 +203,26 @@ public class RelationshipServiceImpl implements RelationshipService {
             JmAppUser user = findUser(jmRelationshipFriendship.getUserId());//自身信息
             JmAppUser userOppsite = findUser(jmRelationshipFriendship.getUserIdOpposite());//对方信息
             if(user != null && userOppsite != null) {
-                //如有任何异常，会在接口层抛出并记录到后台
-                double userIndustry = Double.parseDouble(user.getIndustry());
-                double userOppsiteIndustry = Double.parseDouble(userOppsite.getIndustry());
+                double userIndustry = 0;//默认0，全行业，用于查所有用户，防止大多数用户不设置任何行业
+                double userOppsiteIndustry = 0;
+                if(StringUtils.isNotBlank(user.getIndustry())) {
+                    JmIndustries industry = new JmIndustries();
+                    industry.setId(user.getIndustry());
+                    industry = findIndustry(industry);
+                    //如有任何异常，会在接口层抛出并记录到后台
+                    if(industry != null) {
+                        userIndustry = industry.getScore();//修复使用行业id作为分值的bug:赋值为数值类型的行业分值
+                    }
+                }
+                if(StringUtils.isNotBlank(userOppsite.getIndustry())) {
+                    JmIndustries industry = new JmIndustries();
+                    industry.setId(userOppsite.getIndustry());
+                    industry = findIndustry(industry);
+                    //如有任何异常，会在接口层抛出并记录到后台
+                    if(industry != null) {
+                        userOppsiteIndustry = industry.getScore();//修复使用行业id作为分值的bug:赋值为数值类型的行业分值
+                    }
+                }
                 addFriend = frientsUtil.addFriend(jmRelationshipFriendship.getUserId(),
                         jmRelationshipFriendship.getUserIdOpposite(),userOppsiteIndustry);
                 addFriendOppsite = frientsUtil.addFriend(jmRelationshipFriendship.getUserIdOpposite(),
@@ -547,6 +573,9 @@ public class RelationshipServiceImpl implements RelationshipService {
         //行业陌生人推荐
         industryRelationshipList.addAll(frientsUtil.getStrangers(userId,industryUserIds));
 
+        //业务修正：需要去掉自己
+        industryRelationshipList.remove(userId);
+
         String[] userIds = industryRelationshipList.toArray(new String[industryRelationshipList.size()]);
         //按用户id批量查询所有推荐人脉信息
         List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
@@ -577,8 +606,68 @@ public class RelationshipServiceImpl implements RelationshipService {
         return sortedUsers;
     }
 
+    /** TODO 人脉搜索
+     * 实时获取全行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）
+     * @param user
+     * @return
+     */
+    @Override
+    public List<JmAppUser> allIndustryRelationship(JmAppUser user) {
+        String userId = user.getId();
+        //有序集合
+        List<String> allIndustryRelationshipList = new LinkedList<>();
+        //通讯录好友
+        allIndustryRelationshipList.addAll(frientsUtil.getNoteBookFriends(userId));
+        //二度好友
+        allIndustryRelationshipList.addAll(frientsUtil.getSecFriends(userId,frientsUtil.getFriendKeys(userId)));
+        //三度好友
+        allIndustryRelationshipList.addAll(frientsUtil.getThrFriends(userId,frientsUtil.getSecFriendKeys(userId)));
+        //查询所有用户集合
+        Set<String> allUserIds = new HashSet<>();
+        List<JmAppUser> allUsers = findUsers();
+        if(allUsers != null && allUsers.size() > 0) {
+            for(JmAppUser userInfo :allUsers) {
+                allUserIds.add(userInfo.getId());
+            }
+        }
+        //陌生人
+        allIndustryRelationshipList.addAll(frientsUtil.getStrangers(userId,allUserIds));
+
+        //业务修正：需要去掉自己
+        allIndustryRelationshipList.remove(userId);
+
+        String[] userIds = allIndustryRelationshipList.toArray(new String[allIndustryRelationshipList.size()]);
+        //按用户id批量查询所有推荐人脉信息
+        List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
+        //批量查询该用户与所有该行业人脉的好友关系
+        List<JmRelationshipFriendship> records = jmRelationshipFriendshipMapper.findFriendRecords(userId,userIds);
+        Map<String,Integer> relationships = new HashMap<>();
+        if(records != null && records.size() > 0) {
+            for(JmRelationshipFriendship record :records) {
+                relationships.put(record.getUserIdOpposite(),record.getType());
+            }
+        }
+
+        //需要按allIndustryRelationshipList中的顺序重新排序
+        List<JmAppUser> sortedUsers = new LinkedList<>();
+        if(users != null && users.size() > 0) {
+            Map<String,JmAppUser> userMap = new HashMap<>();
+            for(JmAppUser jmAppUser : users) {
+                userMap.put(jmAppUser.getId(),jmAppUser);
+                //设置关系：查不到关系的无关联，查得到的设置为关系表type值
+                jmAppUser.setRelationType(relationships.get(jmAppUser.getId()) == null ?
+                        4 : (relationships.get(jmAppUser.getId())));
+            }
+            for(String allIndustryRelationship : allIndustryRelationshipList) {
+                JmAppUser industryUser = userMap.get(allIndustryRelationship);
+                sortedUsers.add(industryUser);
+            }
+        }
+        return sortedUsers;
+    }
+
     /**
-     * 实时获取所有（包括一度好友）三度人脉列表，用于能源圈时间线构建
+     * 实时获取所有（包括一度好友）三度人脉列表，用于能源圈时间线构建--不要通讯录好友和陌生人
      * @param user
      * @return
      */
@@ -590,24 +679,26 @@ public class RelationshipServiceImpl implements RelationshipService {
         //好友
         relationshipSet.addAll(frientsUtil.getFriends(userId));
         //通讯录好友
-        relationshipSet.addAll(frientsUtil.getNoteBookFriends(userId));
+//        relationshipSet.addAll(frientsUtil.getNoteBookFriends(userId));
         //二度好友
         relationshipSet.addAll(frientsUtil.getSecFriends(userId,frientsUtil.getFriendKeys(userId)));
         //三度好友
         relationshipSet.addAll(frientsUtil.getThrFriends(userId,frientsUtil.getSecFriendKeys(userId)));
         //查询所有用户集合
-        Set<String> allUserIds = new HashSet<>();
-        List<JmAppUser> allUsers = findUsers();
-        if(allUsers != null && allUsers.size() > 0) {
-            for(JmAppUser userInfo :allUsers) {
-                allUserIds.add(userInfo.getId());
-            }
-        }
+//        Set<String> allUserIds = new HashSet<>();
+//        List<JmAppUser> allUsers = findUsers();
+//        if(allUsers != null && allUsers.size() > 0) {
+//            for(JmAppUser userInfo :allUsers) {
+//                allUserIds.add(userInfo.getId());
+//            }
+//        }
         //陌生人
-        relationshipSet.addAll(frientsUtil.getStrangers(userId,allUserIds));
+//        relationshipSet.addAll(frientsUtil.getStrangers(userId,allUserIds));
+
+        //业务修正：需要去掉自己
+        relationshipSet.remove(userId);
 
         String[] userIds = relationshipSet.toArray(new String[relationshipSet.size()]);
         return userIds;
     }
-
 }

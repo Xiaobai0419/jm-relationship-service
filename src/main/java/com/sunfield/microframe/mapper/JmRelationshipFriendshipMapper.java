@@ -2,10 +2,7 @@ package com.sunfield.microframe.mapper;
 
 import com.sunfield.microframe.domain.JmRelationshipFriendship;
 import com.sunfield.microframe.provider.JmRelationshipFriendshipSqlProvider;
-import org.apache.ibatis.annotations.InsertProvider;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.SelectProvider;
-import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -31,7 +28,7 @@ public interface JmRelationshipFriendshipMapper {
 	 * @return
 	 */
 	@SelectProvider(type= JmRelationshipFriendshipSqlProvider.class, method="generateFindFriendRecordsSql")
-	public List<JmRelationshipFriendship> findFriendRecords(String selfUserId,String[] userIds);
+	public List<JmRelationshipFriendship> findFriendRecords(@Param("selfUserId") String selfUserId, @Param("userIds") String[] userIds);
 
 	/**
 	 * 查询我的好友（互为好友及单方好友的合集）

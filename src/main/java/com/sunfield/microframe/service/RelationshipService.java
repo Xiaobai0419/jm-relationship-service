@@ -49,6 +49,9 @@ public interface RelationshipService {
     //实时获取某行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）
     List<JmAppUser> industryRelationship(JmAppUser user);
 
+    //实时获取全行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）
+    List<JmAppUser> allIndustryRelationship(JmAppUser user);
+
     //实时获取所有（不分行业，包括一度好友）三度人脉列表，用于能源圈时间线构建
     String[] friendshipRelationship(JmAppUser user);
 

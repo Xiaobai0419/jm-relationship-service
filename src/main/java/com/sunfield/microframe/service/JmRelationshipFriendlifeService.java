@@ -1,8 +1,6 @@
 package com.sunfield.microframe.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.domain.JmRelationshipUserFriendlife;
@@ -57,8 +55,13 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 			JmAppUser user = new JmAppUser();
 			user.setId(selfId);
 			String[] userIds = relationshipService.friendshipRelationship(user);
+			//业务修正：需要加上用户自己，要看到自己所发所有能源圈信息
+			List<String> userIdList = Arrays.asList(userIds);
+			List<String> userIdsList = new ArrayList<>();
+			userIdsList.add(selfId);//解决Arrays.asList转换的List无法添加元素的问题
+			userIdsList.addAll(userIdList);
 			//批量查询能源圈信息，用户信息已冗余
-			List<JmRelationshipFriendlife> friendlifeList = mapper.findOnesList(userIds);
+			List<JmRelationshipFriendlife> friendlifeList = mapper.findOnesList(userIdsList.toArray(new String[userIdsList.size()]));
 			if(friendlifeList != null && friendlifeList.size() > 0) {
 				//获取访问用户对这批朋友圈的点赞状态
 				Map<String,JmRelationshipFriendlife> friendlifeMap = new HashMap<>();
@@ -68,7 +71,7 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 				//批量查询返回的点赞集合是乱序的，要按朋友圈id设置到对应朋友圈
 				List<JmRelationshipUserFriendlife> jmRelationshipUserFriendlifes =
 						jmRelationshipUserFriendlifeMapper.findSelfOnes(selfId,//访问者一定是该用户自己
-								friendlifeMap.entrySet().toArray(new String[friendlifeMap.entrySet().size()]));
+								friendlifeMap.keySet().toArray(new String[friendlifeMap.keySet().size()]));
 				if(jmRelationshipUserFriendlifes != null && jmRelationshipUserFriendlifes.size() > 0) {
 					for(JmRelationshipUserFriendlife jmRelationshipUserFriendlife : jmRelationshipUserFriendlifes) {
 						if(jmRelationshipUserFriendlife != null && jmRelationshipUserFriendlife.getYesorno() == 1) {
@@ -99,7 +102,7 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 				//批量查询返回的点赞集合是乱序的，要按朋友圈id设置到对应朋友圈
 				List<JmRelationshipUserFriendlife> jmRelationshipUserFriendlifes =
 						jmRelationshipUserFriendlifeMapper.findSelfOnes(obj.getVisitedUserId(),
-								friendlifeMap.entrySet().toArray(new String[friendlifeMap.entrySet().size()]));
+								friendlifeMap.keySet().toArray(new String[friendlifeMap.keySet().size()]));
 				if(jmRelationshipUserFriendlifes != null && jmRelationshipUserFriendlifes.size() > 0) {
 					for(JmRelationshipUserFriendlife jmRelationshipUserFriendlife : jmRelationshipUserFriendlifes) {
 						if(jmRelationshipUserFriendlife != null && jmRelationshipUserFriendlife.getYesorno() == 1) {
@@ -132,10 +135,15 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 			JmAppUser user = new JmAppUser();
 			user.setId(selfId);
 			String[] userIds = relationshipService.friendshipRelationship(user);
+			//业务修正：需要加上用户自己，要看到自己所发所有能源圈信息
+			List<String> userIdList = Arrays.asList(userIds);
+			List<String> userIdsList = new ArrayList<>();
+			userIdsList.add(selfId);//TODO 解决Arrays.asList转换的List无法添加元素的问题，原因待查
+			userIdsList.addAll(userIdList);
 			//批量查询能源圈信息，用户信息已冗余
-			List<JmRelationshipFriendlife> totalList = mapper.findOnesList(userIds);
+			List<JmRelationshipFriendlife> totalList = mapper.findOnesList(userIdsList.toArray(new String[userIdsList.size()]));
 			if(!totalList.isEmpty()){
-				List<JmRelationshipFriendlife> pageList = mapper.findOnesPage(userIds,obj.getPageSize(),obj.getPageNumber());
+				List<JmRelationshipFriendlife> pageList = mapper.findOnesPage(userIdsList.toArray(new String[userIdsList.size()]),obj.getPageSize(),obj.getPageNumber());
 				if(pageList != null && pageList.size() > 0) {
 					//获取访问用户对这批朋友圈的点赞状态
 					Map<String,JmRelationshipFriendlife> friendlifeMap = new HashMap<>();
@@ -145,7 +153,7 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 					//批量查询返回的点赞集合是乱序的，要按朋友圈id设置到对应朋友圈
 					List<JmRelationshipUserFriendlife> jmRelationshipUserFriendlifes =
 							jmRelationshipUserFriendlifeMapper.findSelfOnes(selfId,//访问者一定是该用户自己
-									friendlifeMap.entrySet().toArray(new String[friendlifeMap.entrySet().size()]));
+									friendlifeMap.keySet().toArray(new String[friendlifeMap.keySet().size()]));
 					if(jmRelationshipUserFriendlifes != null && jmRelationshipUserFriendlifes.size() > 0) {
 						for(JmRelationshipUserFriendlife jmRelationshipUserFriendlife : jmRelationshipUserFriendlifes) {
 							if(jmRelationshipUserFriendlife != null && jmRelationshipUserFriendlife.getYesorno() == 1) {
@@ -176,7 +184,7 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 				//批量查询返回的点赞集合是乱序的，要按朋友圈id设置到对应朋友圈
 				List<JmRelationshipUserFriendlife> jmRelationshipUserFriendlifes =
 						jmRelationshipUserFriendlifeMapper.findSelfOnes(obj.getVisitedUserId(),
-								friendlifeMap.entrySet().toArray(new String[friendlifeMap.entrySet().size()]));
+								friendlifeMap.keySet().toArray(new String[friendlifeMap.keySet().size()]));
 				if(jmRelationshipUserFriendlifes != null && jmRelationshipUserFriendlifes.size() > 0) {
 					for(JmRelationshipUserFriendlife jmRelationshipUserFriendlife : jmRelationshipUserFriendlifes) {
 						if(jmRelationshipUserFriendlife != null && jmRelationshipUserFriendlife.getYesorno() == 1) {

@@ -2,10 +2,7 @@ package com.sunfield.microframe.mapper;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.InsertProvider;
-import org.apache.ibatis.annotations.SelectProvider;
-import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.annotations.*;
 
 import com.sunfield.microframe.domain.JmRelationshipFriendlife;
 import com.sunfield.microframe.provider.JmRelationshipFriendlifeSqlProvider;
@@ -31,7 +28,7 @@ public interface JmRelationshipFriendlifeMapper{
 	 * @return
 	 */
 	@SelectProvider(type=JmRelationshipFriendlifeSqlProvider.class, method="generateFindOnesListSql")
-	public List<JmRelationshipFriendlife> findOnesList(String[] userIds);
+	public List<JmRelationshipFriendlife> findOnesList(@Param("userIds") String[] userIds);
 
 	/**
 	 * 列表查询--某用户个人发布的能源圈时间线
@@ -57,7 +54,7 @@ public interface JmRelationshipFriendlifeMapper{
 	 * @return
 	 */
 	@SelectProvider(type=JmRelationshipFriendlifeSqlProvider.class, method="generateFindOnesPageSql")
-	public List<JmRelationshipFriendlife> findOnesPage(String[] userIds,int pageSize,int pageNumber);
+	public List<JmRelationshipFriendlife> findOnesPage(@Param("userIds") String[] userIds,@Param("pageSize") int pageSize,@Param("pageNumber") int pageNumber);
 
 	/**
 	 * 分页查询--某用户个人发布的能源圈时间线
