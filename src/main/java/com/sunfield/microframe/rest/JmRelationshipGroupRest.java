@@ -86,7 +86,8 @@ public class JmRelationshipGroupRest{
 		}
 	}
 
-	@ApiOperation(value="查询部落详情：必需参数：id,部落id")
+	@ApiOperation(value="查询部落详情：必需参数：id,部落id；operatorId，操作者用户id（用于显示与部落关系）" +
+			"返回的用户与部落关系：根据userGroupRelation字段判断：0 默认无关联 1 群主 2 成员 3 申请中 4 已拒绝")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
 	@RequestMapping(value = "/findOne", method = RequestMethod.POST)
     public RelationshipResponseBean<JmRelationshipGroup> findOne(@RequestBody JmRelationshipGroup obj) {
@@ -128,22 +129,22 @@ public class JmRelationshipGroupRest{
 		}
 	}
 
-	@ApiOperation(value="查询与部落关系：必需参数：id,部落id；operatorId，操作者用户id" +
-			"返回：根据responseStatus字段值判断：1 群主 2 成员 3 非成员")
-	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
-	@RequestMapping(value = "/findGroupRelation", method = RequestMethod.POST)
-	public RelationshipResponseBean<JmRelationshipGroup> findGroupRelation(@RequestBody JmRelationshipGroup obj) {
-		try {
-			if(StringUtils.isBlank(obj.getId())) {
-				return new RelationshipResponseBean<JmRelationshipGroup>(RelationshipResponseStatus.PARAMS_ERROR);
-			}
-			return service.findGroupRelation(obj);
-		}catch (Exception e) {
-			e.printStackTrace();
-			log.info("系统异常：" + e.getMessage());
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
-		}
-	}
+//	@ApiOperation(value="查询与部落关系：必需参数：id,部落id；operatorId，操作者用户id" +
+//			"返回：根据responseStatus字段值判断：1 群主 2 成员 0 非成员")
+//	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipGroup")
+//	@RequestMapping(value = "/findGroupRelation", method = RequestMethod.POST)
+//	public RelationshipResponseBean<JmRelationshipGroup> findGroupRelation(@RequestBody JmRelationshipGroup obj) {
+//		try {
+//			if(StringUtils.isBlank(obj.getId())) {
+//				return new RelationshipResponseBean<JmRelationshipGroup>(RelationshipResponseStatus.PARAMS_ERROR);
+//			}
+//			return service.findGroupRelation(obj);
+//		}catch (Exception e) {
+//			e.printStackTrace();
+//			log.info("系统异常：" + e.getMessage());
+//			return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
+//		}
+//	}
 
 	@ApiOperation(value="创建部落：必需参数：creatorId，创建者id；name，content，industryId，iconUrl；" +
 			"memberList中需要至少两个成员用户，只传递其用户id字段即可，如不重复的少于2个会失败（创建时至少加两个其他成员）")

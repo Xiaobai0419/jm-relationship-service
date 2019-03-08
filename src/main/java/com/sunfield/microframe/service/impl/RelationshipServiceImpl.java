@@ -547,15 +547,27 @@ public class RelationshipServiceImpl implements RelationshipService {
         //行业陌生人推荐
         industryRelationshipList.addAll(frientsUtil.getStrangers(userId,industryUserIds));
 
-        //按用户id批量查询所有推荐人脉信息
         String[] userIds = industryRelationshipList.toArray(new String[industryRelationshipList.size()]);
+        //按用户id批量查询所有推荐人脉信息
         List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
+        //批量查询该用户与所有该行业人脉的好友关系
+        List<JmRelationshipFriendship> records = jmRelationshipFriendshipMapper.findFriendRecords(userId,userIds);
+        Map<String,Integer> relationships = new HashMap<>();
+        if(records != null && records.size() > 0) {
+            for(JmRelationshipFriendship record :records) {
+                relationships.put(record.getUserIdOpposite(),record.getType());
+            }
+        }
+
         //需要按industryRelationshipList中的顺序重新排序
         List<JmAppUser> sortedUsers = new LinkedList<>();
         if(users != null && users.size() > 0) {
             Map<String,JmAppUser> userMap = new HashMap<>();
             for(JmAppUser jmAppUser : users) {
                 userMap.put(jmAppUser.getId(),jmAppUser);
+                //设置关系：查不到关系的无关联，查得到的设置为关系表type值
+                jmAppUser.setRelationType(relationships.get(jmAppUser.getId()) == null ?
+                        4 : (relationships.get(jmAppUser.getId())));
             }
             for(String industryUserId : industryRelationshipList) {
                 JmAppUser industryUser = userMap.get(industryUserId);

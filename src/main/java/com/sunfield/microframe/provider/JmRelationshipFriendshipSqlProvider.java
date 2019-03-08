@@ -66,6 +66,34 @@ public class JmRelationshipFriendshipSqlProvider {
 		return sql;
 	}
 
+	public String generateFindFriendRecordsSql(String selfUserId,String[] userIds){
+		String sql = new SQL(){
+			{
+				SELECT(COLUMNS);
+				FROM("jm_relationship_friendship");
+
+				//只支持以主方查询
+				WHERE("user_id = #{selfUserId}");//这是我
+
+				if(userIds != null && userIds.length > 0) {
+					StringBuilder inSql = new StringBuilder("user_id_opposite in(");
+					for(String userId : userIds) {
+						inSql.append("'" + userId + "',");
+					}
+					inSql.deleteCharAt(inSql.length() - 1);
+					inSql.append(")");
+					AND();
+					WHERE(inSql.toString());
+				}
+
+				AND();
+				WHERE("status = '0'");
+
+			}
+		}.toString();
+		return sql;
+	}
+
 	//查询我的好友（互为好友及单方好友的合集）--应考虑去重，去掉自己（防止加自己为好友，和相互请求双双通过的情况）
  	public String generateFindFriendsSql(JmRelationshipFriendship obj){
 		return new SQL(){

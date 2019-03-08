@@ -11,8 +11,10 @@ import com.sunfield.microframe.common.utils.MessageUtil;
 import com.sunfield.microframe.common.utils.PageUtils;
 import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.domain.JmIndustries;
+import com.sunfield.microframe.domain.JmRelationshipGroupRequest;
 import com.sunfield.microframe.feign.JmAppUserFeignService;
 import com.sunfield.microframe.feign.JmIndustriesFeignService;
+import com.sunfield.microframe.mapper.JmRelationshipGroupRequestMapper;
 import io.rong.messages.TxtMessage;
 import io.rong.models.Result;
 import io.rong.models.group.GroupMember;
@@ -40,6 +42,8 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	private FrientsUtil frientsUtil;
 	@Autowired
 	private JmRelationshipGroupMapper mapper;
+	@Autowired
+	private JmRelationshipGroupRequestMapper requestMapper;
 	@Autowired
 	@Qualifier("jmAppUserFeignService")
 	private JmAppUserFeignService jmAppUserFeignService;
@@ -202,7 +206,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	 * @return
 	 */
 	public RelationshipResponseBean<JmRelationshipGroup> findOne(JmRelationshipGroup obj){
-		if(StringUtils.isBlank(obj.getId())) {
+		if(StringUtils.isBlank(obj.getId()) || StringUtils.isBlank(obj.getOperatorId())) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		JmRelationshipGroup jmRelationshipGroup = mapper.findOne(obj.getId());
@@ -211,6 +215,34 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		&& StringUtils.isNotBlank(jmRelationshipGroup.getCreatorId())) {
 			JmAppUser creator = (JmAppUser) frientsUtil.groupMemberSingleValue(jmRelationshipGroup.getId(),jmRelationshipGroup.getCreatorId());
 			jmRelationshipGroup.setCreator(creator);
+			//业务修正：查询访问者与部落关系：申请中/被拒绝/成员/群主/无关联（没申请也没被拒绝）
+			if(jmRelationshipGroup.getCreatorId().equals(obj.getOperatorId())) {
+				//设置关系为群主
+				jmRelationshipGroup.setUserGroupRelation(1);
+			}else {
+				//不是群主，先查询是否为成员
+				Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
+				if(allMembers.contains(obj.getOperatorId())) {
+					//是成员
+					jmRelationshipGroup.setUserGroupRelation(2);
+				}else {
+					//如果不是群主/成员
+					JmRelationshipGroupRequest groupRequest = new JmRelationshipGroupRequest();
+					groupRequest.setGroupId(obj.getId());
+					groupRequest.setRequestorId(obj.getOperatorId());
+					//引用重新赋值
+					groupRequest = requestMapper.findOne(groupRequest);
+					if(groupRequest == null) {
+						//不是成员，且没请求也没被拒过，则无关联
+						jmRelationshipGroup.setUserGroupRelation(0);//即使有默认值，也明确指定，使业务明确，避免业务更改时的错误
+					}else {
+						Integer requestType = groupRequest.getType();
+						if(requestType != null) {
+							jmRelationshipGroup.setUserGroupRelation(requestType == 1 ? 3 : (requestType == 2 ? 4 : 0));
+						}
+					}
+				}
+			}
 		}
 		return jmRelationshipGroup != null ?
 				new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,jmRelationshipGroup):
@@ -305,7 +337,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	}
 
 	/**
-	 * 查询与部落关系--是否是成员及创建者，TODO 特别用于好友列表中已加入某部落成员不再支持被加入该部落（置灰效果）
+	 * 查询与部落关系--是否是成员及创建者，特别用于好友列表中已加入某部落成员不再支持被加入该部落（置灰效果，不做也一样，重复添加有幂等）
 	 * 用于显示发消息还是申请/申请中，和显示成员列表等成员特权
 	 * 用于显示编辑，拉人等群主特权
 	 * @param obj
@@ -328,16 +360,16 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//操作者是群主本人
 		if(operatorId.equals(thisGroup.getCreatorId())) {
-			obj.setResponseStatus(1);//群主
+			obj.setUserGroupRelation(1);//群主
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,obj);
 		}else {//非群主，需要判断他是不是成员
 			//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
 			Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 			if(!allMembers.contains(operatorId)) {
-				obj.setResponseStatus(3);//非成员
+				obj.setUserGroupRelation(0);//非成员
 				return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,obj);
 			}else {
-				obj.setResponseStatus(2);//成员
+				obj.setUserGroupRelation(2);//成员
 				return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,obj);
 			}
 		}

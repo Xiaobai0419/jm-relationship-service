@@ -25,6 +25,15 @@ public interface JmRelationshipFriendshipMapper {
 	public JmRelationshipFriendship findFriendRecord(JmRelationshipFriendship obj);
 
 	/**
+	 * 查询我和一批人的好友状态
+	 * @param selfUserId
+	 * @param userIds
+	 * @return
+	 */
+	@SelectProvider(type= JmRelationshipFriendshipSqlProvider.class, method="generateFindFriendRecordsSql")
+	public List<JmRelationshipFriendship> findFriendRecords(String selfUserId,String[] userIds);
+
+	/**
 	 * 查询我的好友（互为好友及单方好友的合集）
 	 * @param obj
 	 * @return

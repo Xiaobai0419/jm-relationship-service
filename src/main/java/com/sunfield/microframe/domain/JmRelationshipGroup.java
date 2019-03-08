@@ -40,17 +40,17 @@ public class JmRelationshipGroup extends BaseDomain{
 	@ApiModelProperty(value="成员列表", dataType="List<JmAppUser>")
 	private List<JmAppUser> memberList;//用于创建部落时添加成员，和部落创建者（一般从自身好友列表中）添加成员的操作，传递json数组，如果这里使用Set去重，要重写JmAppUser的equals和hashCode方法
 
-	@ApiModelProperty(value="成员列表", dataType="List<JmAppUser>")
-	private Integer responseStatus = 0;
+	@ApiModelProperty(value="访问用户与部落的关系：0 默认无关联 1 群主 2 成员 3 申请中 4 已拒绝", dataType="Integer")
+	private Integer userGroupRelation = 0;
 
 	private JmAppUser creator;
 
-	public Integer getResponseStatus() {
-		return responseStatus;
+	public Integer getUserGroupRelation() {
+		return userGroupRelation;
 	}
 
-	public void setResponseStatus(Integer responseStatus) {
-		this.responseStatus = responseStatus;
+	public void setUserGroupRelation(Integer userGroupRelation) {
+		this.userGroupRelation = userGroupRelation;
 	}
 
 	public JmAppUser getCreator() {

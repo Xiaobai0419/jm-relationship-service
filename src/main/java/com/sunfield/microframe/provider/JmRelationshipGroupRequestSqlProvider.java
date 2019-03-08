@@ -108,7 +108,7 @@ public class JmRelationshipGroupRequestSqlProvider{
 			{
 				UPDATE("jm_relationship_group_request");
 
-				//更新两次请求期间的冗余内容变化
+				//更新两次请求期间的冗余内容变化，保持数据一致性（严格一致性需要事件通知机制，监听冗余内容相关服务的更新通知消息队列）
 				SET("requestor_name = #{requestorName}");
 				SET("group_name = #{groupName}");
 				SET("creator_id = #{creatorId}");
