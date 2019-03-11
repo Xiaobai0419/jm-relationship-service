@@ -41,7 +41,7 @@ public class JmRelationshipGroupRequestSqlProvider{
 					WHERE("type = '1'");
 				}
 				//按创建者id查询该创建者创建的所有群所有请求（不包括已拒绝）列表
-				if(StringUtils.isNotBlank(obj.getGroupId())) {
+				if(StringUtils.isNotBlank(obj.getCreatorId())) {
 					WHERE("creator_id = #{creatorId}");
 					WHERE("type = '1'");
 				}

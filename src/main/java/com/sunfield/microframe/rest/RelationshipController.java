@@ -284,6 +284,28 @@ public class RelationshipController {
         }
     }
 
+    //全行业三度人脉搜索列表
+    @ApiOperation(value="全行业三度人脉搜索列表")
+    @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id", required = true, dataType = "JmAppUser")
+    @RequestMapping(value = "/allIndustryRelationship", method = RequestMethod.POST)
+    public RelationshipResponseBean<List<JmAppUser>> allIndustryRelationship(@RequestBody JmAppUser user) {
+        try {
+            //必需参数判断
+            if(StringUtils.isBlank(user.getId())) {
+                return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+            }
+            List<JmAppUser> resultList = relationshipService.allIndustryRelationship(user);
+            if(resultList == null) {
+                return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
+            }
+            return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,resultList);
+        }catch (Exception e) {
+            e.printStackTrace();
+            log.info("系统异常：" + e.getMessage());
+            return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
+        }
+    }
+
     //行业三度人脉搜索列表--分页 TODO 考虑一次性加载的性能问题，是否缓存
     @ApiOperation(value="行业三度人脉搜索列表--分页")
     @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id，industry：行业id", required = true, dataType = "JmAppUser")
@@ -297,6 +319,47 @@ public class RelationshipController {
             //应用层分页
             return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
                     PageUtils.pageList(relationshipService.industryRelationship(user),user.getPageNumber(),user.getPageSize()));
+        }catch (Exception e) {
+            e.printStackTrace();
+            log.info("系统异常：" + e.getMessage());
+            return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
+        }
+    }
+
+    //全行业三度人脉搜索列表--分页 TODO 考虑一次性加载的性能问题，是否缓存
+    @ApiOperation(value="全行业三度人脉搜索列表--分页")
+    @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id", required = true, dataType = "JmAppUser")
+    @RequestMapping(value = "/allIndustryRelationshipPage", method = RequestMethod.POST)
+    public RelationshipResponseBean<Page<JmAppUser>> allIndustryRelationshipPage(@RequestBody JmAppUser user) {
+        try {
+            //必需参数判断
+            if(StringUtils.isBlank(user.getId())) {
+                return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+            }
+            //应用层分页
+            return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
+                    PageUtils.pageList(relationshipService.allIndustryRelationship(user),user.getPageNumber(),user.getPageSize()));
+        }catch (Exception e) {
+            e.printStackTrace();
+            log.info("系统异常：" + e.getMessage());
+            return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
+        }
+    }
+
+    //全行业三度人脉搜索列表--用于机遇首页人脉搜索显示3个最新头像和总数 TODO 考虑一次性加载的性能问题，是否缓存
+    @ApiOperation(value="全行业三度人脉搜索列表--用于机遇首页人脉搜索显示3个最新头像和总数")
+    @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id，分页参数：pageSize固定传3，pageNumber固定传1", required = true, dataType = "JmAppUser")
+    @RequestMapping(value = "/allIndustryRelationshipList", method = RequestMethod.POST)
+    public RelationshipResponseBean<Page<JmAppUser>> allIndustryRelationshipList(@RequestBody JmAppUser user) {
+        try {
+            //必需参数判断
+            if(StringUtils.isBlank(user.getId())) {
+                return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+            }
+            //应用层分页
+            return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
+                    //固定查询第一页，每页3条即可，总数也已返回，前端根据总数判断决定显示效果
+                    PageUtils.pageList(relationshipService.allIndustryRelationship(user),1,3));
         }catch (Exception e) {
             e.printStackTrace();
             log.info("系统异常：" + e.getMessage());

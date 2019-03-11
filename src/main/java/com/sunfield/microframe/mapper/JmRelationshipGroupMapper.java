@@ -2,10 +2,7 @@ package com.sunfield.microframe.mapper;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.InsertProvider;
-import org.apache.ibatis.annotations.SelectProvider;
-import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.annotations.*;
 
 import com.sunfield.microframe.domain.JmRelationshipGroup;
 import com.sunfield.microframe.provider.JmRelationshipGroupSqlProvider;
@@ -40,6 +37,14 @@ public interface JmRelationshipGroupMapper{
 	 */
 	@SelectProvider(type=JmRelationshipGroupSqlProvider.class, method="generateFindOneSql")
 	public JmRelationshipGroup findOne(String id);
+
+	/**
+	 * 按名字查询数量
+	 * @param name
+	 * @return
+	 */
+	@SelectProvider(type=JmRelationshipGroupSqlProvider.class, method="generateFindNameSql")
+	public int findName(@Param("name") String name);//别忘记加@Param注解标参数名，否则绑定失败
 
 	/**
 	 * 插入单行

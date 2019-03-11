@@ -70,6 +70,17 @@ public class JmRelationshipGroupSqlProvider{
 			}
 		}.toString();
 	}
+
+	public String generateFindNameSql(String name){
+		return new SQL(){
+			{
+				SELECT("count(1)");
+				FROM("jm_relationship_group");
+
+				WHERE("name = #{name}");
+			}
+		}.toString();
+	}
 	
 	public String generateInsertSql(JmRelationshipGroup obj){
 		return new SQL(){

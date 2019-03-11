@@ -5,14 +5,12 @@ import com.sunfield.microframe.common.response.Page;
 import com.sunfield.microframe.common.utils.FrientsUtil;
 import com.sunfield.microframe.common.utils.MessageUtil;
 import com.sunfield.microframe.common.utils.PageUtils;
-import com.sunfield.microframe.domain.JmAppUser;
-import com.sunfield.microframe.domain.JmIndustries;
-import com.sunfield.microframe.domain.JmRelationshipFriendship;
-import com.sunfield.microframe.domain.JmRelationshipGroupRequest;
+import com.sunfield.microframe.domain.*;
 import com.sunfield.microframe.domain.base.BaseDomain;
 import com.sunfield.microframe.feign.JmAppUserFeignService;
 import com.sunfield.microframe.feign.JmIndustriesFeignService;
 import com.sunfield.microframe.mapper.JmRelationshipFriendshipMapper;
+import com.sunfield.microframe.mapper.JmRelationshipGroupMapper;
 import com.sunfield.microframe.mapper.JmRelationshipGroupRequestMapper;
 import com.sunfield.microframe.service.RelationshipService;
 import io.rong.messages.TxtMessage;
@@ -46,6 +44,8 @@ public class RelationshipServiceImpl implements RelationshipService {
     private FrientsUtil frientsUtil;
     @Autowired
     private JmRelationshipFriendshipMapper jmRelationshipFriendshipMapper;
+    @Autowired
+    private JmRelationshipGroupMapper jmRelationshipGroupMapper;
     @Autowired
     private JmRelationshipGroupRequestMapper jmRelationshipGroupRequestMapper;
     @Autowired
@@ -405,8 +405,8 @@ public class RelationshipServiceImpl implements RelationshipService {
         for(JmRelationshipFriendship friendshipReqeust : relationshipList) {
             friendshipReqeust.setId(friendshipReqeust.getUserId());
             //BaseDomain的备用字段中加入区分好友请求和群组请求的额外信息
-            friendshipReqeust.setCreateBy("");
-            friendshipReqeust.setRemarks("申请加您为好友");
+            friendshipReqeust.setCreateBy("");//覆盖，防止原来有值
+//            friendshipReqeust.setRemarks("");
         }
 
         //时间倒序列表
@@ -418,8 +418,9 @@ public class RelationshipServiceImpl implements RelationshipService {
         for(JmRelationshipGroupRequest groupInRequest : groupRequestList) {
             groupInRequest.setId(groupInRequest.getRequestorId());
             //BaseDomain的备用字段中加入区分好友请求和群组请求的额外信息
-            groupInRequest.setCreateBy(groupInRequest.getGroupName());
-            groupInRequest.setRemarks("请求加入您创建的部落");
+            //设置部落id到公共基类的createBy字段
+            groupInRequest.setCreateBy(groupInRequest.getGroupId());
+//            groupInRequest.setRemarks("");
         }
 
         //优先队列按时间倒序排序--优先队列是可以有“重复”数据的
@@ -447,7 +448,18 @@ public class RelationshipServiceImpl implements RelationshipService {
             //设置返回的JmAppUser的备用字段为BaseDomain中事先存储的好友或群组请求信息
             if(user != null) {
                 user.setCreateBy(baseDomain.getCreateBy());
-                user.setRemarks(baseDomain.getRemarks());
+//                user.setRemarks(baseDomain.getRemarks());
+                //是群组请求的按createBy中此前设置的群组id查询群组信息进行设置
+                if(StringUtils.isNotBlank(user.getCreateBy())) {
+                    //取到的是群组请求的群组id
+                    String groupId = user.getCreateBy();
+                    JmRelationshipGroup group = jmRelationshipGroupMapper.findOne(groupId);
+                    if(group != null) {
+                        //设置部落名字、头像url到公共基类的updateBy、remarks字段
+                        user.setUpdateBy(group.getName());
+                        user.setRemarks(group.getIconUrl());
+                    }
+                }
                 requestUserList.add(user);
             }
         }
