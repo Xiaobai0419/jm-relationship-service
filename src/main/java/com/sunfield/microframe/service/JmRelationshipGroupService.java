@@ -265,8 +265,8 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//查询部落信息，获取群主id
 		JmRelationshipGroup jmRelationshipGroup = mapper.findOne(obj.getId());
-		if(jmRelationshipGroup == null || StringUtils.isNotBlank(jmRelationshipGroup.getId())
-				|| StringUtils.isNotBlank(jmRelationshipGroup.getCreatorId())) {
+		if(jmRelationshipGroup == null || StringUtils.isBlank(jmRelationshipGroup.getId())
+				|| StringUtils.isBlank(jmRelationshipGroup.getCreatorId())) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		String creatorId = jmRelationshipGroup.getCreatorId();
@@ -308,8 +308,8 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//查询部落信息，获取群主id
 		JmRelationshipGroup jmRelationshipGroup = mapper.findOne(obj.getId());
-		if(jmRelationshipGroup == null || StringUtils.isNotBlank(jmRelationshipGroup.getId())
-				|| StringUtils.isNotBlank(jmRelationshipGroup.getCreatorId())) {
+		if(jmRelationshipGroup == null || StringUtils.isBlank(jmRelationshipGroup.getId())
+				|| StringUtils.isBlank(jmRelationshipGroup.getCreatorId())) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
 		}
 		String creatorId = jmRelationshipGroup.getCreatorId();
@@ -393,6 +393,11 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		String name = obj.getName();
 		if(StringUtils.isBlank(name)) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+		}
+		//业务修正：按名字精确查询，判断是否重名
+		int has = mapper.findName(name);
+		if(has > 0) {
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);//重名
 		}
 
 		//Set集合自动去重
