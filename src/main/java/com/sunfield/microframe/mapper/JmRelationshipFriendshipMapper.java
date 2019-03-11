@@ -47,7 +47,7 @@ public interface JmRelationshipFriendshipMapper {
 	public List<JmRelationshipFriendship> findFriendsPage(JmRelationshipFriendship obj);
 
 	/**
-	 * 查询我发出的所有好友请求状态列表（包括已拒绝我的）
+	 * 查询我发出的所有好友请求状态列表（不包括已拒绝我的，已拒绝的显示加好友）
 	 * @param obj
 	 * @return
 	 */

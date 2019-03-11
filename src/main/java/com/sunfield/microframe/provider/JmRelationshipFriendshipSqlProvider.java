@@ -124,7 +124,7 @@ public class JmRelationshipFriendshipSqlProvider {
 		return sql.toString();
 	}
 
-	//查询我发出的所有好友请求状态（我的所有非好友的已请求和已拒绝我的）
+	//查询我发出的所有好友请求状态（不包括已拒绝我的，已拒绝的显示加好友）
 	public String generateFindFriendRequestsSql(JmRelationshipFriendship obj){
 		return new SQL(){
 			{
@@ -138,8 +138,8 @@ public class JmRelationshipFriendshipSqlProvider {
 				WHERE("status = '0'");
 
 				AND();
-				//查询好友请求关系
-				WHERE("type = 2 or type = 3");
+				//查询好友请求关系，不包括已拒绝我的
+				WHERE("type = 2");
 			}
 		}.toString();
 	}

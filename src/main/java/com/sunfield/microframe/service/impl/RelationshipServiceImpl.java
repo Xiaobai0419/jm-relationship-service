@@ -588,6 +588,26 @@ public class RelationshipServiceImpl implements RelationshipService {
         //业务修正：需要去掉自己
         industryRelationshipList.remove(userId);
 
+        //业务修正：每次在业务层去掉（全部）已经申请好友的所有人脉
+        JmRelationshipFriendship jmRelationshipFriendship = new JmRelationshipFriendship();
+        jmRelationshipFriendship.setUserId(userId);
+        List<JmRelationshipFriendship> requestList = jmRelationshipFriendshipMapper.findFriendRequests(jmRelationshipFriendship);
+        List<String> requestIds = new ArrayList<>();
+        if(requestList != null && requestList.size() > 0) {
+            for(JmRelationshipFriendship relationshipFriendship : requestList) {
+                requestIds.add(relationshipFriendship.getUserIdOpposite());//添加对方id到请求id列表
+            }
+        }
+        //只有使用迭代器才可迭代删除，避免并发修改异常
+        Iterator<String> relationshipIterator = industryRelationshipList.iterator();
+        while(relationshipIterator.hasNext()) {
+            String relationshipUserId = relationshipIterator.next();
+            if(requestIds.contains(relationshipUserId)) {
+                //去除构建的人脉列表中（无论是按行业还是全行业）已请求的
+                relationshipIterator.remove();
+            }
+        }
+
         String[] userIds = industryRelationshipList.toArray(new String[industryRelationshipList.size()]);
         //按用户id批量查询所有推荐人脉信息
         List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
@@ -647,6 +667,26 @@ public class RelationshipServiceImpl implements RelationshipService {
 
         //业务修正：需要去掉自己
         allIndustryRelationshipList.remove(userId);
+
+        //业务修正：每次在业务层去掉（全部）已经申请好友的所有人脉
+        JmRelationshipFriendship jmRelationshipFriendship = new JmRelationshipFriendship();
+        jmRelationshipFriendship.setUserId(userId);
+        List<JmRelationshipFriendship> requestList = jmRelationshipFriendshipMapper.findFriendRequests(jmRelationshipFriendship);
+        List<String> requestIds = new ArrayList<>();
+        if(requestList != null && requestList.size() > 0) {
+            for(JmRelationshipFriendship relationshipFriendship : requestList) {
+                requestIds.add(relationshipFriendship.getUserIdOpposite());//添加对方id到请求id列表
+            }
+        }
+        //只有使用迭代器才可迭代删除，避免并发修改异常
+        Iterator<String> relationshipIterator = allIndustryRelationshipList.iterator();
+        while(relationshipIterator.hasNext()) {
+            String relationshipUserId = relationshipIterator.next();
+            if(requestIds.contains(relationshipUserId)) {
+                //去除构建的人脉列表中（无论是按行业还是全行业）已请求的
+                relationshipIterator.remove();
+            }
+        }
 
         String[] userIds = allIndustryRelationshipList.toArray(new String[allIndustryRelationshipList.size()]);
         //按用户id批量查询所有推荐人脉信息
