@@ -50,7 +50,7 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 	public List<JmRelationshipFriendlife> findOnesList(JmRelationshipFriendlife obj){
 		//该用户id
 		String selfId = obj.getUserId();
-		//构建并获取他的一度、二度、三度好友及通讯录好友、陌生人的集合
+		//构建并获取他的一度、二度、三度好友
 		if(StringUtils.isNotBlank(selfId)) {
 			JmAppUser user = new JmAppUser();
 			user.setId(selfId);
@@ -130,7 +130,7 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 	public Page<JmRelationshipFriendlife> findOnesPage(JmRelationshipFriendlife obj){
 		//该用户id
 		String selfId = obj.getUserId();
-		//构建并获取他的一度、二度、三度好友及通讯录好友、陌生人的集合
+		//构建并获取他的一度、二度、三度好友
 		if(StringUtils.isNotBlank(selfId)) {
 			JmAppUser user = new JmAppUser();
 			user.setId(selfId);
@@ -138,7 +138,7 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 			//业务修正：需要加上用户自己，要看到自己所发所有能源圈信息
 			List<String> userIdList = Arrays.asList(userIds);
 			List<String> userIdsList = new ArrayList<>();
-			userIdsList.add(selfId);//TODO 解决Arrays.asList转换的List无法添加元素的问题，原因待查
+			userIdsList.add(selfId);//解决Arrays.asList转换的List无法添加元素的问题
 			userIdsList.addAll(userIdList);
 			//批量查询能源圈信息，用户信息已冗余
 			List<JmRelationshipFriendlife> totalList = mapper.findOnesList(userIdsList.toArray(new String[userIdsList.size()]));
