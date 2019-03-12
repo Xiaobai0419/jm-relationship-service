@@ -5,6 +5,7 @@ import com.sunfield.microframe.common.response.RelationshipResponseBean;
 import com.sunfield.microframe.common.response.RelationshipResponseStatus;
 import com.sunfield.microframe.common.utils.PageUtils;
 import com.sunfield.microframe.domain.JmAppUser;
+import com.sunfield.microframe.domain.JmIndustries;
 import com.sunfield.microframe.domain.JmRelationshipFriendship;
 import com.sunfield.microframe.service.RelationshipService;
 import io.swagger.annotations.Api;
@@ -262,39 +263,32 @@ public class RelationshipController {
         }
     }
 
-    //行业三度人脉搜索列表
-    @ApiOperation(value="行业三度人脉搜索列表")
-    @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id，industry：行业id", required = true, dataType = "JmAppUser")
+    //行业、全部三度人脉搜索列表
+    @ApiOperation(value="行业、全部三度人脉搜索列表")
+    @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id，industry：行业id，不传或传空代表全行业", required = true, dataType = "JmAppUser")
     @RequestMapping(value = "/industryRelationship", method = RequestMethod.POST)
     public RelationshipResponseBean<List<JmAppUser>> industryRelationship(@RequestBody JmAppUser user) {
-        try {
-            //必需参数判断
-            if(StringUtils.isBlank(user.getId()) || StringUtils.isBlank(user.getIndustry())) {
-                return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
-            }
-            List<JmAppUser> resultList = relationshipService.industryRelationship(user);
-            if(resultList == null) {
-                return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
-            }
-            return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,resultList);
-        }catch (Exception e) {
-            e.printStackTrace();
-            log.info("系统异常：" + e.getMessage());
-            return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
-        }
-    }
-
-    //全行业三度人脉搜索列表
-    @ApiOperation(value="全行业三度人脉搜索列表")
-    @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id", required = true, dataType = "JmAppUser")
-    @RequestMapping(value = "/allIndustryRelationship", method = RequestMethod.POST)
-    public RelationshipResponseBean<List<JmAppUser>> allIndustryRelationship(@RequestBody JmAppUser user) {
         try {
             //必需参数判断
             if(StringUtils.isBlank(user.getId())) {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
             }
-            List<JmAppUser> resultList = relationshipService.allIndustryRelationship(user);
+            List<JmAppUser> resultList = null;
+            if(StringUtils.isNotBlank(user.getIndustry())) {
+                //业务修正：查行业分值
+                int industryScore = 0;
+                JmIndustries industries = new JmIndustries();
+                industries.setId(user.getIndustry());
+                industries = relationshipService.findIndustry(industries);
+                if(industries != null) {
+                    industryScore = industries.getScore();
+                }
+                if(industryScore != 0) {
+                    user.setIndustry(String.valueOf(industryScore));//设置为分值字段（整数）转成的字符串
+                    resultList = relationshipService.industryRelationship(user);//按行业
+                }
+            }
+            resultList = relationshipService.allIndustryRelationship(user);//全行业
             if(resultList == null) {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
             }
@@ -306,36 +300,33 @@ public class RelationshipController {
         }
     }
 
-    //行业三度人脉搜索列表--分页 TODO 考虑一次性加载的性能问题，是否缓存
-    @ApiOperation(value="行业三度人脉搜索列表--分页")
+    //行业、全部三度人脉搜索列表--分页 TODO 考虑一次性加载的性能问题，是否缓存
+    @ApiOperation(value="行业、全部三度人脉搜索列表--分页")
     @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id，industry：行业id", required = true, dataType = "JmAppUser")
     @RequestMapping(value = "/industryRelationshipPage", method = RequestMethod.POST)
     public RelationshipResponseBean<Page<JmAppUser>> industryRelationshipPage(@RequestBody JmAppUser user) {
         try {
             //必需参数判断
-            if(StringUtils.isBlank(user.getId()) || StringUtils.isBlank(user.getIndustry())) {
-                return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
-            }
-            //应用层分页
-            return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
-                    PageUtils.pageList(relationshipService.industryRelationship(user),user.getPageNumber(),user.getPageSize()));
-        }catch (Exception e) {
-            e.printStackTrace();
-            log.info("系统异常：" + e.getMessage());
-            return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
-        }
-    }
-
-    //全行业三度人脉搜索列表--分页 TODO 考虑一次性加载的性能问题，是否缓存
-    @ApiOperation(value="全行业三度人脉搜索列表--分页")
-    @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id", required = true, dataType = "JmAppUser")
-    @RequestMapping(value = "/allIndustryRelationshipPage", method = RequestMethod.POST)
-    public RelationshipResponseBean<Page<JmAppUser>> allIndustryRelationshipPage(@RequestBody JmAppUser user) {
-        try {
-            //必需参数判断
             if(StringUtils.isBlank(user.getId())) {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
             }
+            if(StringUtils.isNotBlank(user.getIndustry())) {//按行业
+                //业务修正：查行业分值
+                int industryScore = 0;
+                JmIndustries industries = new JmIndustries();
+                industries.setId(user.getIndustry());
+                industries = relationshipService.findIndustry(industries);
+                if(industries != null) {
+                    industryScore = industries.getScore();
+                }
+                if(industryScore != 0) {
+                    user.setIndustry(String.valueOf(industryScore));//设置为分值字段（整数）转成的字符串
+                    //应用层分页
+                    return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
+                            PageUtils.pageList(relationshipService.industryRelationship(user),user.getPageNumber(),user.getPageSize()));
+                }
+            }
+            //全行业
             //应用层分页
             return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
                     PageUtils.pageList(relationshipService.allIndustryRelationship(user),user.getPageNumber(),user.getPageSize()));

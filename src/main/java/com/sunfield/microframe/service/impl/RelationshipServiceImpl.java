@@ -60,7 +60,8 @@ public class RelationshipServiceImpl implements RelationshipService {
         return jmAppUserFeignService.findOne(userId).getData();
     }
 
-    private JmIndustries findIndustry(JmIndustries industry) {
+    @Override
+    public JmIndustries findIndustry(JmIndustries industry) {
         return jmIndustriesFeignService.findOne(industry).getData();
     }
 
@@ -203,7 +204,7 @@ public class RelationshipServiceImpl implements RelationshipService {
             JmAppUser user = findUser(jmRelationshipFriendship.getUserId());//自身信息
             JmAppUser userOppsite = findUser(jmRelationshipFriendship.getUserIdOpposite());//对方信息
             if(user != null && userOppsite != null) {
-                double userIndustry = 0;//默认0，全行业，用于查所有用户，防止大多数用户不设置任何行业
+                double userIndustry = 0;//默认0，全行业，防止大多数用户不设置任何行业
                 double userOppsiteIndustry = 0;
                 if(StringUtils.isNotBlank(user.getIndustry())) {
                     JmIndustries industry = new JmIndustries();
@@ -529,32 +530,32 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @param self
      * @return
      */
-    @Override
-    public List<JmAppUser> userListHandle(List<JmRelationshipGroupRequest> groupRequestList,String self) {
-        if(groupRequestList == null) {
-            return null;
-        }else if(groupRequestList.size() == 0) {
-            return new ArrayList<>();
-        }else {
-            //Set集合实现自动去重
-            Set<String> userIdList = new HashSet<>();
-            for(JmRelationshipGroupRequest groupRequest : groupRequestList) {
-                if(StringUtils.isNotBlank(groupRequest.getRequestorId())) {
-                    userIdList.add(groupRequest.getRequestorId());
-                }
-            }
-            if(StringUtils.isNotBlank(self)) {
-                userIdList.remove(self);//去掉自身
-            }
-            List<JmAppUser> userList = null;
-            if(userIdList.size() > 0) {
-                //远程批量查询用户信息
-                //使用无参toArray强转数组的方式会报错
-                userList = jmAppUserFeignService.findListByIds(userIdList.toArray(new String[userIdList.size()])).getData();
-            }
-            return userList;
-        }
-    }
+//    @Override
+//    public List<JmAppUser> userListHandle(List<JmRelationshipGroupRequest> groupRequestList,String self) {
+//        if(groupRequestList == null) {
+//            return null;
+//        }else if(groupRequestList.size() == 0) {
+//            return new ArrayList<>();
+//        }else {
+//            //Set集合实现自动去重
+//            Set<String> userIdList = new HashSet<>();
+//            for(JmRelationshipGroupRequest groupRequest : groupRequestList) {
+//                if(StringUtils.isNotBlank(groupRequest.getRequestorId())) {
+//                    userIdList.add(groupRequest.getRequestorId());
+//                }
+//            }
+//            if(StringUtils.isNotBlank(self)) {
+//                userIdList.remove(self);//去掉自身
+//            }
+//            List<JmAppUser> userList = null;
+//            if(userIdList.size() > 0) {
+//                //远程批量查询用户信息
+//                //使用无参toArray强转数组的方式会报错
+//                userList = jmAppUserFeignService.findListByIds(userIdList.toArray(new String[userIdList.size()])).getData();
+//            }
+//            return userList;
+//        }
+//    }
     //单个用户间发消息、消息撤回、推送等，服务端需要调融云--前台可做，需求没有可以不做
 
     /** TODO 人脉搜索
