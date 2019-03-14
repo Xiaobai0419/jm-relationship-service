@@ -28,7 +28,8 @@ public class RedisConfig extends CachingConfigurerSupport {
     @Bean
     public CacheManager cacheManager(@SuppressWarnings("rawtypes") RedisTemplate redisTemplate) {
         RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate);
-        cacheManager.setDefaultExpiration(defaultExpire);
+        //人脉服务数据需要Redis持久化，不能设置过期时间！！
+//        cacheManager.setDefaultExpiration(defaultExpire);
         return cacheManager;
     }
 
