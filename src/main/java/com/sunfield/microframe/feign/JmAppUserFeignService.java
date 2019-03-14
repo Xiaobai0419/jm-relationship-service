@@ -1,5 +1,6 @@
 package com.sunfield.microframe.feign;
 
+import com.sunfield.microframe.common.response.Page;
 import com.sunfield.microframe.common.response.ResponseBean;
 import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.feign.fallback.JmAppUserFeignServiceFallback;
@@ -28,6 +29,28 @@ public interface JmAppUserFeignService {
      */
     @RequestMapping(value = "/JmAppUserSupport/findListByIds", method = RequestMethod.POST)
     ResponseBean<List<JmAppUser>> findListByIds(@RequestParam("ids") String[] ids);//key/value形式传递数组对象，必须使用@RequestParam注解，且指定的数组名不！要！带[]，名字与服务端一样，因为key/value必须要有一个key名
+
+    /**
+     * 根据批量手机号获取
+     * @param mobiles
+     * @return
+     */
+    @RequestMapping(value = "/JmAppUserSupport/findListByMobiles", method = RequestMethod.POST)
+    public ResponseBean<List<JmAppUser>> findListByMobiles(@RequestParam("mobiles") String[] mobiles);
+
+    /**
+     * 根据id列表+昵称，或id列表+公司名进行模糊查找
+     * @param ids
+     * @param nickName
+     * @param companyName
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/JmAppUserSupport/findListByIdsAndNames", method = RequestMethod.POST)
+    public ResponseBean<Page<JmAppUser>> findListByIdsAndNames(@RequestParam("ids") String[] ids,
+           @RequestParam("nickName") String nickName, @RequestParam("companyName") String companyName,
+           @RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize);
 
     /**
      * 远程获取所有用户列表

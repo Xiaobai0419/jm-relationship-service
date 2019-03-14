@@ -7,6 +7,7 @@ import com.sunfield.microframe.common.utils.PageUtils;
 import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.domain.JmIndustries;
 import com.sunfield.microframe.domain.JmRelationshipFriendship;
+import com.sunfield.microframe.params.NoteBook;
 import com.sunfield.microframe.service.RelationshipService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -180,7 +181,7 @@ public class RelationshipController {
     }
 
     //单个用户好友列表
-    @ApiOperation(value="好友列表")
+    @ApiOperation(value="好友列表：业务1：所有好友；业务2：按好友名字模糊搜索，需传入userName（关键字模糊匹配）")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId,为操作者用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriends", method = RequestMethod.POST)
     public RelationshipResponseBean<List<JmAppUser>> findFriends(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
@@ -203,7 +204,7 @@ public class RelationshipController {
     }
 
     //单个用户好友列表--分页
-    @ApiOperation(value="好友列表--分页")
+    @ApiOperation(value="好友列表--分页：业务1：所有好友；业务2：按好友名字模糊搜索，需传入userName（关键字模糊匹配）")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId,为操作者用户id", required = true, dataType = "JmRelationshipFriendship")
     @RequestMapping(value = "/findFriendsPage", method = RequestMethod.POST)
     public RelationshipResponseBean<Page<JmAppUser>> findFriendsPage(@RequestBody JmRelationshipFriendship jmRelationshipFriendship) {
@@ -264,7 +265,7 @@ public class RelationshipController {
     }
 
     //行业、全部三度人脉搜索列表
-    @ApiOperation(value="行业、全部三度人脉搜索列表")
+    @ApiOperation(value="行业、全部三度人脉搜索列表：业务1：全量获取；业务2：人脉按昵称、公司名搜索，关键字统一传入nickName字段")
     @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id，industry：行业id，不传或传空代表全行业", required = true, dataType = "JmAppUser")
     @RequestMapping(value = "/industryRelationship", method = RequestMethod.POST)
     public RelationshipResponseBean<List<JmAppUser>> industryRelationship(@RequestBody JmAppUser user) {
@@ -275,7 +276,7 @@ public class RelationshipController {
             }
             List<JmAppUser> resultList = null;
             if(StringUtils.isNotBlank(user.getIndustry())) {
-                //业务修正：查行业分值
+                //业务修正：查行业分值，保证字段是数值类型
                 int industryScore = 0;
                 JmIndustries industries = new JmIndustries();
                 industries.setId(user.getIndustry());
@@ -300,8 +301,8 @@ public class RelationshipController {
         }
     }
 
-    //行业、全部三度人脉搜索列表--分页 TODO 考虑一次性加载的性能问题，是否缓存
-    @ApiOperation(value="行业、全部三度人脉搜索列表--分页")
+    //行业、全部三度人脉搜索列表--分页
+    @ApiOperation(value="行业、全部三度人脉搜索列表--分页：业务1：全量获取；业务2：人脉按昵称、公司名搜索，关键字统一传入nickName字段")
     @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id，industry：行业id", required = true, dataType = "JmAppUser")
     @RequestMapping(value = "/industryRelationshipPage", method = RequestMethod.POST)
     public RelationshipResponseBean<Page<JmAppUser>> industryRelationshipPage(@RequestBody JmAppUser user) {
@@ -311,7 +312,7 @@ public class RelationshipController {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
             }
             if(StringUtils.isNotBlank(user.getIndustry())) {//按行业
-                //业务修正：查行业分值
+                //业务修正：查行业分值，保证字段是数值类型
                 int industryScore = 0;
                 JmIndustries industries = new JmIndustries();
                 industries.setId(user.getIndustry());
@@ -337,7 +338,7 @@ public class RelationshipController {
         }
     }
 
-    //全行业三度人脉搜索列表--用于机遇首页人脉搜索显示3个最新头像和总数 TODO 考虑一次性加载的性能问题，是否缓存
+    //全行业三度人脉搜索列表--用于机遇首页人脉搜索显示3个最新头像和总数
     @ApiOperation(value="全行业三度人脉搜索列表--用于机遇首页人脉搜索显示3个最新头像和总数")
     @ApiImplicitParam(name = "user", value = "必传参数：id：登录用户id，分页参数：pageSize固定传3，pageNumber固定传1", required = true, dataType = "JmAppUser")
     @RequestMapping(value = "/allIndustryRelationshipList", method = RequestMethod.POST)
@@ -351,6 +352,29 @@ public class RelationshipController {
             return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
                     //固定查询第一页，每页3条即可，总数也已返回，前端根据总数判断决定显示效果
                     PageUtils.pageList(relationshipService.allIndustryRelationship(user),1,3));
+        }catch (Exception e) {
+            e.printStackTrace();
+            log.info("系统异常：" + e.getMessage());
+            return new RelationshipResponseBean<>(RelationshipResponseStatus.BUSY);
+        }
+    }
+
+    /**
+     * 通讯录上传接口
+     * @param noteBook
+     * @return
+     */
+    @ApiOperation(value="通讯录上传接口")
+    @ApiImplicitParam(name = "noteBook", value = "必传参数：userId：登录用户id；通讯录用户信息：mobile：手机号（必传），nickName：昵称", required = true, dataType = "NoteBook")
+    @RequestMapping(value = "/achieveNotebook", method = RequestMethod.POST)
+    public RelationshipResponseBean<List<JmAppUser>> achieveNotebook(@RequestBody NoteBook noteBook) {
+        try {
+            String userId = noteBook.getUserId();
+            List<JmAppUser> noteBookUsers = noteBook.getNoteBookUsers();
+            if(StringUtils.isBlank(userId) || noteBookUsers == null || noteBookUsers.size() == 0) {
+                return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+            }
+            return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,relationshipService.achieveNotebook(noteBook));
         }catch (Exception e) {
             e.printStackTrace();
             log.info("系统异常：" + e.getMessage());

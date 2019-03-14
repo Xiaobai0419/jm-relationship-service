@@ -12,9 +12,11 @@ import com.sunfield.microframe.feign.JmIndustriesFeignService;
 import com.sunfield.microframe.mapper.JmRelationshipFriendshipMapper;
 import com.sunfield.microframe.mapper.JmRelationshipGroupMapper;
 import com.sunfield.microframe.mapper.JmRelationshipGroupRequestMapper;
+import com.sunfield.microframe.params.NoteBook;
 import com.sunfield.microframe.service.RelationshipService;
 import io.rong.messages.TxtMessage;
 import io.rong.models.response.ResponseResult;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -343,7 +345,7 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
 
     /**
-     * 查询自己的所有好友 TODO 好友搜索
+     * 查询自己的所有好友/好友搜索
      * 参数统一传入：userId是操作者自己，userIdOpposite是对方，方法内部需要交叉主对方的，新建Bean使用传入参数的各字段交叉赋值
      * @param jmRelationshipFriendship
      * @return
@@ -352,7 +354,13 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Override
     public List<JmAppUser> findFriends(JmRelationshipFriendship jmRelationshipFriendship) {
         List<JmRelationshipFriendship> relationshipList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
-        List<JmAppUser> users = userListHandle(relationshipList,false,jmRelationshipFriendship.getUserId());
+        List<JmAppUser> users = null;
+        String userName = jmRelationshipFriendship.getUserName();
+        if(StringUtils.isNotBlank(userName)) {
+            users = userListHandle(relationshipList,false,jmRelationshipFriendship.getUserId(),userName,0,0,jmRelationshipFriendship);
+        }else {
+            users = userListHandle(relationshipList,false,jmRelationshipFriendship.getUserId(),"",0,0,jmRelationshipFriendship);
+        }
         //业务修正：去掉返回好友的一切时间字段，避免从中获取进行群成员添加时回传的时间格式错误导致的失败
         for(JmAppUser user : users) {
             user.setGroupAddDate(null);
@@ -365,7 +373,7 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
 
     /**
-     * 查询自己的所有好友--分页
+     * 查询自己的所有好友/好友搜索--分页
      * 参数统一传入：userId是操作者自己，userIdOpposite是对方，方法内部需要交叉主对方的，新建Bean使用传入参数的各字段交叉赋值
      * @param jmRelationshipFriendship
      * @return
@@ -375,18 +383,40 @@ public class RelationshipServiceImpl implements RelationshipService {
     public Page<JmAppUser> findFriendsPage(JmRelationshipFriendship jmRelationshipFriendship) {
         List<JmRelationshipFriendship> resultList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
         if(resultList != null && resultList.size() > 0) {
-            List<JmRelationshipFriendship> pageList = jmRelationshipFriendshipMapper.findFriendsPage(jmRelationshipFriendship);
-            List<JmAppUser> userList = userListHandle(pageList,false,jmRelationshipFriendship.getUserId());
-            //业务修正：去掉返回好友的一切时间字段，避免从中获取进行群成员添加时回传的时间格式错误导致的失败
-            for(JmAppUser user : userList) {
-                user.setGroupAddDate(null);
-                user.setMemberEndTime(null);
-                user.setMemberStartTime(null);
-                user.setCreateDate(null);
-                user.setUpdateDate(null);
+            List<JmAppUser> userList = null;
+            String userName = jmRelationshipFriendship.getUserName();
+            if(StringUtils.isNotBlank(userName)) {
+                //传入全部好友id和条件、分页信息，直接调用远程模糊匹配分页
+                userList = userListHandle(resultList,false,jmRelationshipFriendship.getUserId(),userName,
+                        jmRelationshipFriendship.getPageNumber(),jmRelationshipFriendship.getPageSize(),jmRelationshipFriendship);
+                //业务修正：去掉返回好友的一切时间字段，避免从中获取进行群成员添加时回传的时间格式错误导致的失败
+                for(JmAppUser user : userList) {
+                    user.setGroupAddDate(null);
+                    user.setMemberEndTime(null);
+                    user.setMemberStartTime(null);
+                    user.setCreateDate(null);
+                    user.setUpdateDate(null);
+                }
+                //设置总数为入参带出来的远程分页总数
+                return new Page<>(jmRelationshipFriendship.getTotalNum(),jmRelationshipFriendship.getPageSize(),
+                        jmRelationshipFriendship.getPageNumber(),userList);
+            }else {
+                //查全部的该分页
+                List<JmRelationshipFriendship> pageList = jmRelationshipFriendshipMapper.findFriendsPage(jmRelationshipFriendship);
+                //查该分页的全量具体信息
+                userList = userListHandle(pageList,false,jmRelationshipFriendship.getUserId(),"",
+                        0,0,jmRelationshipFriendship);
+                //业务修正：去掉返回好友的一切时间字段，避免从中获取进行群成员添加时回传的时间格式错误导致的失败
+                for(JmAppUser user : userList) {
+                    user.setGroupAddDate(null);
+                    user.setMemberEndTime(null);
+                    user.setMemberStartTime(null);
+                    user.setCreateDate(null);
+                    user.setUpdateDate(null);
+                }
+                return new Page<>(resultList.size(),jmRelationshipFriendship.getPageSize(),
+                        jmRelationshipFriendship.getPageNumber(),userList);
             }
-            return new Page<>(resultList.size(),jmRelationshipFriendship.getPageSize(),
-                    jmRelationshipFriendship.getPageNumber(),userList);
         }
         return new Page<>();
     }
@@ -492,7 +522,9 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @return
      */
     @Override
-    public List<JmAppUser> userListHandle(List<JmRelationshipFriendship> relationshipList,boolean reverse,String self) {
+    public List<JmAppUser> userListHandle(List<JmRelationshipFriendship> relationshipList,boolean reverse,
+                                          String self,String userName,int pageNumber, int pageSize,
+                                          JmRelationshipFriendship jmRelationshipFriendshipInput) {
         if(relationshipList == null) {
             return null;
         }else if(relationshipList.size() == 0) {
@@ -517,7 +549,27 @@ public class RelationshipServiceImpl implements RelationshipService {
             if(userIdList.size() > 0) {
                 //远程批量查询用户信息
                 //使用无参toArray强转数组的方式会报错
-                userList = jmAppUserFeignService.findListByIds(userIdList.toArray(new String[userIdList.size()])).getData();
+                if(StringUtils.isBlank(userName)) {
+                    //全量查找
+                    userList = jmAppUserFeignService.findListByIds(userIdList.toArray(new String[userIdList.size()])).getData();
+                }else if(pageNumber > 0 && pageSize > 0) {
+                    //按用户名模糊搜索功能--分页
+                    Page<JmAppUser> pageUsers = jmAppUserFeignService.findListByIdsAndNames(userIdList.toArray(new String[userIdList.size()]),
+                            userName,"",pageNumber,pageSize).getData();
+                    if(pageUsers != null) {
+                        //设置远程模糊查找分页的总数
+                        jmRelationshipFriendshipInput.setTotalNum(pageUsers.getTotalNum());
+                        userList = pageUsers.getData();
+                    }
+                }else {
+                    //按用户名模糊搜索功能
+                    Page<JmAppUser> pageUsers = jmAppUserFeignService.findListByIdsAndNames(userIdList.toArray(new String[userIdList.size()]),
+                            userName,"",1,Integer.MAX_VALUE).getData();
+                    if(pageUsers != null) {
+                        userList = pageUsers.getData();
+                    }
+                }
+
             }
             return userList;
         }
@@ -558,8 +610,9 @@ public class RelationshipServiceImpl implements RelationshipService {
 //    }
     //单个用户间发消息、消息撤回、推送等，服务端需要调融云--前台可做，需求没有可以不做
 
-    /** TODO 人脉搜索
-     * 实时获取某行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）--不能缓存！每次必须实时获取
+    /**
+     * 实时获取某行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）/人脉按昵称、公司名搜索
+     * --不能缓存！每次必须实时获取
      * @param user
      * @return
      */
@@ -610,8 +663,39 @@ public class RelationshipServiceImpl implements RelationshipService {
         }
 
         String[] userIds = industryRelationshipList.toArray(new String[industryRelationshipList.size()]);
-        //按用户id批量查询所有推荐人脉信息
-        List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
+        List<JmAppUser> users = null;
+        //关键字统一传入此字段，无论是人名还是公司名
+        String nickName = user.getNickName();
+        if(StringUtils.isNotBlank(nickName)) {
+            Map<String,JmAppUser> userMap = new HashMap<>();
+            //以用户名或公司名模糊查找取合集
+            //以用户名模糊查找所有
+            Page<JmAppUser> pageUsers1 = jmAppUserFeignService.findListByIdsAndNames(userIds,nickName,"",1,Integer.MAX_VALUE).getData();
+            if(pageUsers1 != null) {
+                List<JmAppUser> users1 = pageUsers1.getData();
+                if(users1 != null && users1.size() > 0) {
+                    for(JmAppUser jmAppUser : users1) {
+                        userMap.put(jmAppUser.getId(),jmAppUser);
+                    }
+                }
+            }
+            //以公司名模糊查找所有
+            Page<JmAppUser> pageUsers2 = jmAppUserFeignService.findListByIdsAndNames(userIds,"",nickName,1,Integer.MAX_VALUE).getData();
+            if(pageUsers2 != null) {
+                List<JmAppUser> users2 = pageUsers2.getData();
+                if(users2 != null && users2.size() > 0) {
+                    for(JmAppUser jmAppUser : users2) {
+                        userMap.put(jmAppUser.getId(),jmAppUser);//以唯一id为key,重复的会覆盖，不重复的会添加
+                    }
+                }
+            }
+            users = new ArrayList<>();
+            users.addAll(userMap.values());
+        }else {
+            //全量查找
+            //按用户id批量查询所有推荐人脉信息
+            users = jmAppUserFeignService.findListByIds(userIds).getData();
+        }
         //批量查询该用户与所有该行业人脉的好友关系
         List<JmRelationshipFriendship> records = jmRelationshipFriendshipMapper.findFriendRecords(userId,userIds);
         Map<String,Integer> relationships = new HashMap<>();
@@ -633,14 +717,16 @@ public class RelationshipServiceImpl implements RelationshipService {
             }
             for(String industryUserId : industryRelationshipList) {
                 JmAppUser industryUser = userMap.get(industryUserId);
-                sortedUsers.add(industryUser);
+                if(industryUser != null) {
+                    sortedUsers.add(industryUser);
+                }
             }
         }
         return sortedUsers;
     }
 
-    /** TODO 人脉搜索
-     * 实时获取全行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）
+    /**
+     * 实时获取全行业三度人脉搜索列表（不包括一度好友，按通讯录好友、二度、三度、陌生人顺序，实时获取应对变化）/人脉按昵称、公司名搜索
      * @param user
      * @return
      */
@@ -690,8 +776,39 @@ public class RelationshipServiceImpl implements RelationshipService {
         }
 
         String[] userIds = allIndustryRelationshipList.toArray(new String[allIndustryRelationshipList.size()]);
-        //按用户id批量查询所有推荐人脉信息
-        List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
+        List<JmAppUser> users = null;
+        //关键字统一传入此字段，无论是人名还是公司名
+        String nickName = user.getNickName();
+        if(StringUtils.isNotBlank(nickName)) {
+            Map<String,JmAppUser> userMap = new HashMap<>();
+            //以用户名或公司名模糊查找取合集
+            //以用户名模糊查找所有
+            Page<JmAppUser> pageUsers1 = jmAppUserFeignService.findListByIdsAndNames(userIds,nickName,"",1,Integer.MAX_VALUE).getData();
+            if(pageUsers1 != null) {
+                List<JmAppUser> users1 = pageUsers1.getData();
+                if(users1 != null && users1.size() > 0) {
+                    for(JmAppUser jmAppUser : users1) {
+                        userMap.put(jmAppUser.getId(),jmAppUser);
+                    }
+                }
+            }
+            //以公司名模糊查找所有
+            Page<JmAppUser> pageUsers2 = jmAppUserFeignService.findListByIdsAndNames(userIds,"",nickName,1,Integer.MAX_VALUE).getData();
+            if(pageUsers2 != null) {
+                List<JmAppUser> users2 = pageUsers2.getData();
+                if(users2 != null && users2.size() > 0) {
+                    for(JmAppUser jmAppUser : users2) {
+                        userMap.put(jmAppUser.getId(),jmAppUser);//以唯一id为key,重复的会覆盖，不重复的会添加
+                    }
+                }
+            }
+            users = new ArrayList<>();
+            users.addAll(userMap.values());
+        }else {
+            //全量查找
+            //按用户id批量查询所有推荐人脉信息
+            users = jmAppUserFeignService.findListByIds(userIds).getData();
+        }
         //批量查询该用户与所有该行业人脉的好友关系
         List<JmRelationshipFriendship> records = jmRelationshipFriendshipMapper.findFriendRecords(userId,userIds);
         Map<String,Integer> relationships = new HashMap<>();
@@ -713,7 +830,9 @@ public class RelationshipServiceImpl implements RelationshipService {
             }
             for(String allIndustryRelationship : allIndustryRelationshipList) {
                 JmAppUser industryUser = userMap.get(allIndustryRelationship);
-                sortedUsers.add(industryUser);
+                if(industryUser != null) {
+                    sortedUsers.add(industryUser);
+                }
             }
         }
         return sortedUsers;
@@ -753,5 +872,79 @@ public class RelationshipServiceImpl implements RelationshipService {
 
         String[] userIds = relationshipSet.toArray(new String[relationshipSet.size()]);
         return userIds;
+    }
+
+    /**
+     * 通讯录上传接口
+     * @param noteBook
+     * @return
+     */
+    @Override
+    public List<JmAppUser> achieveNotebook(NoteBook noteBook) {
+        String userId = noteBook.getUserId();
+        List<JmAppUser> noteBookUsers = noteBook.getNoteBookUsers();
+        //根据手机号数组批量获取已注册APP的用户
+        if(noteBookUsers != null && noteBookUsers.size() > 0) {
+            List<String> mobiles = new ArrayList<>();
+            for(JmAppUser user : noteBookUsers) {
+                if(user != null && StringUtils.isNotBlank(user.getMobile())) {
+                    mobiles.add(user.getMobile());
+                }
+            }
+            //批量查手机用户
+            List<JmAppUser> existUsers = jmAppUserFeignService
+                    .findListByMobiles(mobiles.toArray(new String[mobiles.size()]))
+                    .getData();
+            if(existUsers != null && existUsers.size() > 0) {
+                List<String> userIndustries = new ArrayList<>();
+                for(JmAppUser user : existUsers) {
+                    userIndustries.add(user.getIndustry());
+                }
+                Map<String,Integer> industriesMap = new HashMap<>();
+                //批量查行业分值
+                List<JmIndustries> industries = jmIndustriesFeignService
+                        .findByIds(userIndustries.toArray(new String[userIndustries.size()]))
+                        .getData();
+                if(industries != null && industries.size() > 0) {
+                    for(JmIndustries jmIndustries : industries) {
+                        industriesMap.put(jmIndustries.getId(),jmIndustries.getScore());
+                    }
+                }
+                for(JmAppUser user : existUsers) {
+                    //行业id替换为行业分值，用于Redis ZSet存储
+                    user.setIndustry(String.valueOf(industriesMap.get(user.getIndustry())));
+                }
+                Map<String,Double> userIndustryMap = new HashMap<>();
+                for(JmAppUser user : existUsers) {
+                    double score = 0;
+                    try {
+                        score = Double.parseDouble(user.getIndustry());
+                    }catch (Exception e) {
+
+                    }
+                    //查得到分值的存实际分值，查不到的是用户没设置行业等，默认赋分值0进行存储
+                    userIndustryMap.put(user.getId(),score);
+                }
+                //把这些用户存入该登录用户的通讯录好友Redis ZSet集合中
+                frientsUtil.initNoteBookFriends(userId,userIndustryMap);
+                //可以把这些用户返回给前端
+                return existUsers;
+            }
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        Map<String,Integer> industriesMap = new HashMap<>();
+        log.info("---------------------1-" + industriesMap.get(null));
+        industriesMap.put(null,null);
+        industriesMap.put(null,null);
+        industriesMap.put(null,null);
+        log.info("---------------------2-" + industriesMap.get(null));
+        log.info("---------------------3-" + industriesMap.get(""));
+        log.info("---------------------4-" + industriesMap.get("someKey"));
+        for(Map.Entry<String, Integer> entry : industriesMap.entrySet()) {
+            log.info("key->" + entry.getKey() + ",value->" + entry.getValue());
+        }
     }
 }
