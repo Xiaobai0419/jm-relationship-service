@@ -287,6 +287,10 @@ public class RelationshipController {
                 if(industryScore != 0) {
                     user.setIndustry(String.valueOf(industryScore));//设置为分值字段（整数）转成的字符串
                     resultList = relationshipService.industryRelationship(user);//按行业
+                    if(resultList == null) {
+                        return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
+                    }
+                    return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,resultList);
                 }
             }
             resultList = relationshipService.allIndustryRelationship(user);//全行业

@@ -17,6 +17,8 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableCaching
@@ -30,6 +32,10 @@ public class RedisConfig extends CachingConfigurerSupport {
         RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate);
         //人脉服务数据需要Redis持久化，不能设置过期时间！！
 //        cacheManager.setDefaultExpiration(defaultExpire);
+        //一些指定特定名称的Cache设置过期时间，用于好友列表、好友请求列表等的缓存，不能设置太长！！
+        Map<String, Long> expires = new HashMap<>();
+        expires.put("jm_friends_cache",60L);
+        cacheManager.setExpires(expires);
         return cacheManager;
     }
 

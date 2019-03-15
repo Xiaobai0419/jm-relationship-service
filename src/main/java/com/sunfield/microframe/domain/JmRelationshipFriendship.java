@@ -23,7 +23,7 @@ public class JmRelationshipFriendship extends BaseDomain{
 	private Boolean reverse = false;//反向关系，即操作者的对方作为主方和操作者的关系；默认为正向关系，即操作者作为主方和对方的关系
 
 	@ApiModelProperty(value="用户昵称，关联用户表nickName", dataType="String")
-	private String userName;
+	private String userName = "";//默认空串，用于缓存键
 
 	private int totalNum = 0;
 
