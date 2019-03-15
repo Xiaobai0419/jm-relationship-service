@@ -16,10 +16,10 @@ public class PageUtils {
         int total = list.size();
         int fromIndex = (pageNumber - 1) * pageSize;
         if (fromIndex >= total) {
-            return new Page<>();
+            return new Page<>(total,pageSize,pageNumber);//解决空页中分页信息错误的bug
         }
         if(fromIndex < 0){
-            return new Page<>();
+            return new Page<>(total,pageSize,pageNumber);
         }
         int toIndex = pageNumber * pageSize;
         if (toIndex > total) {
