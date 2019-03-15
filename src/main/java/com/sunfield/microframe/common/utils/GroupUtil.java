@@ -150,7 +150,7 @@ public class GroupUtil {
 
 
     public static void main(String[] args) {
-        String groupId = "testGroupS111111";
+        String groupId = "2cf871dedc234ef5ab4a28816d10adef";
         String groupName = "AAAsunField001";
         GroupMember[] members = {new GroupMember().setId("hHjap87"),new GroupMember().setId("test111")};
         //创建部落
@@ -174,11 +174,11 @@ public class GroupUtil {
 //        Result result = quitFromGroup(groupId,groupName,members);
 //        System.out.println("group result:  " + (result != null ? result.toString():"FAIL!"));
         //获取部落成员
-//        GroupUserQueryResult result = membersOfGroup(groupId);
-//        System.out.println("group result:  " + (result != null ? result.toString():"FAIL!"));
-        //刷新部落信息到融云
-        Result result = updateGroup(groupId,"NewLine");
+        GroupUserQueryResult result = membersOfGroup(groupId);
         System.out.println("group result:  " + (result != null ? result.toString():"FAIL!"));
+        //刷新部落信息到融云
+//        Result result = updateGroup(groupId,"NewLine");
+//        System.out.println("group result:  " + (result != null ? result.toString():"FAIL!"));
         //解散部落
 //        Result result = dismissGroup(groupId,new GroupMember().setId("AAAAA"));//传递部落任意一个成员--测试发现传一个不存在的也可以解散！！
 //        System.out.println("group result:  " + (result != null ? result.toString():"FAIL!"));
