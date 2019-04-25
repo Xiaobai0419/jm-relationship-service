@@ -149,7 +149,7 @@ public class RelationshipController {
 
     //单个用户查询与另一个用户的好友状态（用于用户详情页、人脉搜索列表显示已请求状态，显示不同按钮，特别：已请求尚未通过的置灰显示请求中，已拒绝的可重新显示加好友按钮）
     //双向查询，你可能请求过对方，或与对方是好友；对方可能请求过你好友，待通过或已被拒绝，或你已删除对方，对方保持单向好友关系
-    @ApiOperation(value="查询与另一个用户的好友状态，根据type字段判断：0 好友 1 对方已删除好友（显示“加好友”） 2 好友请求中 " +
+    @ApiOperation(value="查询与另一个用户的好友状态，根据type字段判断：0 好友 2 好友请求中 " +
             "3 对方已拒绝（显示“加好友”） 4 无关联（显示“加好友”）")
     @ApiImplicitParam(name = "jmRelationshipFriendship", value = "必传参数：userId、userIdOpposite," +
             "其中userId为操作者用户id,userIdOpposite为对方用户id", required = true, dataType = "JmRelationshipFriendship")
@@ -169,7 +169,8 @@ public class RelationshipController {
             }else {
                 //正向关系
                 switch (result.getType()) {
-                    case 0:case 1:case 2:case 3:return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
+                    case 0:case 2:case 3:return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
+                    case 1:return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,new JmRelationshipFriendship());
                     default:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
                 }
             }

@@ -16,7 +16,6 @@ import com.sunfield.microframe.params.NoteBook;
 import com.sunfield.microframe.service.RelationshipService;
 import io.rong.messages.TxtMessage;
 import io.rong.models.response.ResponseResult;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,11 +101,11 @@ public class RelationshipServiceImpl implements RelationshipService {
         }
         //需要先查询好友关系，判断是更新还是插入
         JmRelationshipFriendship record = jmRelationshipFriendshipMapper.findFriendRecord(jmRelationshipFriendship);
-        if(record != null && (record.getType() == 0 || record.getType() == 1 || record.getType() == 2)) {
+        if(record != null && (record.getType() == 0 || record.getType() == 2)) {
             //已经是好友关系，返回;已经请求过好友，等待中，返回--接口端根据不同返回type值给用户不同友好提示
             return record;
-        }else if(record != null && record.getType() == 3) {
-            //已被拒绝过，更新
+        }else if(record != null) {
+            //已有记录，更新
             jmRelationshipFriendship.preUpdate();
             jmRelationshipFriendship.setType(2);
             //更新已有记录为类型2
@@ -131,8 +130,6 @@ public class RelationshipServiceImpl implements RelationshipService {
             } else {
                 return null;
             }
-        }else if(record != null) {
-            return null;
         }else {
             //无记录，插入
             jmRelationshipFriendship.preInsert();
@@ -300,15 +297,18 @@ public class RelationshipServiceImpl implements RelationshipService {
         jmRelationshipFriendshipOppsite.setUserIdOpposite(jmRelationshipFriendship.getUserId());
         jmRelationshipFriendshipOppsite.setType(1);
         //更新对方类型为1（单方好友）
-        int mysqlResult1 = jmRelationshipFriendshipMapper.update(jmRelationshipFriendshipOppsite);
+//        int mysqlResult1 = jmRelationshipFriendshipMapper.update(jmRelationshipFriendshipOppsite);
+        //需求变更：双向删除，直接从对方也删除好友记录
+        int mysqlResult1 = jmRelationshipFriendshipMapper.delete(jmRelationshipFriendshipOppsite);
         int mysqlResult2 = 0;
         if(mysqlResult1 > 0) {//更新成功才删除,防止无对方记录而删除自身记录的情况
             //（逻辑）删除自身记录
             mysqlResult2 = jmRelationshipFriendshipMapper.delete(jmRelationshipFriendship);
         }
         if(mysqlResult1 > 0 && mysqlResult2 > 0) {//关系型数据库完全操作成功才操作Redis:防止更新不存在记录也会更新Redis的情况
-            //到Redis中自己、对方（可不移除）的一度好友Zset集合中移除对方记录--ZSet结构多次操作幂等
+            //到Redis中自己、对方的一度好友Zset集合中移除对方记录--ZSet结构多次操作幂等
             long removeFriend = frientsUtil.removeFriend(jmRelationshipFriendship.getUserId(),jmRelationshipFriendship.getUserIdOpposite());
+            long removeFriend2 = frientsUtil.removeFriend(jmRelationshipFriendship.getUserIdOpposite(),jmRelationshipFriendship.getUserId());
             log.info("Redis Remove:removeFriend/" + removeFriend);
         }
         //各种分布式事务成功条件满足后--TODO 目前Redis返回结果不符合成功的事实，暂时去掉

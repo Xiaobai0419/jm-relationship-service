@@ -94,7 +94,7 @@ public class JmRelationshipFriendshipSqlProvider {
 		return sql;
 	}
 
-	//查询我的好友（互为好友及单方好友的合集）--应考虑去重，去掉自己（防止加自己为好友，和相互请求双双通过的情况）
+	//查询我的好友（互为好友的合集）--应考虑去重，去掉自己（防止加自己为好友，和相互请求双双通过的情况）
  	public String generateFindFriendsSql(JmRelationshipFriendship obj){
 		return new SQL(){
 			{
@@ -109,7 +109,7 @@ public class JmRelationshipFriendshipSqlProvider {
 
 				AND();
 				//查询好友关系
-				WHERE("type = 0 or type = 1");
+				WHERE("type = 0");
 			}
 		}.toString();
 	}
