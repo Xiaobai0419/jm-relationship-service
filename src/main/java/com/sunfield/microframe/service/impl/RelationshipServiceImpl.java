@@ -670,15 +670,15 @@ public class RelationshipServiceImpl implements RelationshipService {
         jmRelationshipFriendship.setUserId(userId);
 
         //业务容错：去关系型数据库查一遍好友列表进行去除，防止Redis好友数据丢失（此时的人脉搜索列表退化为全体陌生人）
-        List<JmRelationshipFriendship> friendList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
-        List<String> friendIds = new ArrayList<>();
-        if(friendList != null && friendList.size() > 0) {
-            for(JmRelationshipFriendship relationshipFriendship : friendList) {
-                friendIds.add(relationshipFriendship.getUserIdOpposite());//添加对方id到好友id列表
-            }
-        }
+//        List<JmRelationshipFriendship> friendList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
+//        List<String> friendIds = new ArrayList<>();
+//        if(friendList != null && friendList.size() > 0) {
+//            for(JmRelationshipFriendship relationshipFriendship : friendList) {
+//                friendIds.add(relationshipFriendship.getUserIdOpposite());//添加对方id到好友id列表
+//            }
+//        }
         //人脉中再次尝试去掉所有好友
-        industryRelationshipList.removeAll(friendIds);
+//        industryRelationshipList.removeAll(friendIds);
 
         //业务修正：每次在业务层去掉（全部）已经申请好友的所有人脉
         List<JmRelationshipFriendship> requestList = jmRelationshipFriendshipMapper.findFriendRequests(jmRelationshipFriendship);
@@ -795,15 +795,15 @@ public class RelationshipServiceImpl implements RelationshipService {
         jmRelationshipFriendship.setUserId(userId);
 
         //业务容错：去关系型数据库查一遍好友列表进行去除，防止Redis好友数据丢失（此时的人脉搜索列表退化为全体陌生人）
-        List<JmRelationshipFriendship> friendList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
-        List<String> friendIds = new ArrayList<>();
-        if(friendList != null && friendList.size() > 0) {
-            for(JmRelationshipFriendship relationshipFriendship : friendList) {
-                friendIds.add(relationshipFriendship.getUserIdOpposite());//添加对方id到好友id列表
-            }
-        }
+//        List<JmRelationshipFriendship> friendList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
+//        List<String> friendIds = new ArrayList<>();
+//        if(friendList != null && friendList.size() > 0) {
+//            for(JmRelationshipFriendship relationshipFriendship : friendList) {
+//                friendIds.add(relationshipFriendship.getUserIdOpposite());//添加对方id到好友id列表
+//            }
+//        }
         //人脉中再次尝试去掉所有好友
-        allIndustryRelationshipList.removeAll(friendIds);
+//        allIndustryRelationshipList.removeAll(friendIds);
 
         //业务修正：每次在业务层去掉（全部）已经申请好友的所有人脉
         List<JmRelationshipFriendship> requestList = jmRelationshipFriendshipMapper.findFriendRequests(jmRelationshipFriendship);
