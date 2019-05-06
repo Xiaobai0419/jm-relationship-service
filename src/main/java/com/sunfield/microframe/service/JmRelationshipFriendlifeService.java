@@ -66,6 +66,13 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 				//获取访问用户对这批朋友圈的点赞状态
 				Map<String,JmRelationshipFriendlife> friendlifeMap = new HashMap<>();
 				for(JmRelationshipFriendlife life : friendlifeList) {
+					//查询每个用户最新信息
+					JmAppUser jmAppUser = findUser(life.getUserId());
+					if(jmAppUser != null) {
+						life.setMobile(jmAppUser.getMobile());
+						life.setHeadPicUrl(jmAppUser.getHeadPicUrl());
+						life.setNickName(jmAppUser.getNickName());
+					}
 					friendlifeMap.put(life.getId(),life);
 				}
 				//批量查询返回的点赞集合是乱序的，要按朋友圈id设置到对应朋友圈
@@ -97,6 +104,13 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 				//获取访问用户对这批朋友圈的点赞状态
 				Map<String,JmRelationshipFriendlife> friendlifeMap = new HashMap<>();
 				for(JmRelationshipFriendlife life : friendlifeList) {
+					//查询每个用户最新信息
+					JmAppUser jmAppUser = findUser(life.getUserId());
+					if(jmAppUser != null) {
+						life.setMobile(jmAppUser.getMobile());
+						life.setHeadPicUrl(jmAppUser.getHeadPicUrl());
+						life.setNickName(jmAppUser.getNickName());
+					}
 					friendlifeMap.put(life.getId(),life);
 				}
 				//批量查询返回的点赞集合是乱序的，要按朋友圈id设置到对应朋友圈
@@ -148,6 +162,13 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 					//获取访问用户对这批朋友圈的点赞状态
 					Map<String,JmRelationshipFriendlife> friendlifeMap = new HashMap<>();
 					for(JmRelationshipFriendlife life : pageList) {
+						//查询每个用户最新信息
+						JmAppUser jmAppUser = findUser(life.getUserId());
+						if(jmAppUser != null) {
+							life.setMobile(jmAppUser.getMobile());
+							life.setHeadPicUrl(jmAppUser.getHeadPicUrl());
+							life.setNickName(jmAppUser.getNickName());
+						}
 						friendlifeMap.put(life.getId(),life);
 					}
 					//批量查询返回的点赞集合是乱序的，要按朋友圈id设置到对应朋友圈
@@ -179,6 +200,13 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 				//获取访问用户对这批朋友圈的点赞状态
 				Map<String,JmRelationshipFriendlife> friendlifeMap = new HashMap<>();
 				for(JmRelationshipFriendlife life : pageList) {
+					//查询每个用户最新信息
+					JmAppUser jmAppUser = findUser(life.getUserId());
+					if(jmAppUser != null) {
+						life.setMobile(jmAppUser.getMobile());
+						life.setHeadPicUrl(jmAppUser.getHeadPicUrl());
+						life.setNickName(jmAppUser.getNickName());
+					}
 					friendlifeMap.put(life.getId(),life);
 				}
 				//批量查询返回的点赞集合是乱序的，要按朋友圈id设置到对应朋友圈
@@ -204,6 +232,13 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 	public JmRelationshipFriendlife findOne(JmRelationshipFriendlife obj){
 		JmRelationshipFriendlife result = mapper.findOne(obj.getId());
 		if(result != null) {
+			//查询每个用户最新信息
+			JmAppUser jmAppUser = findUser(result.getUserId());
+			if(jmAppUser != null) {
+				result.setMobile(jmAppUser.getMobile());
+				result.setHeadPicUrl(jmAppUser.getHeadPicUrl());
+				result.setNickName(jmAppUser.getNickName());
+			}
 			//获取访问用户对该条朋友圈点赞状态
 			JmRelationshipUserFriendlife jmRelationshipUserFriendlife = jmRelationshipUserFriendlifeMapper.findSelfOne(obj.getVisitedUserId(),obj.getId());
 			if(jmRelationshipUserFriendlife != null && jmRelationshipUserFriendlife.getYesorno() == 1) {
@@ -281,5 +316,5 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 		}
 		return mapper.delete(obj.getId());
 	}
-	
+
 }

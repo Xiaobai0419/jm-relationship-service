@@ -5,6 +5,7 @@ import com.sunfield.microframe.common.response.ResponseBean;
 import com.sunfield.microframe.common.response.ResponseStatus;
 import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.feign.JmAppUserFeignService;
+import com.sunfield.microframe.params.UpdateFriendParams;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +39,11 @@ public class JmAppUserFeignServiceFallback implements JmAppUserFeignService {
 
     @Override
     public ResponseBean<List<JmAppUser>> findListByIndustry(String industry) {
+        return new ResponseBean<>(ResponseStatus.BUSY);
+    }
+
+    @Override
+    public ResponseBean<Integer> updateFriendNum(UpdateFriendParams params) {
         return new ResponseBean<>(ResponseStatus.BUSY);
     }
 }

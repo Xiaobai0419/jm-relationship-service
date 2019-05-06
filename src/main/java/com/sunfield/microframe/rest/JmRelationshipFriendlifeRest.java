@@ -199,6 +199,50 @@ public class JmRelationshipFriendlifeRest {
 		}
     }
 
+	@ApiOperation(value="能源圈评论数+1，传递能源圈id")
+	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
+	@RequestMapping(value = "/updateComments", method = RequestMethod.POST)
+	public ResponseBean<JmRelationshipFriendlife> updateComments(@RequestBody JmRelationshipFriendlife obj) {
+		try {
+			if(StringUtils.isBlank(obj.getId())) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
+			}
+			obj.setCommentTag(1);
+			JmRelationshipFriendlife object = service.updateNum(obj);
+			if(object != null) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
+			} else {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.FAIL);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
+		}
+	}
+
+	@ApiOperation(value="能源圈评论数-1，传递能源圈id")
+	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
+	@RequestMapping(value = "/updateCommentsMinus", method = RequestMethod.POST)
+	public ResponseBean<JmRelationshipFriendlife> updateCommentsMinus(@RequestBody JmRelationshipFriendlife obj) {
+		try {
+			if(StringUtils.isBlank(obj.getId())) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.PARAMS_ERROR);
+			}
+			obj.setCommentTag(1);
+			JmRelationshipFriendlife object = service.updateNumMinus(obj);
+			if(object != null) {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
+			} else {
+				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.FAIL);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			log.info("系统异常：" + e.getMessage());
+			return new ResponseBean<>(ResponseStatus.BUSY);
+		}
+	}
+
 	@ApiOperation(value="删除：用户删除自己所发朋友圈，必需参数：id：朋友圈id；visitedUserId：当前登录用户id")
 	@ApiImplicitParam(name = "obj", value = "", required = true, dataType = "JmRelationshipFriendlife")
 	@RequestMapping(value = "/deleteSelf", method = RequestMethod.POST)

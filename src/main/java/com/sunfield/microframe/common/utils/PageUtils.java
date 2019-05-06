@@ -2,6 +2,7 @@ package com.sunfield.microframe.common.utils;
 
 import com.sunfield.microframe.common.response.Page;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PageUtils {
@@ -25,6 +26,7 @@ public class PageUtils {
         if (toIndex > total) {
             toIndex = total;
         }
-        return new Page<>(list.size(),pageSize,pageNumber,list.subList(fromIndex, toIndex));
+        //list.subList(fromIndex, toIndex)将无法序列化，因为从subList()返回的子列表对象未实现无参构造函数。
+        return new Page<>(list.size(),pageSize,pageNumber,new ArrayList<>(list.subList(fromIndex, toIndex)));
     }
 }

@@ -13,6 +13,7 @@ import com.sunfield.microframe.mapper.JmRelationshipFriendshipMapper;
 import com.sunfield.microframe.mapper.JmRelationshipGroupMapper;
 import com.sunfield.microframe.mapper.JmRelationshipGroupRequestMapper;
 import com.sunfield.microframe.params.NoteBook;
+import com.sunfield.microframe.params.UpdateFriendParams;
 import com.sunfield.microframe.service.RelationshipService;
 import io.rong.messages.TxtMessage;
 import io.rong.models.response.ResponseResult;
@@ -228,6 +229,13 @@ public class RelationshipServiceImpl implements RelationshipService {
                 addFriendOppsite = frientsUtil.addFriend(jmRelationshipFriendship.getUserIdOpposite(),
                         jmRelationshipFriendship.getUserId(),userIndustry);
                 log.info("Redis Input:addFriend/" + addFriend + ",addFriendOppsite/" + addFriendOppsite);
+                //更新各自好友数量
+                UpdateFriendParams params = new UpdateFriendParams();
+                params.setId(user.getId());
+                params.setNum(1);
+                jmAppUserFeignService.updateFriendNum(params);
+                params.setId(userOppsite.getId());
+                jmAppUserFeignService.updateFriendNum(params);
             }
             //调用融云sdk通知对方已通过好友--消息类型：系统消息
             TxtMessage txtMessage = null;
@@ -310,6 +318,13 @@ public class RelationshipServiceImpl implements RelationshipService {
             long removeFriend = frientsUtil.removeFriend(jmRelationshipFriendship.getUserId(),jmRelationshipFriendship.getUserIdOpposite());
             long removeFriend2 = frientsUtil.removeFriend(jmRelationshipFriendship.getUserIdOpposite(),jmRelationshipFriendship.getUserId());
             log.info("Redis Remove:removeFriend/" + removeFriend);
+            //更新各自好友数量
+            UpdateFriendParams params = new UpdateFriendParams();
+            params.setId(jmRelationshipFriendship.getUserId());
+            params.setNum(-1);
+            jmAppUserFeignService.updateFriendNum(params);
+            params.setId(jmRelationshipFriendship.getUserIdOpposite());
+            jmAppUserFeignService.updateFriendNum(params);
         }
         //各种分布式事务成功条件满足后--TODO 目前Redis返回结果不符合成功的事实，暂时去掉
         if(mysqlResult1 > 0 && mysqlResult2 > 0) {

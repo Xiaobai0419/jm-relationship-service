@@ -169,10 +169,10 @@ public class JmRelationshipFriendlifeSqlProvider{
 			{
 				UPDATE("jm_relationship_friendlife");
 
-				if(obj.getAyes() == 1) {
+				if(obj.getAyesTag() == 1) {
 					SET("ayes = ayes + 1");
 				}
-				if(obj.getComments() == 1) {
+				if(obj.getCommentTag() == 1) {
 					SET("comments = comments + 1");
 				}
 				SET("update_by = #{updateBy}");
@@ -189,10 +189,10 @@ public class JmRelationshipFriendlifeSqlProvider{
 			{
 				UPDATE("jm_relationship_friendlife");
 
-				if(obj.getAyes() == 1) {
+				if(obj.getAyesTag() == 1) {
 					SET("ayes = ayes - 1");
 				}
-				if(obj.getComments() == 1) {
+				if(obj.getCommentTag() == 1) {
 					SET("comments = comments - 1");
 				}
 				SET("update_by = #{updateBy}");

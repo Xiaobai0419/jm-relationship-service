@@ -4,7 +4,9 @@ import com.sunfield.microframe.common.response.Page;
 import com.sunfield.microframe.common.response.ResponseBean;
 import com.sunfield.microframe.domain.JmAppUser;
 import com.sunfield.microframe.feign.fallback.JmAppUserFeignServiceFallback;
+import com.sunfield.microframe.params.UpdateFriendParams;
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -66,4 +68,12 @@ public interface JmAppUserFeignService {
      */
     @RequestMapping(value = "/JmAppUserSupport/findListByIndustry", method = RequestMethod.POST)
     ResponseBean<List<JmAppUser>> findListByIndustry(@RequestParam("industry") String industry);
+
+    /**
+     * 更新好友数量
+     * @param params
+     * @return
+     */
+    @RequestMapping(value = "/JmAppUserSupport/updateFriendNum", method = RequestMethod.POST)
+    public ResponseBean<Integer> updateFriendNum(@RequestBody UpdateFriendParams params);
 }//经测试，非@RequestBody（一般为json）方式的Rest参数，即传递key/value方式，Feign客户端方法参数需要加上@RequestParam注解标注所传字段名，否则无法向Rest服务端传递key/value参数（获取到null），自然也无法调用成功

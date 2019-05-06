@@ -62,7 +62,7 @@ public class JmRelationshipUserFriendlifeService implements ITxTransaction{
 			JmRelationshipFriendlife jmRelationshipFriendlife = new JmRelationshipFriendlife();
 			jmRelationshipFriendlife.preUpdate();//别忘了，否则数据库报错！！
 			jmRelationshipFriendlife.setId(obj.getFriendlifeId());//该条朋友圈id
-			jmRelationshipFriendlife.setAyes(1);//点赞数+1
+			jmRelationshipFriendlife.setAyesTag(1);//点赞数+1
 			mysqlResult2 = jmRelationshipFriendlifeMapper.updateNum(jmRelationshipFriendlife);
 		}
 
@@ -93,7 +93,7 @@ public class JmRelationshipUserFriendlifeService implements ITxTransaction{
 			JmRelationshipFriendlife jmRelationshipFriendlife = new JmRelationshipFriendlife();
 			jmRelationshipFriendlife.preUpdate();
 			jmRelationshipFriendlife.setId(obj.getFriendlifeId());//该条朋友圈id
-			jmRelationshipFriendlife.setAyes(1);//点赞数-1
+			jmRelationshipFriendlife.setAyesTag(1);//点赞数-1
 			mysqlResult2 = jmRelationshipFriendlifeMapper.updateNumMinus(jmRelationshipFriendlife);
 		}
 

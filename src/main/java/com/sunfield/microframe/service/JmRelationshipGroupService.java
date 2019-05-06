@@ -53,6 +53,10 @@ public class JmRelationshipGroupService implements ITxTransaction{
 	@Qualifier("jmIndustriesFeignService")
 	private JmIndustriesFeignService jmIndustriesFeignService;
 
+	private JmAppUser findUser(String userId) {
+		return jmAppUserFeignService.findOne(userId).getData();
+	}
+
 	private JmIndustries findIndustry(JmIndustries industry) {
 		return jmIndustriesFeignService.findOne(industry).getData();
 	}
@@ -79,7 +83,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			}
 		}
 		if(groupList == null) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,new ArrayList<>());
 		}
 		return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,groupList);
 	}
@@ -172,7 +176,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			}
 		}
 		if(groupList == null) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,new ArrayList<>());
 		}
 		return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,groupList);
 	}
@@ -235,7 +239,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			}
 		}
 		if(groupList == null || groupList.size() == 0) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,new Page<>(0,obj.getPageNumber(),obj.getPageSize(),new ArrayList<>()));
 		}
 		//应用层分页
 		return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
@@ -346,7 +350,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//非成员禁止查看
 		if(!allMembers.contains(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
 		}
 		//把群主排第一个
 		List<JmAppUser> memberUsers = frientsUtil.groupMembersValues(obj.getId());
@@ -408,7 +412,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//非成员禁止查看
 		if(!allMembers.contains(operatorId)) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
 		}
 		//把群主排第一个
 		List<JmAppUser> memberUsers = frientsUtil.groupMembersValues(obj.getId());
@@ -612,7 +616,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//操作者非群主本人
 		if(!operatorId.equals(thisGroup.getCreatorId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_CREATOR);
 		}
 
 		//Set集合自动去重
@@ -707,7 +711,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		if(operatorId.equals(thisGroup.getCreatorId())) {
 			//判断有没有踢自己
 			if(memberIds.contains(operatorId)) {
-				return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+				return new RelationshipResponseBean<>(RelationshipResponseStatus.CREATOR_OUT);
 			}
 		}else {//非群主，需要判断他是不是成员且是自己退出
 			//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
@@ -726,10 +730,10 @@ public class JmRelationshipGroupService implements ITxTransaction{
 				}
 			}
 			if(!allMembers.contains(operatorId)) {
-				return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+				return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
 			}else {
 				if(memberIds.size() > 1 || !memberIds.contains(operatorId)) {
-					return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);//群成员只能退本人
+					return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_SELF);//群成员只能退本人
 				}
 			}
 		}
@@ -744,7 +748,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//调用融云退出群组接口
 		Result groupResult = GroupUtil.quitFromGroup(obj.getId(),groupMembers.toArray(new GroupMember[groupMembers.size()]));
-		//查询Redis被移除成员具体信息 TODO 这里的Redis查询有问题--已解决，待测试
+		//查询Redis被移除成员具体信息--这里的Redis查询问题已解决
 		List<JmAppUser> userList = frientsUtil.groupMembersValues(obj.getId(),memberIds);
 		//调用用户服务获取一次，防止Redis数据丢失
 		if(userList == null || userList.size() == 0) {
@@ -765,13 +769,12 @@ public class JmRelationshipGroupService implements ITxTransaction{
 				}
 			}else {//退群
 				//调用融云给群和群主一个通知
-				for(JmAppUser user : userList) {
-					TxtMessage txtMessage = new TxtMessage("'" + (user != null && StringUtils.isNotBlank(user.getNickName()) ?
-							user.getNickName() : "") + "'已退出部落", "部落成员退出通知");
-					//能否发给自己？
-					MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), new String[]{thisGroup.getCreatorId()},txtMessage);
-					MessageUtil.sendGroupTxtMessage(thisGroup.getCreatorId(),new String[]{thisGroup.getId()},txtMessage);
-				}
+				JmAppUser user = findUser(operatorId);
+				TxtMessage txtMessage = new TxtMessage("'" + (user != null && StringUtils.isNotBlank(user.getNickName()) ?
+						user.getNickName() : "") + "'已退出部落", "部落成员退出通知");
+				//能否发给自己？
+				MessageUtil.sendSystemTxtMessage(thisGroup.getCreatorId(), new String[]{thisGroup.getCreatorId()},txtMessage);
+				MessageUtil.sendGroupTxtMessage(thisGroup.getCreatorId(),new String[]{thisGroup.getId()},txtMessage);
 			}
 		}
 		//从Redis反向获取自动去重的部落成员个数，更新部到关系型数据库！
@@ -814,7 +817,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//操作者非群主本人
 		if(!operatorId.equals(thisGroup.getCreatorId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_CREATOR);
 		}
 		//冗余更新行业分类名
 		if(StringUtils.isNotBlank(obj.getIndustryId())) {
@@ -867,7 +870,7 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		}
 		//操作者非群主本人
 		if(!operatorId.equals(thisGroup.getCreatorId())) {
-			return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
+			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_CREATOR);
 		}
 
 		int mysqlResult = mapper.delete(obj.getId());
