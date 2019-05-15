@@ -37,7 +37,7 @@ public class JmRelationshipFriendlifeService implements ITxTransaction{
 	@Autowired
 	private RelationshipService relationshipService;
 
-	@Cacheable(key = "#p0")//缓存用户信息--注意与其他人同一个键不同信息的彼此覆盖情况！！会因数据结构不同而返回缓存信息失败！
+//	@Cacheable(key = "#p0")//缓存用户信息--注意与其他人同一个键不同信息的彼此覆盖情况！！会因数据结构不同而返回缓存信息失败！
 	public JmAppUser findUser(String userId) {
 		return jmAppUserFeignService.findOne(userId).getData();
 	}

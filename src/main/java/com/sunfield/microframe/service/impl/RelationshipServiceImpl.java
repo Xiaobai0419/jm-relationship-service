@@ -21,10 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -39,7 +35,7 @@ import java.util.*;
  */
 @Slf4j
 @Service
-@CacheConfig(cacheNames = "jmRelationshipCache")//类级别公共缓存名配置
+//@CacheConfig(cacheNames = "jmRelationshipCache")//类级别公共缓存名配置
 public class RelationshipServiceImpl implements RelationshipService {
 
     @Autowired
@@ -57,7 +53,7 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Qualifier("jmIndustriesFeignService")
     private JmIndustriesFeignService jmIndustriesFeignService;
 
-    @Cacheable(key = "#p0")//缓存用户信息
+//    @Cacheable(key = "#p0")//缓存用户信息
     public JmAppUser findUser(String userId) {
         return jmAppUserFeignService.findOne(userId).getData();
     }
@@ -67,12 +63,12 @@ public class RelationshipServiceImpl implements RelationshipService {
         return jmIndustriesFeignService.findOne(industry).getData();
     }
 
-    @Cacheable(value = "jm_friends_cache",key = "'allUsersInfo'")//缓存所有用户信息（60s）--注意用户更新和增减问题，可能造成一些信息错误或加载不到！！
+//    @Cacheable(value = "jm_friends_cache",key = "'allUsersInfo'")//缓存所有用户信息（60s）--注意用户更新和增减问题，可能造成一些信息错误或加载不到！！
     public List<JmAppUser> findUsers() {
         return jmAppUserFeignService.findList().getData();
     }
 
-    @Cacheable(value = "jm_friends_cache",key = "'allUsersInfo_industry_'+ #p0")//缓存该行业所有用户信息（60s）
+//    @Cacheable(value = "jm_friends_cache",key = "'allUsersInfo_industry_'+ #p0")//缓存该行业所有用户信息（60s）
     public List<JmAppUser> findUsers(String industry) {
         return jmAppUserFeignService.findListByIndustry(industry).getData();
     }
@@ -86,7 +82,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
     @TxTransaction
     //对方好友请求列表缓存清除
-    @Caching(evict = {@CacheEvict(value = "jm_friends_cache",key = "#p0.userIdOpposite + '_findFriendRequestsOppsite'")})
+//    @Caching(evict = {@CacheEvict(value = "jm_friends_cache",key = "#p0.userIdOpposite + '_findFriendRequestsOppsite'")})
     @Override
     public JmRelationshipFriendship addFriendRequest(JmRelationshipFriendship jmRelationshipFriendship) {
         //添加自己为好友的情况
@@ -168,7 +164,9 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
     @TxTransaction
     @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED,readOnly = false)
-    @Caching(evict = {@CacheEvict(value = "jm_friends_cache",key = "#p0.userId + '_findFriends'")})//缓存清除--注意只能清除全部好友缓存，无法清除特定搜索历史缓存
+//    @Caching(evict = {@CacheEvict(value = "jm_friends_cache",key = "#p0.userId + '_findFriends'"),
+//            @CacheEvict(value = "jm_friends_cache",key = "#p0.userIdOpposite + '_findFriends'"),
+//            @CacheEvict(value = "jm_friends_cache",key = "#p0.userId + '_findFriendRequestsOppsite'")})//缓存清除--请求自身和对方好友缓存，自身好友请求缓存
     @Override
     public JmRelationshipFriendship agreeAsAFriend(JmRelationshipFriendship jmRelationshipFriendship) {
         //通过自己为好友的情况
@@ -275,7 +273,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
 //    @TxTransaction
     //自身好友请求列表缓存清除
-    @Caching(evict = {@CacheEvict(value = "jm_friends_cache",key = "#p0.userId + '_findFriendRequestsOppsite'")})
+//    @Caching(evict = {@CacheEvict(value = "jm_friends_cache",key = "#p0.userId + '_findFriendRequestsOppsite'")})
     @Override
     public JmRelationshipFriendship rejectFriendRequest(JmRelationshipFriendship jmRelationshipFriendship) {
         JmRelationshipFriendship jmRelationshipFriendshipOppsite = new JmRelationshipFriendship();
@@ -304,7 +302,8 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
     @TxTransaction
     @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.READ_COMMITTED,readOnly = false)
-    @Caching(evict = {@CacheEvict(value = "jm_friends_cache",key = "#p0.userId + '_findFriends'")})//缓存清除--注意只能清除全部好友缓存，无法清除特定搜索历史缓存
+//    @Caching(evict = {@CacheEvict(value = "jm_friends_cache",key = "#p0.userId + '_findFriends'"),
+//            @CacheEvict(value = "jm_friends_cache",key = "#p0.userIdOpposite + '_findFriends'")})//缓存清除--清除自身和对方好友缓存
     @Override
     public JmRelationshipFriendship removeFriend(JmRelationshipFriendship jmRelationshipFriendship) {
         JmRelationshipFriendship jmRelationshipFriendshipOppsite = new JmRelationshipFriendship();
@@ -375,7 +374,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @param jmRelationshipFriendship
      * @return
      */
-    @Cacheable(value = "jm_friends_cache",key = "#p0.userId + '_findFriends_' + #p0.userName")//缓存存储键名：每个用户的每个业务都该不同！！
+//    @Cacheable(value = "jm_friends_cache",key = "#p0.userId + '_findFriends'")//缓存存储键名：每个用户的每个业务都该不同！！
     @Override
     public List<JmAppUser> findFriends(JmRelationshipFriendship jmRelationshipFriendship) {
         List<JmRelationshipFriendship> relationshipList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
@@ -405,7 +404,8 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @param jmRelationshipFriendship
      * @return
      */
-    @Cacheable(value = "jm_friends_cache",key = "#p0.userId + '_findFriendsPage_' + #p0.userName + '_' + #p0.pageNumber + '_' + #p0.pageSize")//缓存存储键名：每个用户的每个业务都该不同！！每页不同！！
+    //分页缓存造成好友请求列表数据无法更新的bug,去掉！！
+//    @Cacheable(value = "jm_friends_cache",key = "#p0.userId + '_findFriendsPage_' + #p0.pageNumber + '_' + #p0.pageSize")//缓存存储键名：每个用户的每个业务都该不同！！每页不同！！
     @Override
     public Page<JmAppUser> findFriendsPage(JmRelationshipFriendship jmRelationshipFriendship) {
         List<JmRelationshipFriendship> resultList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
@@ -459,7 +459,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @param jmRelationshipFriendship
      * @return
      */
-    @Cacheable(value = "jm_friends_cache",key = "#p0.userId + '_findFriendRequestsOppsite'")//缓存存储键名：每个用户的每个业务都该不同！！
+//    @Cacheable(value = "jm_friends_cache",key = "#p0.userId + '_findFriendRequestsOppsite'")//缓存存储键名：每个用户的每个业务都该不同！！
     @Override
     public List<JmAppUser> findFriendRequestsOppsite(JmRelationshipFriendship jmRelationshipFriendship) {
         //时间倒序列表
@@ -536,7 +536,8 @@ public class RelationshipServiceImpl implements RelationshipService {
      * @param jmRelationshipFriendship
      * @return
      */
-    @Cacheable(value = "jm_friends_cache",key = "#p0.userId + '_findFriendRequestsOppsitePage_' + #p0.pageNumber + '_' + #p0.pageSize")//缓存存储键名：每个用户的每个业务都该不同！！每页不同！！
+    //分页缓存造成好友请求列表数据无法更新的bug,去掉！！
+//    @Cacheable(value = "jm_friends_cache",key = "#p0.userId + '_findFriendRequestsOppsitePage_' + #p0.pageNumber + '_' + #p0.pageSize")//缓存存储键名：每个用户的每个业务都该不同！！每页不同！！
     @Override
     public Page<JmAppUser> findFriendRequestsOppsitePage(JmRelationshipFriendship jmRelationshipFriendship) {
         List<JmAppUser> requestUsers = findFriendRequestsOppsite(jmRelationshipFriendship);
