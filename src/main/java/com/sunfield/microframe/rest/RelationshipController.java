@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -317,20 +318,9 @@ public class RelationshipController {
                 return new RelationshipResponseBean<>(RelationshipResponseStatus.PARAMS_ERROR);
             }
             if(StringUtils.isNotBlank(user.getIndustry())) {//按行业
-                //业务修正：查行业分值，保证字段是数值类型
-                int industryScore = 0;
-                JmIndustries industries = new JmIndustries();
-                industries.setId(user.getIndustry());
-                industries = relationshipService.findIndustry(industries);
-                if(industries != null) {
-                    industryScore = industries.getScore();
-                }
-                if(industryScore != 0) {
-                    user.setIndustry(String.valueOf(industryScore));//设置为分值字段（整数）转成的字符串
-                    //应用层分页
-                    return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
-                            PageUtils.pageList(relationshipService.industryRelationship(user),user.getPageNumber(),user.getPageSize()));
-                }
+                //应用层分页
+                return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,
+                        PageUtils.pageList(relationshipService.industryRelationship(user),user.getPageNumber(),user.getPageSize()));
             }
             //全行业
             //应用层分页

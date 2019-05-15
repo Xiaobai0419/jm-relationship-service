@@ -204,24 +204,32 @@ public class RelationshipServiceImpl implements RelationshipService {
             JmAppUser user = findUser(jmRelationshipFriendship.getUserId());//自身信息
             JmAppUser userOppsite = findUser(jmRelationshipFriendship.getUserIdOpposite());//对方信息
             if(user != null && userOppsite != null) {
-                double userIndustry = 0;//默认0，全行业，防止大多数用户不设置任何行业
-                double userOppsiteIndustry = 0;
+                Double userIndustry = 0d;//默认0，全行业，防止大多数用户不设置任何行业
+                Double userOppsiteIndustry = 0d;
                 if(StringUtils.isNotBlank(user.getIndustry())) {
-                    JmIndustries industry = new JmIndustries();
-                    industry.setId(user.getIndustry());
-                    industry = findIndustry(industry);
-                    //如有任何异常，会在接口层抛出并记录到后台
-                    if(industry != null) {
-                        userIndustry = industry.getScore();//修复使用行业id作为分值的bug:赋值为数值类型的行业分值
+                    try {
+                        JmIndustries industry = new JmIndustries();
+                        industry.setId(user.getIndustry());
+                        industry = findIndustry(industry);
+                        if(industry != null) {
+                            userIndustry = industry.getScore().doubleValue();//修复使用行业id作为分值的bug:赋值为数值类型的行业分值
+                        }
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                        log.info("用户行业分值转换、存储异常：" + user.getId());
                     }
                 }
                 if(StringUtils.isNotBlank(userOppsite.getIndustry())) {
-                    JmIndustries industry = new JmIndustries();
-                    industry.setId(userOppsite.getIndustry());
-                    industry = findIndustry(industry);
-                    //如有任何异常，会在接口层抛出并记录到后台
-                    if(industry != null) {
-                        userOppsiteIndustry = industry.getScore();//修复使用行业id作为分值的bug:赋值为数值类型的行业分值
+                    try {
+                        JmIndustries industry = new JmIndustries();
+                        industry.setId(userOppsite.getIndustry());
+                        industry = findIndustry(industry);
+                        if(industry != null) {
+                            userOppsiteIndustry = industry.getScore().doubleValue();//修复使用行业id作为分值的bug:赋值为数值类型的行业分值
+                        }
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                        log.info("用户行业分值转换、存储异常：" + userOppsite.getId());
                     }
                 }
                 addFriend = frientsUtil.addFriend(jmRelationshipFriendship.getUserId(),
@@ -642,34 +650,53 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
     @Override
     public List<JmAppUser> industryRelationship(JmAppUser user) {
+        log.info("人脉搜索开始：" + new Date().toString());
         String userId = user.getId();
         String industryId = user.getIndustry();
-        //有序集合
-        List<String> industryRelationshipList = new LinkedList<>();
-        //行业通讯录好友推荐
-        industryRelationshipList.addAll(frientsUtil.getNoteBookFriends(userId,Double.parseDouble(industryId)));
-        //行业二度好友推荐
-        industryRelationshipList.addAll(frientsUtil.getSecFriends(userId,frientsUtil.getFriendKeys(userId),Double.parseDouble(industryId)));
-        //行业三度好友推荐
-        industryRelationshipList.addAll(frientsUtil.getThrFriends(userId,frientsUtil.getSecFriendKeys(userId),Double.parseDouble(industryId)));
-        //查询该行业所有用户集合
-        Set<String> industryUserIds = new HashSet<>();
-        List<JmAppUser> industryUsers = findUsers(industryId);
-        if(industryUsers != null && industryUsers.size() > 0) {
-            for(JmAppUser userInfo :industryUsers) {
-                industryUserIds.add(userInfo.getId());
+        log.info("人脉搜索输入的行业原始id信息：" + industryId);
+        //业务修正：查行业分值，保证字段是数值类型
+        Integer industryScore = 0;
+        try {
+            JmIndustries industries = new JmIndustries();
+            industries.setId(industryId);
+            industries = findIndustry(industries);
+            if (industries != null) {
+                industryScore = industries.getScore();
+                log.info("人脉搜索行业查询到的分值：" + industryScore);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("人脉搜索行业查询异常");
         }
-        //行业陌生人推荐
-        industryRelationshipList.addAll(frientsUtil.getStrangers(userId,industryUserIds));
+        log.info("人脉搜索industry最终分值（默认0是没查到行业，返回空集）:" + industryScore);
+        //找不到搜索的行业信息的直接返回空集
+        if (industryScore != 0) {
+            //有序集合
+            List<String> industryRelationshipList = new LinkedList<>();
+            //行业通讯录好友推荐
+            industryRelationshipList.addAll(frientsUtil.getNoteBookFriends(userId,industryScore.doubleValue()));
+            //行业二度好友推荐
+            industryRelationshipList.addAll(frientsUtil.getSecFriends(userId,frientsUtil.getFriendKeys(userId),industryScore.doubleValue()));
+            //行业三度好友推荐
+            industryRelationshipList.addAll(frientsUtil.getThrFriends(userId,frientsUtil.getSecFriendKeys(userId),industryScore.doubleValue()));
+            //查询该行业所有用户集合
+            Set<String> industryUserIds = new HashSet<>();
+            List<JmAppUser> industryUsers = findUsers(industryId);
+            if(industryUsers != null && industryUsers.size() > 0) {
+                for(JmAppUser userInfo :industryUsers) {
+                    industryUserIds.add(userInfo.getId());
+                }
+            }
+            //行业陌生人推荐
+            industryRelationshipList.addAll(frientsUtil.getStrangers(userId,industryUserIds));
 
-        //业务修正：需要去掉自己
-        industryRelationshipList.remove(userId);
+            //业务修正：需要去掉自己
+            industryRelationshipList.remove(userId);
 
-        JmRelationshipFriendship jmRelationshipFriendship = new JmRelationshipFriendship();
-        jmRelationshipFriendship.setUserId(userId);
+            JmRelationshipFriendship jmRelationshipFriendship = new JmRelationshipFriendship();
+            jmRelationshipFriendship.setUserId(userId);
 
-        //业务容错：去关系型数据库查一遍好友列表进行去除，防止Redis好友数据丢失（此时的人脉搜索列表退化为全体陌生人）
+            //业务容错：去关系型数据库查一遍好友列表进行去除，防止Redis好友数据丢失（此时的人脉搜索列表退化为全体陌生人）
 //        List<JmRelationshipFriendship> friendList = jmRelationshipFriendshipMapper.findFriends(jmRelationshipFriendship);
 //        List<String> friendIds = new ArrayList<>();
 //        if(friendList != null && friendList.size() > 0) {
@@ -677,88 +704,117 @@ public class RelationshipServiceImpl implements RelationshipService {
 //                friendIds.add(relationshipFriendship.getUserIdOpposite());//添加对方id到好友id列表
 //            }
 //        }
-        //人脉中再次尝试去掉所有好友
+            //人脉中再次尝试去掉所有好友
 //        industryRelationshipList.removeAll(friendIds);
 
-        //业务修正：每次在业务层去掉（全部）已经申请好友的所有人脉
-        List<JmRelationshipFriendship> requestList = jmRelationshipFriendshipMapper.findFriendRequests(jmRelationshipFriendship);
-        List<String> requestIds = new ArrayList<>();
-        if(requestList != null && requestList.size() > 0) {
-            for(JmRelationshipFriendship relationshipFriendship : requestList) {
-                requestIds.add(relationshipFriendship.getUserIdOpposite());//添加对方id到请求id列表
+            //业务修正：每次在业务层去掉（全部）已经申请好友的所有人脉
+            List<JmRelationshipFriendship> requestList = jmRelationshipFriendshipMapper.findFriendRequests(jmRelationshipFriendship);
+            List<String> requestIds = new ArrayList<>();
+            if(requestList != null && requestList.size() > 0) {
+                for(JmRelationshipFriendship relationshipFriendship : requestList) {
+                    requestIds.add(relationshipFriendship.getUserIdOpposite());//添加对方id到请求id列表
+                }
             }
-        }
-        //只有使用迭代器才可迭代删除，避免并发修改异常
-        Iterator<String> relationshipIterator = industryRelationshipList.iterator();
-        while(relationshipIterator.hasNext()) {
-            String relationshipUserId = relationshipIterator.next();
-            if(requestIds.contains(relationshipUserId)) {
-                //去除构建的人脉列表中（无论是按行业还是全行业）已请求的
-                relationshipIterator.remove();
+            //只有使用迭代器才可迭代删除，避免并发修改异常
+            Iterator<String> relationshipIterator = industryRelationshipList.iterator();
+            while(relationshipIterator.hasNext()) {
+                String relationshipUserId = relationshipIterator.next();
+                if(requestIds.contains(relationshipUserId)) {
+                    //去除构建的人脉列表中（无论是按行业还是全行业）已请求的
+                    relationshipIterator.remove();
+                }
             }
-        }
 
-        String[] userIds = industryRelationshipList.toArray(new String[industryRelationshipList.size()]);
-        List<JmAppUser> users = null;
-        //关键字统一传入此字段，无论是人名还是公司名
-        String nickName = user.getNickName();
-        if(StringUtils.isNotBlank(nickName)) {
-            Map<String,JmAppUser> userMap = new HashMap<>();
-            //以用户名或公司名模糊查找取合集
-            //以用户名模糊查找所有
-            Page<JmAppUser> pageUsers1 = jmAppUserFeignService.findListByIdsAndNames(userIds,nickName,"",1,Integer.MAX_VALUE).getData();
-            if(pageUsers1 != null) {
-                List<JmAppUser> users1 = pageUsers1.getData();
-                if(users1 != null && users1.size() > 0) {
-                    for(JmAppUser jmAppUser : users1) {
+            String[] userIds = industryRelationshipList.toArray(new String[industryRelationshipList.size()]);
+            //行业人脉可能为空，因为大部分人不填任何行业，好友集合中也无此行业分值信息
+            if(userIds == null || userIds.length == 0) {
+                log.info("人脉搜索结束：" + new Date().toString());
+                return new ArrayList<>();
+            }
+//        if(StringUtils.isNotBlank(nickName)) {
+//            Map<String,JmAppUser> userMap = new HashMap<>();
+//            //以用户名或公司名模糊查找取合集
+//            //以用户名模糊查找所有
+//            Page<JmAppUser> pageUsers1 = jmAppUserFeignService.findListByIdsAndNames(userIds,nickName,"",1,Integer.MAX_VALUE).getData();
+//            if(pageUsers1 != null) {
+//                List<JmAppUser> users1 = pageUsers1.getData();
+//                if(users1 != null && users1.size() > 0) {
+//                    for(JmAppUser jmAppUser : users1) {
+//                        userMap.put(jmAppUser.getId(),jmAppUser);
+//                    }
+//                }
+//            }
+//            //以公司名模糊查找所有
+//            Page<JmAppUser> pageUsers2 = jmAppUserFeignService.findListByIdsAndNames(userIds,"",nickName,1,Integer.MAX_VALUE).getData();
+//            if(pageUsers2 != null) {
+//                List<JmAppUser> users2 = pageUsers2.getData();
+//                if(users2 != null && users2.size() > 0) {
+//                    for(JmAppUser jmAppUser : users2) {
+//                        userMap.put(jmAppUser.getId(),jmAppUser);//以唯一id为key,重复的会覆盖，不重复的会添加
+//                    }
+//                }
+//            }
+//            users = new ArrayList<>();
+//            users.addAll(userMap.values());
+//        }else {
+//            //全量查找
+//            //按用户id批量查询所有推荐人脉信息
+//            users = jmAppUserFeignService.findListByIds(userIds).getData();
+//        }
+            List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
+            //需要按industryRelationshipList中的顺序重新排序
+            List<JmAppUser> sortedUsers = new LinkedList<>();
+            if(users != null && users.size() > 0) {
+                //关键字统一传入此字段，无论是人名还是公司名
+                String nickName = user.getNickName();
+                Map<String,JmAppUser> userMap = new HashMap<>();
+                ListIterator<JmAppUser> iterator = users.listIterator();
+                //优化：统一批量查出所有人脉，应用层模糊查找
+                if(StringUtils.isNotBlank(nickName)) {
+                    while(iterator.hasNext()) {
+                        JmAppUser jmAppUser = iterator.next();
+                        String resNickName = jmAppUser.getNickName();
+                        String resCompanyName = jmAppUser.getCompanyName();
+                        String resMobile = jmAppUser.getMobile();
+                        if((StringUtils.isBlank(resNickName) || resNickName.indexOf(nickName) == -1) &&
+                                (StringUtils.isBlank(resCompanyName) || resCompanyName.indexOf(nickName) == -1) &&
+                                (StringUtils.isBlank(resMobile) || resMobile.indexOf(nickName) == -1)) {
+                            iterator.remove();
+                        }else {
+                            userMap.put(jmAppUser.getId(),jmAppUser);
+                        }
+                    }
+                }else {
+                    for(JmAppUser jmAppUser : users) {
                         userMap.put(jmAppUser.getId(),jmAppUser);
                     }
                 }
-            }
-            //以公司名模糊查找所有
-            Page<JmAppUser> pageUsers2 = jmAppUserFeignService.findListByIdsAndNames(userIds,"",nickName,1,Integer.MAX_VALUE).getData();
-            if(pageUsers2 != null) {
-                List<JmAppUser> users2 = pageUsers2.getData();
-                if(users2 != null && users2.size() > 0) {
-                    for(JmAppUser jmAppUser : users2) {
-                        userMap.put(jmAppUser.getId(),jmAppUser);//以唯一id为key,重复的会覆盖，不重复的会添加
+                //批量查询该用户与所有该行业人脉的好友关系
+//            List<JmRelationshipFriendship> records = jmRelationshipFriendshipMapper.findFriendRecords(userId,userIds);
+//            Map<String,Integer> relationships = new HashMap<>();
+//            if(records != null && records.size() > 0) {
+//                for(JmRelationshipFriendship record :records) {
+//                    relationships.put(record.getUserIdOpposite(),record.getType());
+//                }
+//            }
+//            for(JmAppUser jmAppUser : users) {
+//                //设置关系：查不到关系的无关联，查得到的设置为关系表type值
+//                jmAppUser.setRelationType(relationships.get(jmAppUser.getId()) == null ?
+//                        4 : (relationships.get(jmAppUser.getId())));
+//            }
+                for(String industryUserId : industryRelationshipList) {
+                    JmAppUser industryUser = userMap.get(industryUserId);
+                    if(industryUser != null) {
+                        sortedUsers.add(industryUser);
                     }
                 }
             }
-            users = new ArrayList<>();
-            users.addAll(userMap.values());
+            log.info("人脉搜索结束：" + new Date().toString());
+            return sortedUsers;
         }else {
-            //全量查找
-            //按用户id批量查询所有推荐人脉信息
-            users = jmAppUserFeignService.findListByIds(userIds).getData();
+            log.info("人脉搜索结束：" + new Date().toString());
+            return new ArrayList<>();
         }
-        //批量查询该用户与所有该行业人脉的好友关系
-        List<JmRelationshipFriendship> records = jmRelationshipFriendshipMapper.findFriendRecords(userId,userIds);
-        Map<String,Integer> relationships = new HashMap<>();
-        if(records != null && records.size() > 0) {
-            for(JmRelationshipFriendship record :records) {
-                relationships.put(record.getUserIdOpposite(),record.getType());
-            }
-        }
-
-        //需要按industryRelationshipList中的顺序重新排序
-        List<JmAppUser> sortedUsers = new LinkedList<>();
-        if(users != null && users.size() > 0) {
-            Map<String,JmAppUser> userMap = new HashMap<>();
-            for(JmAppUser jmAppUser : users) {
-                userMap.put(jmAppUser.getId(),jmAppUser);
-                //设置关系：查不到关系的无关联，查得到的设置为关系表type值
-                jmAppUser.setRelationType(relationships.get(jmAppUser.getId()) == null ?
-                        4 : (relationships.get(jmAppUser.getId())));
-            }
-            for(String industryUserId : industryRelationshipList) {
-                JmAppUser industryUser = userMap.get(industryUserId);
-                if(industryUser != null) {
-                    sortedUsers.add(industryUser);
-                }
-            }
-        }
-        return sortedUsers;
     }
 
     /**
@@ -768,6 +824,7 @@ public class RelationshipServiceImpl implements RelationshipService {
      */
     @Override
     public List<JmAppUser> allIndustryRelationship(JmAppUser user) {
+        log.info("人脉搜索开始：" + new Date().toString());
         String userId = user.getId();
         //有序集合
         List<String> allIndustryRelationshipList = new LinkedList<>();
@@ -824,58 +881,81 @@ public class RelationshipServiceImpl implements RelationshipService {
         }
 
         String[] userIds = allIndustryRelationshipList.toArray(new String[allIndustryRelationshipList.size()]);
-        List<JmAppUser> users = null;
-        //关键字统一传入此字段，无论是人名还是公司名
-        String nickName = user.getNickName();
-        if(StringUtils.isNotBlank(nickName)) {
-            Map<String,JmAppUser> userMap = new HashMap<>();
-            //以用户名或公司名模糊查找取合集
-            //以用户名模糊查找所有
-            Page<JmAppUser> pageUsers1 = jmAppUserFeignService.findListByIdsAndNames(userIds,nickName,"",1,Integer.MAX_VALUE).getData();
-            if(pageUsers1 != null) {
-                List<JmAppUser> users1 = pageUsers1.getData();
-                if(users1 != null && users1.size() > 0) {
-                    for(JmAppUser jmAppUser : users1) {
-                        userMap.put(jmAppUser.getId(),jmAppUser);
-                    }
-                }
-            }
-            //以公司名模糊查找所有
-            Page<JmAppUser> pageUsers2 = jmAppUserFeignService.findListByIdsAndNames(userIds,"",nickName,1,Integer.MAX_VALUE).getData();
-            if(pageUsers2 != null) {
-                List<JmAppUser> users2 = pageUsers2.getData();
-                if(users2 != null && users2.size() > 0) {
-                    for(JmAppUser jmAppUser : users2) {
-                        userMap.put(jmAppUser.getId(),jmAppUser);//以唯一id为key,重复的会覆盖，不重复的会添加
-                    }
-                }
-            }
-            users = new ArrayList<>();
-            users.addAll(userMap.values());
-        }else {
-            //全量查找
-            //按用户id批量查询所有推荐人脉信息
-            users = jmAppUserFeignService.findListByIds(userIds).getData();
+        if(userIds == null || userIds.length == 0) {
+            log.info("人脉搜索结束：" + new Date().toString());
+            return new ArrayList<>();
         }
-        //批量查询该用户与所有该行业人脉的好友关系
-        List<JmRelationshipFriendship> records = jmRelationshipFriendshipMapper.findFriendRecords(userId,userIds);
-        Map<String,Integer> relationships = new HashMap<>();
-        if(records != null && records.size() > 0) {
-            for(JmRelationshipFriendship record :records) {
-                relationships.put(record.getUserIdOpposite(),record.getType());
-            }
-        }
-
+//        if(StringUtils.isNotBlank(nickName)) {
+//            Map<String,JmAppUser> userMap = new HashMap<>();
+//            //以用户名或公司名模糊查找取合集
+//            //以用户名模糊查找所有
+//            Page<JmAppUser> pageUsers1 = jmAppUserFeignService.findListByIdsAndNames(userIds,nickName,"",1,Integer.MAX_VALUE).getData();
+//            if(pageUsers1 != null) {
+//                List<JmAppUser> users1 = pageUsers1.getData();
+//                if(users1 != null && users1.size() > 0) {
+//                    for(JmAppUser jmAppUser : users1) {
+//                        userMap.put(jmAppUser.getId(),jmAppUser);
+//                    }
+//                }
+//            }
+//            //以公司名模糊查找所有
+//            Page<JmAppUser> pageUsers2 = jmAppUserFeignService.findListByIdsAndNames(userIds,"",nickName,1,Integer.MAX_VALUE).getData();
+//            if(pageUsers2 != null) {
+//                List<JmAppUser> users2 = pageUsers2.getData();
+//                if(users2 != null && users2.size() > 0) {
+//                    for(JmAppUser jmAppUser : users2) {
+//                        userMap.put(jmAppUser.getId(),jmAppUser);//以唯一id为key,重复的会覆盖，不重复的会添加
+//                    }
+//                }
+//            }
+//            users = new ArrayList<>();
+//            users.addAll(userMap.values());
+//        }else {
+//            //全量查找
+//            //按用户id批量查询所有推荐人脉信息
+//            users = jmAppUserFeignService.findListByIds(userIds).getData();
+//        }
+        List<JmAppUser> users = jmAppUserFeignService.findListByIds(userIds).getData();
         //需要按allIndustryRelationshipList中的顺序重新排序
         List<JmAppUser> sortedUsers = new LinkedList<>();
         if(users != null && users.size() > 0) {
+            //关键字统一传入此字段，无论是人名还是公司名
+            String nickName = user.getNickName();
             Map<String,JmAppUser> userMap = new HashMap<>();
-            for(JmAppUser jmAppUser : users) {
-                userMap.put(jmAppUser.getId(),jmAppUser);
-                //设置关系：查不到关系的无关联，查得到的设置为关系表type值
-                jmAppUser.setRelationType(relationships.get(jmAppUser.getId()) == null ?
-                        4 : (relationships.get(jmAppUser.getId())));
+            ListIterator<JmAppUser> iterator = users.listIterator();
+            //优化：统一批量查出所有人脉，应用层模糊查找
+            if(StringUtils.isNotBlank(nickName)) {
+                while(iterator.hasNext()) {
+                    JmAppUser jmAppUser = iterator.next();
+                    String resNickName = jmAppUser.getNickName();
+                    String resCompanyName = jmAppUser.getCompanyName();
+                    String resMobile = jmAppUser.getMobile();
+                    if((StringUtils.isBlank(resNickName) || resNickName.indexOf(nickName) == -1) &&
+                            (StringUtils.isBlank(resCompanyName) || resCompanyName.indexOf(nickName) == -1) &&
+                            (StringUtils.isBlank(resMobile) || resMobile.indexOf(nickName) == -1)) {
+                        iterator.remove();
+                    }else {
+                        userMap.put(jmAppUser.getId(),jmAppUser);
+                    }
+                }
+            }else {
+                for(JmAppUser jmAppUser : users) {
+                    userMap.put(jmAppUser.getId(),jmAppUser);
+                }
             }
+            //批量查询该用户与所有该行业人脉的好友关系
+//            List<JmRelationshipFriendship> records = jmRelationshipFriendshipMapper.findFriendRecords(userId,userIds);
+//            Map<String,Integer> relationships = new HashMap<>();
+//            if(records != null && records.size() > 0) {
+//                for(JmRelationshipFriendship record :records) {
+//                    relationships.put(record.getUserIdOpposite(),record.getType());
+//                }
+//            }
+//            for(JmAppUser jmAppUser : users) {
+//                //设置关系：查不到关系的无关联，查得到的设置为关系表type值
+//                jmAppUser.setRelationType(relationships.get(jmAppUser.getId()) == null ?
+//                        4 : (relationships.get(jmAppUser.getId())));
+//            }
             for(String allIndustryRelationship : allIndustryRelationshipList) {
                 JmAppUser industryUser = userMap.get(allIndustryRelationship);
                 if(industryUser != null) {
@@ -883,6 +963,7 @@ public class RelationshipServiceImpl implements RelationshipService {
                 }
             }
         }
+        log.info("人脉搜索结束：" + new Date().toString());
         return sortedUsers;
     }
 

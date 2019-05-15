@@ -353,11 +353,13 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
 		}
 		//把群主排第一个
-		List<JmAppUser> memberUsers = frientsUtil.groupMembersValues(obj.getId());
-		//调用用户服务获取一次，防止Redis数据丢失
-		if(memberUsers == null || memberUsers.size() == 0) {
-			memberUsers = jmAppUserFeignService.findListByIds(allMembers.toArray(new String[allMembers.size()])).getData();
-		}
+//		List<JmAppUser> memberUsers = frientsUtil.groupMembersValues(obj.getId());
+//		//调用用户服务获取一次，防止Redis数据丢失
+//		if(memberUsers == null || memberUsers.size() == 0) {
+//			memberUsers = jmAppUserFeignService.findListByIds(allMembers.toArray(new String[allMembers.size()])).getData();
+//		}
+		//业务修正：实时查询用户，防止更新用户信息无法获取
+		List<JmAppUser> memberUsers = jmAppUserFeignService.findListByIds(allMembers.toArray(new String[allMembers.size()])).getData();
 		List<JmAppUser> bossFirstMembers = new LinkedList<>();//有序集合
 		if(memberUsers != null && memberUsers.size() > 0) {
 			Iterator<JmAppUser> iterator = memberUsers.iterator();
@@ -415,11 +417,13 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
 		}
 		//把群主排第一个
-		List<JmAppUser> memberUsers = frientsUtil.groupMembersValues(obj.getId());
-		//调用用户服务获取一次，防止Redis数据丢失
-		if(memberUsers == null || memberUsers.size() == 0) {
-			memberUsers = jmAppUserFeignService.findListByIds(allMembers.toArray(new String[allMembers.size()])).getData();
-		}
+//		List<JmAppUser> memberUsers = frientsUtil.groupMembersValues(obj.getId());
+//		//调用用户服务获取一次，防止Redis数据丢失
+//		if(memberUsers == null || memberUsers.size() == 0) {
+//			memberUsers = jmAppUserFeignService.findListByIds(allMembers.toArray(new String[allMembers.size()])).getData();
+//		}
+		//业务修正：实时查询用户，防止更新用户信息无法获取
+		List<JmAppUser> memberUsers = jmAppUserFeignService.findListByIds(allMembers.toArray(new String[allMembers.size()])).getData();
 		List<JmAppUser> bossFirstMembers = new LinkedList<>();//有序集合
 		if(memberUsers != null && memberUsers.size() > 0) {
 			Iterator<JmAppUser> iterator = memberUsers.iterator();
