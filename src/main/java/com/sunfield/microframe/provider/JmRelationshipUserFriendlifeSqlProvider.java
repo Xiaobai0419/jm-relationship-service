@@ -68,6 +68,8 @@ public class JmRelationshipUserFriendlifeSqlProvider{
 				WHERE("user_id = #{userId}");
 				WHERE("friendlife_id = #{friendlifeId}");
 
+				WHERE("status = '0'");
+
 				ORDER_BY("update_date desc");
 			}
 		}.toString();
