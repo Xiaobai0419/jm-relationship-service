@@ -8,9 +8,9 @@ import io.rong.models.user.UserModel;
 
 public class RongCloudUtil {
 
-    private static final String APP_KEY = "0vnjpoad03gbz";
+    private static final String APP_KEY = "e5t4ouvpecq2a";
 
-    private static final String APP_SECRET = "EvpiEkykr9eE3";
+    private static final String APP_SECRET = "YkNbcQLzoICnDA";
 
     private static void test() {
         String appKey = "0vnjpoad03gbz";

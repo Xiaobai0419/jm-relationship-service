@@ -15,11 +15,11 @@ public class GroupUtil {
     /**
      * appKey
      * */
-    private static final String appKey = "0vnjpoad03gbz";
+    private static final String appKey = "e5t4ouvpecq2a";
     /**
      * appSecret
      * */
-    private static final String appSecret = "EvpiEkykr9eE3";
+    private static final String appSecret = "YkNbcQLzoICnDA";
 
     private static final RongCloud rongCloud = RongCloud.getInstance(appKey, appSecret);
 
