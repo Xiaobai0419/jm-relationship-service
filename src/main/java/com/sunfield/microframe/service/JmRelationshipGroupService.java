@@ -142,20 +142,21 @@ public class JmRelationshipGroupService implements ITxTransaction{
 				if(operatorId.equals(group.getCreatorId())) {
 					iterator.remove();//查不到说明非该部落成员，从部落列表中去除
 				}else if(member == null) {
+					iterator.remove();
 					//再查一次融云，防止Redis数据丢失的问题
-					GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(groupId);
-					if(groupResult != null && groupResult.getCode() == 200) {
-						List<GroupUser> memberUsers = groupResult.getMembers();
-						if(memberUsers != null && memberUsers.size() > 0) {
-							List<String> memberIds = new ArrayList<>();
-							for(GroupUser groupUser : memberUsers) {
-								memberIds.add(groupUser.getId());
-							}
-							if(!memberIds.contains(operatorId)) {
-								iterator.remove();
-							}
-						}
-					}
+//					GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(groupId);
+//					if(groupResult != null && groupResult.getCode() == 200) {
+//						List<GroupUser> memberUsers = groupResult.getMembers();
+//						if(memberUsers != null && memberUsers.size() > 0) {
+//							List<String> memberIds = new ArrayList<>();
+//							for(GroupUser groupUser : memberUsers) {
+//								memberIds.add(groupUser.getId());
+//							}
+//							if(!memberIds.contains(operatorId)) {
+//								iterator.remove();
+//							}
+//						}
+//					}
 				}
 			}
 		}
@@ -205,20 +206,21 @@ public class JmRelationshipGroupService implements ITxTransaction{
 				if(operatorId.equals(group.getCreatorId())) {
 					iterator.remove();//查不到说明非该部落成员，从部落列表中去除
 				}else if(member == null) {
+					iterator.remove();
 					//再查一次融云，防止Redis数据丢失的问题
-					GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(groupId);
-					if(groupResult != null && groupResult.getCode() == 200) {
-						List<GroupUser> memberUsers = groupResult.getMembers();
-						if(memberUsers != null && memberUsers.size() > 0) {
-							List<String> memberIds = new ArrayList<>();
-							for(GroupUser groupUser : memberUsers) {
-								memberIds.add(groupUser.getId());
-							}
-							if(!memberIds.contains(operatorId)) {
-								iterator.remove();
-							}
-						}
-					}
+//					GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(groupId);
+//					if(groupResult != null && groupResult.getCode() == 200) {
+//						List<GroupUser> memberUsers = groupResult.getMembers();
+//						if(memberUsers != null && memberUsers.size() > 0) {
+//							List<String> memberIds = new ArrayList<>();
+//							for(GroupUser groupUser : memberUsers) {
+//								memberIds.add(groupUser.getId());
+//							}
+//							if(!memberIds.contains(operatorId)) {
+//								iterator.remove();
+//							}
+//						}
+//					}
 				}
 			}
 		}
@@ -272,18 +274,18 @@ public class JmRelationshipGroupService implements ITxTransaction{
 				//不是群主，先查询是否为成员
 				Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 				//如果为空，到融云查，防止Redis数据丢失
-				if(allMembers == null || allMembers.size() == 0) {
-					allMembers = new HashSet<>();
-					GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(obj.getId());
-					if(groupResult != null && groupResult.getCode() == 200) {
-						List<GroupUser> memberUsers = groupResult.getMembers();
-						if(memberUsers != null && memberUsers.size() > 0) {
-							for(GroupUser groupUser : memberUsers) {
-								allMembers.add(groupUser.getId());
-							}
-						}
-					}
-				}
+//				if(allMembers == null || allMembers.size() == 0) {
+//					allMembers = new HashSet<>();
+//					GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(obj.getId());
+//					if(groupResult != null && groupResult.getCode() == 200) {
+//						List<GroupUser> memberUsers = groupResult.getMembers();
+//						if(memberUsers != null && memberUsers.size() > 0) {
+//							for(GroupUser groupUser : memberUsers) {
+//								allMembers.add(groupUser.getId());
+//							}
+//						}
+//					}
+//				}
 				if(allMembers.contains(obj.getOperatorId())) {
 					//是成员
 					jmRelationshipGroup.setUserGroupRelation(2);
@@ -335,18 +337,18 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
 		Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 		//如果为空，到融云查，防止Redis数据丢失
-		if(allMembers == null || allMembers.size() == 0) {
-			allMembers = new HashSet<>();
-			GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(obj.getId());
-			if(groupResult != null && groupResult.getCode() == 200) {
-				List<GroupUser> memberUsers = groupResult.getMembers();
-				if(memberUsers != null && memberUsers.size() > 0) {
-					for(GroupUser groupUser : memberUsers) {
-						allMembers.add(groupUser.getId());
-					}
-				}
-			}
-		}
+//		if(allMembers == null || allMembers.size() == 0) {
+//			allMembers = new HashSet<>();
+//			GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(obj.getId());
+//			if(groupResult != null && groupResult.getCode() == 200) {
+//				List<GroupUser> memberUsers = groupResult.getMembers();
+//				if(memberUsers != null && memberUsers.size() > 0) {
+//					for(GroupUser groupUser : memberUsers) {
+//						allMembers.add(groupUser.getId());
+//					}
+//				}
+//			}
+//		}
 		//非成员禁止查看
 		if(!allMembers.contains(operatorId)) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
@@ -399,18 +401,18 @@ public class JmRelationshipGroupService implements ITxTransaction{
 		//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
 		Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 		//如果为空，到融云查，防止Redis数据丢失
-		if(allMembers == null || allMembers.size() == 0) {
-			allMembers = new HashSet<>();
-			GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(obj.getId());
-			if(groupResult != null && groupResult.getCode() == 200) {
-				List<GroupUser> memberUsers = groupResult.getMembers();
-				if(memberUsers != null && memberUsers.size() > 0) {
-					for(GroupUser groupUser : memberUsers) {
-						allMembers.add(groupUser.getId());
-					}
-				}
-			}
-		}
+//		if(allMembers == null || allMembers.size() == 0) {
+//			allMembers = new HashSet<>();
+//			GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(obj.getId());
+//			if(groupResult != null && groupResult.getCode() == 200) {
+//				List<GroupUser> memberUsers = groupResult.getMembers();
+//				if(memberUsers != null && memberUsers.size() > 0) {
+//					for(GroupUser groupUser : memberUsers) {
+//						allMembers.add(groupUser.getId());
+//					}
+//				}
+//			}
+//		}
 		//非成员禁止查看
 		if(!allMembers.contains(operatorId)) {
 			return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
@@ -470,18 +472,18 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
 			Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 			//如果为空，到融云查，防止Redis数据丢失
-			if(allMembers == null || allMembers.size() == 0) {
-				allMembers = new HashSet<>();
-				GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(obj.getId());
-				if(groupResult != null && groupResult.getCode() == 200) {
-					List<GroupUser> memberUsers = groupResult.getMembers();
-					if(memberUsers != null && memberUsers.size() > 0) {
-						for(GroupUser groupUser : memberUsers) {
-							allMembers.add(groupUser.getId());
-						}
-					}
-				}
-			}
+//			if(allMembers == null || allMembers.size() == 0) {
+//				allMembers = new HashSet<>();
+//				GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(obj.getId());
+//				if(groupResult != null && groupResult.getCode() == 200) {
+//					List<GroupUser> memberUsers = groupResult.getMembers();
+//					if(memberUsers != null && memberUsers.size() > 0) {
+//						for(GroupUser groupUser : memberUsers) {
+//							allMembers.add(groupUser.getId());
+//						}
+//					}
+//				}
+//			}
 			if(!allMembers.contains(operatorId)) {
 				obj.setUserGroupRelation(0);//非成员
 				return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,obj);
@@ -720,18 +722,18 @@ public class JmRelationshipGroupService implements ITxTransaction{
 			//查询该部落成员id列表，到Redis或融云拉取均可，后端到Redis获取（走内网，前端可以去融云）
 			Set<String> allMembers = frientsUtil.groupMembersKeys(obj.getId());
 			//如果为空，到融云查，防止Redis数据丢失
-			if(allMembers == null || allMembers.size() == 0) {
-				allMembers = new HashSet<>();
-				GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(obj.getId());
-				if(groupResult != null && groupResult.getCode() == 200) {
-					List<GroupUser> memberUsers = groupResult.getMembers();
-					if(memberUsers != null && memberUsers.size() > 0) {
-						for(GroupUser groupUser : memberUsers) {
-							allMembers.add(groupUser.getId());
-						}
-					}
-				}
-			}
+//			if(allMembers == null || allMembers.size() == 0) {
+//				allMembers = new HashSet<>();
+//				GroupUserQueryResult groupResult = GroupUtil.membersOfGroup(obj.getId());
+//				if(groupResult != null && groupResult.getCode() == 200) {
+//					List<GroupUser> memberUsers = groupResult.getMembers();
+//					if(memberUsers != null && memberUsers.size() > 0) {
+//						for(GroupUser groupUser : memberUsers) {
+//							allMembers.add(groupUser.getId());
+//						}
+//					}
+//				}
+//			}
 			if(!allMembers.contains(operatorId)) {
 				return new RelationshipResponseBean<>(RelationshipResponseStatus.NOT_MEMBER);
 			}else {
