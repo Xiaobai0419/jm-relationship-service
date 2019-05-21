@@ -36,7 +36,7 @@ public class JmRelationshipFriendlifeSqlProvider{
 				
 				WHERE("status = '0'");
 
-				ORDER_BY("update_date desc");
+				ORDER_BY("create_date desc");
 				
 			}
 		}.toString();
@@ -61,7 +61,7 @@ public class JmRelationshipFriendlifeSqlProvider{
 					WHERE(inSql.toString());
 				}
 
-				ORDER_BY("update_date desc");
+				ORDER_BY("create_date desc");
 
 			}
 		}.toString();
@@ -80,7 +80,7 @@ public class JmRelationshipFriendlifeSqlProvider{
 					WHERE("user_id = #{userId}");
 				}
 
-				ORDER_BY("update_date desc");
+				ORDER_BY("create_date desc");
 
 			}
 		}.toString();
