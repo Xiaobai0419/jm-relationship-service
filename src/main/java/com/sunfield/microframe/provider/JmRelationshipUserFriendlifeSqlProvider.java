@@ -85,6 +85,7 @@ public class JmRelationshipUserFriendlifeSqlProvider{
 				FROM("jm_relationship_user_friendlife");
 
 				WHERE("user_id = #{userId}");
+				WHERE("status = '0'");
 				if(friendlifeIds != null && friendlifeIds.length > 0) {
 					StringBuilder inSql = new StringBuilder("friendlife_id in(");
 					for(String friendlifeId : friendlifeIds) {
