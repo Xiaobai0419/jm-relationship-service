@@ -53,12 +53,23 @@ public class RelationshipController {
             }
             JmRelationshipFriendship result = relationshipService.addFriendRequest(jmRelationshipFriendship);
             if(result == null) {
-                return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
+                RelationshipResponseBean<JmRelationshipFriendship> res = new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
+                res.setMsg("申请失败");
+                return res;
             }else {
                 switch (result.getType()) {
-                    case 0:case 1:case 2:case 6:case 7:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
-                    case 5:return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
-                    default:return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
+                    case 0:case 1:case 2:case 6:case 7:
+                        RelationshipResponseBean<JmRelationshipFriendship> res = new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
+                        res.setMsg("申请失败");
+                        return res;
+                    case 5:
+                        RelationshipResponseBean<JmRelationshipFriendship> res1 =  new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
+                        res1.setMsg("申请成功");
+                        return res1;
+                    default:
+                        RelationshipResponseBean<JmRelationshipFriendship> res2 =   new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
+                        res2.setMsg("申请失败");
+                        return res2;
                 }
             }
         }catch (Exception e) {
@@ -83,11 +94,17 @@ public class RelationshipController {
             }
             JmRelationshipFriendship result = relationshipService.agreeAsAFriend(jmRelationshipFriendship);
             if(result == null) {
-                return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
+                RelationshipResponseBean<JmRelationshipFriendship> res = new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL);
+                res.setMsg("添加失败");
+                return res;
             }else if(result.getType() == 6){
-                return new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
+                RelationshipResponseBean<JmRelationshipFriendship> res = new RelationshipResponseBean<>(RelationshipResponseStatus.FAIL,result);
+                res.setMsg("添加失败");
+                return res;
             }else {
-                return new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
+                RelationshipResponseBean<JmRelationshipFriendship> res = new RelationshipResponseBean<>(RelationshipResponseStatus.SUCCESS,result);
+                res.setMsg("已添加好友");
+                return res;
             }
         }catch (Exception e) {
             e.printStackTrace();

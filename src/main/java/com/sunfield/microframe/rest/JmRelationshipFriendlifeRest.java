@@ -167,9 +167,13 @@ public class JmRelationshipFriendlifeRest {
 		try {
 			JmRelationshipFriendlife object = service.insert(obj);
 			if(object != null) {
-				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
+				ResponseBean<JmRelationshipFriendlife> res = new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.SUCCESS, object);
+				res.setMsg("发布成功");
+				return res;
 			} else {
-				return new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.FAIL);
+				ResponseBean<JmRelationshipFriendlife> res = new ResponseBean<JmRelationshipFriendlife>(ResponseStatus.FAIL);
+				res.setMsg("发布失败");
+				return res;
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
